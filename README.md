@@ -9,7 +9,7 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
 
-[功能特性](#-功能特性) · [部署方法](#-部署方法) · [本地开发](#-本地开发) · [配置说明](#-配置说明) · [使用说明](#-使用说明)
+[功能特性](#-功能特性) · [界面预览](#-界面预览) · [部署方法](#-部署方法) · [本地开发](#-本地开发) · [配置说明](#-配置说明) · [使用说明](#-使用说明)
 
 </div>
 
@@ -30,6 +30,33 @@
 - **本地历史**：IP、WHOIS 各保存最近 10 条成功查询；点击历史还原，再次查询可更新。
 - **主题与提示**：浅色 / 深色主题，可关闭的功能说明记住当前浏览器的选择。
 - **统一部署**：前端静态文件与 API 由同一个 Cloudflare Worker 提供，无需单独部署 Node 服务或 Docker 容器。
+
+## 🖼️ 界面预览
+
+以下截图来自本地实际运行页面：桌面端为 **1440 × 820**，移动端为 **390 × 844**。IP、延迟与服务状态仅代表截图时的检测结果，会随网络环境和时间变化。
+
+### 桌面端
+
+**首页概览**
+
+![One IP 桌面首页：IP 地址、网络连通性、AI 访问与服务状态](docs/screenshots/desktop-home.jpg)
+
+**CDN 节点诊断**
+
+![One IP 桌面 CDN 诊断：厂商、命中节点与缓存状态](docs/screenshots/desktop-cdn.jpg)
+
+### 移动端
+
+<table>
+  <tr>
+    <th>首页概览</th>
+    <th>CDN 节点诊断</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/mobile-home.jpg" alt="One IP 移动端首页" width="390" /></td>
+    <td><img src="docs/screenshots/mobile-cdn.jpg" alt="One IP 移动端 CDN 节点诊断" width="390" /></td>
+  </tr>
+</table>
 
 ## 🚀 部署方法
 
