@@ -1,3 +1,4 @@
+import { CountryFlag } from "@/components/country-flag";
 import {
   PrivacyToggle,
   PageHeading,
@@ -6,7 +7,7 @@ import {
   Pending,
 } from "@/components/toolkit";
 import { trace } from "@/lib/network";
-import { getDomesticIp } from "@/views/home/api";
+import { getGeo, getDomesticIp } from "@/views/home/api";
 import { useQuery } from "@tanstack/react-query";
 import { AiNetworkCheck } from "./network-check";
 import { AiPlatformLinks } from "./platform-links";
@@ -17,6 +18,20 @@ export default function PlatformDiagnostics({
 }: {
   platform: AiPlatform;
 }) {
+  const exit = useQuery({
+    queryKey: [platform.id, "exit"],
+    enabled: Boolean(platform.traceDomain),
+    queryFn: ({ signal }) => trace(platform.traceDomain!, signal),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const geo = useQuery({
+    queryKey: ["geoip", exit.data?.ip],
+    enabled: Boolean(exit.data?.ip),
+    queryFn: ({ signal }) => getGeo(exit.data!.ip, signal),
+    staleTime: 60_000,
+    retry: false,
+  });
   const domestic = useQuery({
     queryKey: ["domestic-ip"],
     queryFn: ({ signal }) => getDomesticIp(signal),
@@ -39,11 +54,41 @@ export default function PlatformDiagnostics({
             </div>
           }
         >
-          <div className="ip-value text-muted-foreground">暂不可用</div>
-          <p className="small muted">暂未接入此平台可读取的出口 IP 接口。</p>
-          <p className="small muted mt-2">
-            下方对照地址不代表访问 {platform.name} 的实际分流出口。
-          </p>
+          {platform.traceDomain ? (
+            <>
+              <div className="ip-value text-primary">
+                {exit.isPending ? (
+                  <Pending>正在检测出口…</Pending>
+                ) : (
+                  <IpText ip={exit.data?.ip} />
+                )}
+              </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {exit.isError ? (
+                  "出口查询失败，可能受网络或跨域限制。"
+                ) : geo.isFetching ? (
+                  <Pending>查询归属信息…</Pending>
+                ) : (
+                  <>
+                    <CountryFlag
+                      code={geo.data?.country_code ?? exit.data?.country_code}
+                    />{" "}
+                    {[
+                      geo.data?.country ?? exit.data?.country_code,
+                      geo.data?.city,
+                      geo.data?.isp,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "归属信息暂不可用"}
+                  </>
+                )}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs leading-5 text-muted-foreground">
+              暂未找到可读取此平台出口的公开接口；以下地址仅供对照。
+            </p>
+          )}
           <div className="ai-exit-comparison">
             <span className="small muted">其他出口对照</span>
             {[

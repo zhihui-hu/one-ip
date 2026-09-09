@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import { UnderlineHover } from "@/components/underline-hover";
+import { Button } from "@/components/ui/button";
 import type { AiPlatform } from "./platforms";
 
 export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 text-xs text-primary">
+    <div className="mt-4 flex flex-wrap gap-2">
       {[
         { name: "官网", url: `https://${platform.domain}` },
         {
@@ -13,23 +13,23 @@ export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
         },
         { name: "API 文档", url: platform.docsUrl },
       ].map((link) => (
-        <UnderlineHover asChild key={link.name}>
+        <Button variant="outline" size="sm" asChild key={link.name}>
           <a href={link.url} target="_blank" rel="noreferrer">
             {link.name} ↗
           </a>
-        </UnderlineHover>
+        </Button>
       ))}
-      <UnderlineHover asChild>
+      <Button variant="outline" size="sm" asChild>
         <Link to={`/status?service=${platform.statusId}`}>服务状态</Link>
-      </UnderlineHover>
-      <UnderlineHover asChild>
+      </Button>
+      <Button variant="outline" size="sm" asChild>
         <Link to="/browser/privacy">权限与隐私</Link>
-      </UnderlineHover>
-      <UnderlineHover asChild>
+      </Button>
+      <Button variant="outline" size="sm" asChild>
         <Link to="/network/ip">查询公网 IP</Link>
-      </UnderlineHover>
+      </Button>
       {["gpt", "claude"].includes(platform.id) && (
-        <UnderlineHover asChild>
+        <Button variant="outline" size="sm" asChild>
           <a
             href={
               platform.id === "claude"
@@ -41,7 +41,7 @@ export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
           >
             支持地区 ↗
           </a>
-        </UnderlineHover>
+        </Button>
       )}
     </div>
   );

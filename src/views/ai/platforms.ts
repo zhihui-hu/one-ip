@@ -1,6 +1,7 @@
 export const aiPlatforms = [
   {
     id: "gpt",
+    traceDomain: "chatgpt.com",
     apiUrl: "https://api.openai.com/v1",
     docsUrl: "https://platform.openai.com/docs/overview",
     name: "ChatGPT",
@@ -9,11 +10,31 @@ export const aiPlatforms = [
   },
   {
     id: "claude",
+    traceDomain: "claude.ai",
     apiUrl: "https://api.anthropic.com",
     docsUrl: "https://platform.claude.com/docs/en/api/overview",
     name: "Claude",
     domain: "claude.ai",
     statusId: "4",
+  },
+  {
+    id: "grok",
+    traceDomain: "grok.com",
+    apiUrl: "https://api.x.ai",
+    docsUrl: "https://docs.x.ai/",
+    statusId: "33",
+    name: "Grok",
+    domain: "grok.com",
+    statusPage: "https://status.x.ai",
+  },
+  {
+    id: "perplexity",
+    traceDomain: "www.perplexity.ai",
+    apiUrl: "https://api.perplexity.ai",
+    docsUrl: "https://docs.perplexity.ai/",
+    name: "Perplexity",
+    domain: "www.perplexity.ai",
+    statusId: "10",
   },
   {
     id: "gemini",
@@ -33,23 +54,6 @@ export const aiPlatforms = [
     name: "DeepSeek",
     domain: "chat.deepseek.com",
     statusPage: "https://status.deepseek.com",
-  },
-  {
-    id: "grok",
-    apiUrl: "https://api.x.ai",
-    docsUrl: "https://docs.x.ai/",
-    statusId: "33",
-    name: "Grok",
-    domain: "grok.com",
-    statusPage: "https://status.x.ai",
-  },
-  {
-    id: "perplexity",
-    apiUrl: "https://api.perplexity.ai",
-    docsUrl: "https://docs.perplexity.ai/",
-    name: "Perplexity",
-    domain: "www.perplexity.ai",
-    statusId: "10",
   },
   {
     id: "qwen",

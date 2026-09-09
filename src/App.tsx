@@ -15,6 +15,7 @@ import { ToolLayout } from "@/layout/tool-layout";
 import { aiPlatforms } from "@/views/ai/platforms";
 
 const PlatformDiagnostics = lazy(() => import("@/views/ai"));
+const ModuleOverview = lazy(() => import("@/views/module-overview"));
 const HomePage = lazy(() => import("@/views/home"));
 const ClaudePage = lazy(() => import("@/views/claude"));
 const GptPage = lazy(() => import("@/views/gpt"));
@@ -50,7 +51,10 @@ export function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="network" element={<ToolLayout group="network" />}>
-          <Route index element={<Redirect to="/network/ip" />} />
+          <Route
+            index
+            element={<ModuleOverview key="network" group="network" />}
+          />
           <Route path="ip">
             <Route index element={<IpPage />} />
             <Route path=":ip" element={<IpPage />} />
@@ -62,7 +66,10 @@ export function App() {
           <Route path="dns" element={<DnsExitPage />} />
         </Route>
         <Route path="browser" element={<ToolLayout group="browser" />}>
-          <Route index element={<Redirect to="/browser/environment" />} />
+          <Route
+            index
+            element={<ModuleOverview key="browser" group="browser" />}
+          />
           {[
             "environment",
             "fingerprint",
@@ -79,7 +86,7 @@ export function App() {
           <Route path="challenges" element={<ChallengesPage />} />
         </Route>
         <Route path="ai" element={<ToolLayout group="ai" />}>
-          <Route index element={<Redirect to="/ai/gpt" />} />
+          <Route index element={<ModuleOverview key="ai" group="ai" />} />
           <Route path="gpt" element={<GptPage />} />
           <Route path="claude" element={<ClaudePage />} />
           {aiPlatforms

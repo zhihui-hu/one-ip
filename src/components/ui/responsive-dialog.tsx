@@ -35,10 +35,12 @@ export function ResponsiveDialog({
   if (mobile)
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader className="shrink-0">
-            <DrawerTitle>{title}</DrawerTitle>
-            <DrawerDescription>{description}</DrawerDescription>
+        <DrawerContent className="[&>div:first-child]:mt-2 [&>div:first-child]:w-10">
+          <DrawerHeader className="shrink-0 gap-1 px-4 py-2 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-left group-data-[vaul-drawer-direction=top]/drawer-content:text-left">
+            <DrawerTitle className="text-sm leading-5">{title}</DrawerTitle>
+            <DrawerDescription className="text-xs leading-4 empty:hidden">
+              {description}
+            </DrawerDescription>
           </DrawerHeader>
           <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4">
             {children}
@@ -54,9 +56,11 @@ export function ResponsiveDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle className="pr-8">{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+        <DialogHeader className="gap-1">
+          <DialogTitle className="pr-8 text-sm leading-5">{title}</DialogTitle>
+          <DialogDescription className="text-xs leading-4 empty:hidden">
+            {description}
+          </DialogDescription>
         </DialogHeader>
         {children}
       </DialogContent>

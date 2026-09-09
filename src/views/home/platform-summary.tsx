@@ -70,7 +70,10 @@ export function PlatformSummary() {
     orderedPlatforms.sort((a, b) => {
       const left = a.query.data?.median ?? Infinity;
       const right = b.query.data?.median ?? Infinity;
-      return left - right;
+      return (
+        Number(Boolean(b.platform.traceDomain)) -
+          Number(Boolean(a.platform.traceDomain)) || left - right
+      );
     });
   const sortRef = useSortAnimation(
     orderedPlatforms.map(({ platform }) => platform.id).join("|"),

@@ -2410,3 +2410,65 @@ body {
     background: color-mix(in srgb, var(--primary) 13%, transparent);
   }
 }
+
+/* Descriptions support the page content instead of competing with it. */
+.page-help-alert {
+  background: transparent;
+  color: var(--muted-foreground);
+  padding-top: 3px;
+  padding-bottom: 3px;
+  margin-bottom: 8px;
+}
+.page-help-alert [data-slot="alert-description"] {
+  font-size: 12px;
+  line-height: 1.5;
+}
+@media (max-width: 48rem) {
+  .service-status-page .toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .service-status-page .filter-tabs {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .service-status-page .filter-tabs button {
+    flex-shrink: 0;
+    padding-inline: 8px;
+  }
+  .service-status-page .toolbar > button {
+    flex-shrink: 0;
+  }
+  .service-status-page .service-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .service-summary-card {
+    --card-spacing: 8px;
+    gap: 4px;
+  }
+  .service-summary-card [data-slot="card-title"] {
+    font-size: 11px;
+  }
+  .service-summary-number {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+  .service-summary-number > span:last-child {
+    display: none;
+  }
+  .service-status-page button > span > .service-card {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--service-color);
+  }
+}

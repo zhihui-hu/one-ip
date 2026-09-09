@@ -8,6 +8,9 @@ export function ToolLayout({ group }: { group: keyof typeof toolGroups }) {
   return (
     <>
       <nav className="tool-subnav" aria-label="工具导航">
+        <NavLink to={`/${group}`} end>
+          概述
+        </NavLink>
         {toolGroups[group].map((tool) => (
           <NavLink key={tool.path} to={tool.path}>
             {group === "ai" && (

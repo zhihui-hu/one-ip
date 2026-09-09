@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useQueries } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getStatus } from "./api";
@@ -35,6 +36,7 @@ const labels: Record<string, string> = {
   maintenance: "维护中",
 };
 export default function StatusPage() {
+  const mobile = useIsMobile();
   const [params, setParams] = useSearchParams();
   const [detailId, setDetailId] = useState<string | null>(() => {
     const id = params.get("service");
@@ -219,19 +221,77 @@ export default function StatusPage() {
           </ToolCard>
         ))}
       </div>
-      <div className="service-table">
-        <Card>
-          <CardContent>
-            <DataTable
-              data={tableRows}
-              columns={columns}
-              getRowId={(row) => row.id}
-              animateChanges={false}
-              empty="暂无服务"
-            />
-          </CardContent>
-        </Card>
-      </div>
+      {mobile ? (
+        <div className="space-y-3">
+          {sections.map(
+            ([label, items]) =>
+              items.length > 0 && (
+                <Card key={label}>
+                  <CardContent>
+                    <h2 className="mb-1 text-xs font-medium text-muted-foreground">
+                      {label} · {items.length}
+                    </h2>
+                    <div className="divide-y divide-border/50">
+                      {items.map((service) => {
+                        const indicator = service.query.data?.status?.indicator;
+                        const incident = service.query.data?.incidents?.[0];
+                        return (
+                          <button
+                            key={service.id}
+                            type="button"
+                            onClick={() => setDetailId(service.id)}
+                            className="block w-full py-3 text-left"
+                            aria-label={`查看 ${service.name} 详情`}
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                                <SiteLogo
+                                  src={service.icon}
+                                  website={service.page}
+                                />
+                                <span className="truncate">
+                                  {service.name.replace(" (Anthropic)", "")}
+                                </span>
+                              </span>
+                              <span
+                                className={`service-card service-${indicator ?? "unknown"} shrink-0 text-xs`}
+                              >
+                                {service.query.isFetching && !service.query.data
+                                  ? "查询中"
+                                  : !service.url
+                                    ? "未接入"
+                                    : (labels[indicator ?? ""] ?? "待确认")}
+                              </span>
+                            </span>
+                            {incident && (
+                              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                                {incident.name}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ),
+          )}
+        </div>
+      ) : (
+        <div className="service-table">
+          <Card>
+            <CardContent>
+              <DataTable
+                data={tableRows}
+                columns={columns}
+                getRowId={(row) => row.id}
+                animateChanges={false}
+                empty="暂无服务"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
       <p className="small muted">
         每 2 分钟自动检查。未知或查询失败不等于服务故障。
       </p>

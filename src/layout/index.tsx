@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/hooks/use-theme";
-import { Search, Globe, Cable, Activity, Bot } from "lucide-react";
+import { Search, Globe, Cable, Activity, Sparkles } from "lucide-react";
 import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
 import { activeNavigationRoute, navigationRoutes } from "./routes";
@@ -20,7 +20,7 @@ const menuIcons = {
   "/": Search,
   "/browser/": Globe,
   "/network/": Cable,
-  "/ai/": Bot,
+  "/ai/": Sparkles,
   "/status/": Activity,
 };
 
@@ -110,7 +110,6 @@ export function AppLayout() {
                 className="site-home-link flex size-9 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <img src="/icon.svg" alt="" width="32" height="32" />
-                <span className="desktop-brand">IP 网络工具</span>
               </Link>
               <ScrollArea className="nav-tabs-scroll">
                 {list}
@@ -153,7 +152,7 @@ export function AppLayout() {
         <AppUpdateChecker />
       </aside>
       <BuildInfo />
-      <Toaster theme={resolvedTheme} position="top-right" />
+      <Toaster richColors theme={resolvedTheme} position="top-right" />
     </>
   );
 }
