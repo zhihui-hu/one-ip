@@ -59,9 +59,6 @@ importers:
       jotai:
         specifier: latest
         version: 3.0.0(@types/react@19.2.18)(react@19.2.8)
-      liquid-glass-react:
-        specifier: ^1.1.1
-        version: 1.1.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       lucide-react:
         specifier: latest
         version: 1.43.0(react@19.2.8)
@@ -86,6 +83,9 @@ importers:
       react-hook-form:
         specifier: latest
         version: 7.87.0(react@19.2.8)
+      react-liquid-glass-svg:
+        specifier: ^1.0.5
+        version: 1.0.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react-resizable-panels:
         specifier: ^4.12.4
         version: 4.12.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3283,12 +3283,6 @@ packages:
     engines: {node: '>=22.22.1'}
     hasBin: true
 
-  liquid-glass-react@1.1.1:
-    resolution: {integrity: sha512-pKzaktaMAEztd93wpWcz2Z5Z9qdLJUNJdMX+n00Ca4XsnrLTQ5xJzm/+GQXZUeuFXe/PQ8ziVMZO6531PyaFJw==}
-    peerDependencies:
-      react: '>=19'
-      react-dom: '>=19'
-
   locate-path@3.0.0:
     resolution: {integrity: sha512-7AO748wWnIhNqAuaty2ZWHkQHRSNfPVIsPIfwEOWO22AmaoVrWavlOcMR5nzTLNYvp36X220/maaRsrec1G65A==}
     engines: {node: '>=6'}
@@ -3705,6 +3699,12 @@ packages:
 
   react-is@19.2.8:
     resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
+
+  react-liquid-glass-svg@1.0.5:
+    resolution: {integrity: sha512-G8EymWDrkluqigXHw8OhMLeD2N3JuPBeFuNaeMWe5LO16ioB9/vYlL/w3LEDh2zDRED+MmcvWmd51eDeZ5nyDQ==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   react-redux@9.3.0:
     resolution: {integrity: sha512-KQopgqFo/p/fgmAs5qz6p5RWaNAzq40WAu7fJIXnQpYxFPbJYtsJPWvGeF2rOBaY/kEuV77AVsX8TsQzKm+A/g==}
@@ -6926,11 +6926,6 @@ snapshots:
     optionalDependencies:
       yaml: 2.9.0
 
-  liquid-glass-react@1.1.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
-    dependencies:
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-
   locate-path@3.0.0:
     dependencies:
       p-locate: 3.0.0
@@ -7325,6 +7320,11 @@ snapshots:
       react: 19.2.8
 
   react-is@19.2.8: {}
+
+  react-liquid-glass-svg@1.0.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
 
   react-redux@9.3.0(@types/react@19.2.18)(react@19.2.8)(redux@5.0.1):
     dependencies:

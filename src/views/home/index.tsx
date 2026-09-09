@@ -46,7 +46,7 @@ export function HomePage() {
     `${mobile}-${orderedTargets.map(({ target }) => target.name).join("|")}`,
   );
   useEffect(() => {
-    document.title = "我的 IP 查询 - Net.Coffee 复刻版";
+    document.title = "概览 - IP 网络工具";
   }, []);
   const primary = useQueries({
     queries: ([4, 6] as const).map((version) => ({
@@ -71,7 +71,7 @@ export function HomePage() {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   return (
     <div className="home-page">
-      <h1 className="sr-only">我的 IP</h1>
+      <h1 className="sr-only">网络概览</h1>
       <div className="home-overview home-ip-overview">
         {primary.map((query, index) => {
           if (index === 1 && !query.isPending && !query.data) return null;
@@ -82,10 +82,10 @@ export function HomePage() {
             query.isPending ||
             Boolean(query.data && geoByIp.get(query.data.ip)?.isPending);
           return (
-            <Card key={index}>
+            <Card key={index} className="home-primary-card">
               <CardContent className="primary-ip-block">
                 <div className="row-between eyebrow">
-                  <span>IPv{index === 0 ? 4 : 6}</span>
+                  <span>当前出口 · IPv{index === 0 ? 4 : 6}</span>
                   <CountryFlag code={geo?.country_code} />
                 </div>
                 <div className="ip-value">

@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import LiquidGlass from "liquid-glass-react";
+import { LiquidGlass } from "react-liquid-glass-svg";
 
 const preference = "(prefers-reduced-transparency: reduce)";
 function subscribe(callback: () => void) {
@@ -16,22 +16,25 @@ export default function MobileNavGlass({ light }: { light: boolean }) {
   );
   if (reduced) return null;
   return (
-    <div className="mobile-nav-glass" aria-hidden="true">
-      <LiquidGlass
-        className="mobile-glass-surface"
-        overLight={false}
-        displacementScale={light ? 18 : 24}
-        blurAmount={light ? 0.45 : 0.3}
-        saturation={125}
-        aberrationIntensity={0.35}
-        elasticity={0}
-        cornerRadius={26}
-        padding="0"
-        mode="standard"
-        style={{ position: "absolute", top: "50%", left: "50%", width: "100%" }}
-      >
-        <div style={{ height: 66, width: "100%" }} />
-      </LiquidGlass>
-    </div>
+    <LiquidGlass
+      className="mobile-nav-glass"
+      aria-hidden="true"
+      backdropBlur={20}
+      tintColor={light ? "rgba(255,255,255,0.72)" : "rgba(22,27,34,0.78)"}
+      displacementScale={light ? 12 : 16}
+      turbulenceBaseFrequency={0.008}
+      glassBorder={false}
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        borderRadius: "inherit",
+        pointerEvents: "none",
+        boxShadow: light
+          ? "0 5px 18px rgb(25 45 65 / 14%), inset 0 0 0 1px rgb(255 255 255 / 65%)"
+          : "0 5px 20px rgb(0 0 0 / 28%), inset 0 0 0 1px rgb(255 255 255 / 12%)",
+      }}
+    />
   );
 }

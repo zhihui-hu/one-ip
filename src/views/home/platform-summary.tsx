@@ -105,7 +105,7 @@ export function PlatformSummary() {
                     </Link>
                   </UnderlineHover>
                   <span
-                    className="shrink-0"
+                    className="home-metric shrink-0"
                     title={query.data?.description}
                     style={{
                       color: query.isPending
@@ -181,7 +181,7 @@ export function PlatformSummary() {
                       </Link>
                     </UnderlineHover>
                     <span
-                      className="shrink-0"
+                      className="home-metric shrink-0"
                       style={{
                         color: !indicator
                           ? "var(--muted-foreground)"

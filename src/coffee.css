@@ -2195,68 +2195,218 @@ body {
   }
 }
 
-@media (max-width: 48rem) {
-  .mobile-nav-glass {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  .coffee-nav:has(.mobile-nav-glass) {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  .coffee-nav:has(.mobile-nav-glass) > .nav-tabs-scroll {
-    position: relative;
-    z-index: 1;
-  }
-  .mobile-nav-glass > div:not(.mobile-glass-surface) {
-    display: none;
-  }
-  .mobile-nav-glass .glass {
-    width: 100%;
-    background: transparent;
-    box-shadow:
-      0 6px 22px rgb(29 55 82 / 12%),
-      inset 0 1px 1px rgb(255 255 255 / 95%),
-      inset 0 -1px 1px rgb(34 64 94 / 12%) !important;
-  }
-  .mobile-nav-glass .glass__warp {
-    background: rgb(248 251 255 / 58%);
-    -webkit-backdrop-filter: blur(18px) saturate(125%);
-    backdrop-filter: blur(18px) saturate(125%) !important;
-  }
-  .mobile-nav-glass .glass > div {
-    width: 100%;
-  }
-  .dark .mobile-nav-glass .glass__warp {
-    background: rgb(22 27 34 / 65%);
-  }
-  .dark .mobile-nav-glass .glass {
-    background: transparent;
-    box-shadow:
-      0 8px 28px #0006,
-      inset 0 1px 1px #ffffff55,
-      inset 0 -1px 1px #0005 !important;
-  }
-  .coffee-nav:has(.mobile-nav-glass) [role="tablist"] > span {
-    background: color-mix(in srgb, var(--primary) 11%, transparent);
-    box-shadow: inset 0 1px 0 #ffffff80;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .mobile-nav-glass *,
-    .mobile-nav-glass > * {
-      transition: none !important;
-    }
-  }
-}
-
 .home-note {
   font-size: 11px;
   line-height: 1.65;
   font-weight: 400;
   color: var(--subtle);
+}
+
+/* Dashboard hierarchy: primary address, results, then supporting notes. */
+.home-page [data-slot="card"] {
+  --card-spacing: 16px;
+}
+.home-page [data-slot="card-title"] {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.home-page .home-primary-card {
+  background: var(--card);
+}
+.home-page .home-primary-card .eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.035em;
+  color: var(--subtle);
+  margin-bottom: 12px;
+}
+.home-page .home-primary-card .ip-value {
+  font-size: clamp(22px, 2.5vw, 28px);
+  line-height: 1.25;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  margin-bottom: 12px;
+}
+.home-page .primary-ip-meta {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.home-page .primary-ip-meta > p + p {
+  font-size: 11px;
+  color: var(--subtle);
+}
+.home-page .home-metric,
+.home-page .ping-ms {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.home-page .home-connectivity-card .ping-item {
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
+  border-radius: 8px;
+}
+.home-page .home-note {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 10px;
+  color: var(--subtle);
+}
+.home-page .home-shortcuts h2 {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--subtle);
+}
+.home-page .home-shortcuts a {
+  font-size: 12px;
+  padding: 9px 12px;
+  background: transparent;
+}
+.desktop-brand {
+  display: none;
+}
+@media (min-width: 48.001rem) {
+  .coffee-nav {
+    padding: 7px 10px;
+    gap: 16px;
+    margin-bottom: 20px;
+    border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    border-radius: 14px;
+  }
+  .coffee-nav .site-home-link {
+    display: flex;
+    width: auto;
+    gap: 8px;
+    padding: 0 8px 0 0;
+    border-radius: 0;
+  }
+  .coffee-nav .site-home-link img {
+    width: 28px;
+    height: 28px;
+  }
+  .desktop-brand {
+    display: inline;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--foreground);
+  }
+  .coffee-nav [role="tablist"] {
+    gap: 4px;
+  }
+  .coffee-nav [role="tab"] {
+    height: 36px;
+    padding: 0 13px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  .coffee-nav [role="tab"][data-state="active"] {
+    color: var(--primary);
+    font-weight: 650;
+  }
+  .coffee-nav [role="tablist"] > span {
+    background: color-mix(in srgb, var(--primary) 9%, var(--card));
+    border-radius: 9px;
+  }
+}
+@media (max-width: 48rem) {
+  .home-page [data-slot="card"] {
+    --card-spacing: 13px;
+  }
+  .home-page .home-primary-card .ip-value {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .home-page .home-primary-card .eyebrow {
+    margin-bottom: 8px;
+  }
+  .home-page .home-metric {
+    font-size: 12px;
+  }
+  .coffee-nav {
+    max-width: 420px;
+    margin-inline: auto;
+    padding: 4px;
+    border-radius: 22px;
+  }
+  .coffee-nav [role="tablist"],
+  .coffee-nav [role="tab"] {
+    height: 46px;
+  }
+  .coffee-nav [role="tab"] {
+    border-radius: 18px;
+    gap: 2px;
+    padding: 4px 2px;
+    font-size: 10px;
+    line-height: 14px;
+  }
+  .coffee-nav [role="tab"] svg {
+    width: 19px;
+    height: 19px;
+  }
+  .coffee-nav [role="tablist"] > span {
+    border-radius: 18px;
+  }
+  .coffee-container {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  }
+  .update-notices {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Mobile glass: one bounded surface shared by both themes. */
+@media (max-width: 48rem) {
+  .coffee-nav {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(
+      100% - 2 *
+        max(
+          16px,
+          env(safe-area-inset-left, 0px),
+          env(safe-area-inset-right, 0px)
+        )
+    );
+    max-width: 400px;
+    height: 52px;
+    margin-inline: 0;
+    padding: 3px;
+    border: 0;
+    border-radius: 20px;
+  }
+  .coffee-nav:has(.mobile-nav-glass) {
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .mobile-nav-glass {
+    overflow: hidden;
+    box-shadow:
+      0 5px 18px rgb(25 45 65 / 14%),
+      inset 0 0 0 1px rgb(255 255 255 / 65%);
+  }
+  .dark .mobile-nav-glass {
+    box-shadow:
+      0 5px 20px rgb(0 0 0 / 28%),
+      inset 0 0 0 1px rgb(255 255 255 / 12%);
+  }
+  .coffee-nav:has(.mobile-nav-glass) > .nav-tabs-scroll {
+    position: relative;
+    z-index: 1;
+  }
+  .coffee-nav [role="tablist"] {
+    justify-content: center;
+    gap: 0;
+  }
+  .coffee-nav [role="tab"] {
+    justify-content: center;
+    align-items: center;
+    border-radius: 17px;
+  }
+  .coffee-nav [role="tablist"] > span {
+    border-radius: 17px;
+    box-shadow: none;
+    background: color-mix(in srgb, var(--primary) 13%, transparent);
+  }
 }

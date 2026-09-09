@@ -1,7 +1,7 @@
 import { aiPlatforms } from "@/views/ai/platforms";
 
 export const navigationRoutes = [
-  { value: "/", label: "首页", short: "首页" },
+  { value: "/", label: "概览", short: "概览" },
   { value: "/network/", label: "网络检测", short: "网络" },
   { value: "/browser/", label: "浏览器检测", short: "浏览器" },
   { value: "/ai/", label: "AI 检测", short: "AI" },

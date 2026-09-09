@@ -116,7 +116,7 @@ export function App() {
             <section className="status-line">
               <h1>404 · 页面不存在</h1>
               <Button variant="outline" asChild>
-                <Link to="/">返回首页</Link>
+                <Link to="/">返回概览</Link>
               </Button>
             </section>
           }
