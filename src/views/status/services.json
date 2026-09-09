@@ -1,0 +1,219 @@
+[
+  {
+    "id": "0",
+    "name": "Cloudflare",
+    "group": "云服务",
+    "url": "https://www.cloudflarestatus.com/api/v2/summary.json",
+    "page": "https://www.cloudflarestatus.com"
+  },
+  {
+    "id": "1",
+    "name": "Supabase",
+    "group": "云服务",
+    "url": "https://status.supabase.com/api/v2/summary.json",
+    "page": "https://status.supabase.com"
+  },
+  {
+    "id": "2",
+    "name": "SendGrid",
+    "group": "开发",
+    "url": "https://status.sendgrid.com/api/v2/summary.json",
+    "page": "https://status.twilio.com"
+  },
+  {
+    "id": "3",
+    "name": "Twilio",
+    "group": "开发",
+    "url": "https://status.twilio.com/api/v2/summary.json",
+    "page": "https://status.twilio.com"
+  },
+  {
+    "id": "4",
+    "name": "Claude (Anthropic)",
+    "group": "AI",
+    "url": "https://status.claude.com/api/v2/summary.json",
+    "page": "https://status.claude.com"
+  },
+  {
+    "id": "5",
+    "name": "Cursor",
+    "group": "AI",
+    "url": "https://status.cursor.com/api/v2/summary.json",
+    "page": "https://status.cursor.com"
+  },
+  {
+    "id": "6",
+    "name": "ElevenLabs",
+    "group": "AI",
+    "url": "https://status.elevenlabs.io/api/v2/summary.json",
+    "page": "https://status.elevenlabs.io/"
+  },
+  {
+    "id": "7",
+    "name": "Grok",
+    "group": "AI",
+    "url": "",
+    "page": "https://status.x.ai"
+  },
+  {
+    "id": "8",
+    "name": "Groq",
+    "group": "AI",
+    "url": "https://groqstatus.com/api/v2/summary.json",
+    "page": "https://groqstatus.com/"
+  },
+  {
+    "id": "9",
+    "name": "OpenAI",
+    "group": "AI",
+    "url": "https://status.openai.com/api/v2/summary.json",
+    "page": "https://status.openai.com/"
+  },
+  {
+    "id": "10",
+    "name": "Perplexity",
+    "group": "AI",
+    "url": "https://status.perplexity.com/api/v2/summary.json",
+    "page": "https://status.perplexity.com"
+  },
+  {
+    "id": "11",
+    "name": "Replicate",
+    "group": "AI",
+    "url": "https://status.replicate.com/api/v2/summary.json",
+    "page": "https://www.replicatestatus.com/"
+  },
+  {
+    "id": "12",
+    "name": "DigitalOcean",
+    "group": "云服务",
+    "url": "https://status.digitalocean.com/api/v2/summary.json",
+    "page": "http://status.digitalocean.com"
+  },
+  {
+    "id": "13",
+    "name": "Fly.io",
+    "group": "云服务",
+    "url": "https://status.flyio.net/api/v2/summary.json",
+    "page": "https://status.flyio.net"
+  },
+  {
+    "id": "14",
+    "name": "Netlify",
+    "group": "云服务",
+    "url": "https://www.netlifystatus.com/api/v2/summary.json",
+    "page": "https://www.netlifystatus.com"
+  },
+  {
+    "id": "15",
+    "name": "Vercel",
+    "group": "云服务",
+    "url": "https://www.vercel-status.com/api/v2/summary.json",
+    "page": "https://www.vercel-status.com"
+  },
+  {
+    "id": "16",
+    "name": "Atlassian",
+    "group": "开发",
+    "url": "https://status.atlassian.com/api/v2/summary.json",
+    "page": "https://status.atlassian.com"
+  },
+  {
+    "id": "17",
+    "name": "Clerk",
+    "group": "开发",
+    "url": "https://status.clerk.com/api/v2/summary.json",
+    "page": "https://status.clerk.com/"
+  },
+  {
+    "id": "18",
+    "name": "Figma",
+    "group": "开发",
+    "url": "https://status.figma.com/api/v2/summary.json",
+    "page": "https://status.figma.com"
+  },
+  {
+    "id": "19",
+    "name": "GitHub",
+    "group": "开发",
+    "url": "https://www.githubstatus.com/api/v2/summary.json",
+    "page": "https://www.githubstatus.com"
+  },
+  {
+    "id": "20",
+    "name": "Notion",
+    "group": "开发",
+    "url": "https://www.notion-status.com/api/v2/summary.json",
+    "page": "https://www.notion-status.com/"
+  },
+  {
+    "id": "21",
+    "name": "Postman",
+    "group": "开发",
+    "url": "https://status.postman.com/api/v2/summary.json",
+    "page": "https://status.postman.com"
+  },
+  {
+    "id": "22",
+    "name": "Python Infrastructure",
+    "group": "开发",
+    "url": "https://status.python.org/api/v2/summary.json",
+    "page": "https://status.python.org"
+  },
+  {
+    "id": "23",
+    "name": "Sentry",
+    "group": "开发",
+    "url": "https://status.sentry.io/api/v2/summary.json",
+    "page": "https://status.sentry.io"
+  },
+  {
+    "id": "24",
+    "name": "Stripe",
+    "group": "开发",
+    "url": "https://www.stripestatus.com/api/v2/summary.json",
+    "page": "https://www.stripestatus.com"
+  },
+  {
+    "id": "25",
+    "name": "npm",
+    "group": "开发",
+    "url": "https://status.npmjs.org/api/v2/summary.json",
+    "page": "https://status.npmjs.org"
+  },
+  {
+    "id": "26",
+    "name": "Discord",
+    "group": "社区",
+    "url": "https://discordstatus.com/api/v2/summary.json",
+    "page": "https://discordstatus.com"
+  },
+  {
+    "id": "27",
+    "name": "Pinterest",
+    "group": "社区",
+    "url": "https://www.pintereststatus.com/api/v2/summary.json",
+    "page": "https://www.pintereststatus.com"
+  },
+  {
+    "id": "28",
+    "name": "Reddit",
+    "group": "社区",
+    "url": "https://www.redditstatus.com/api/v2/summary.json",
+    "page": "https://www.redditstatus.com"
+  },
+  {
+    "id": "29",
+    "name": "Twitch",
+    "group": "社区",
+    "url": "https://status.twitch.tv/api/v2/summary.json",
+    "page": "https://status.twitch.com"
+  },
+  {
+    "id": "30",
+    "name": "Zoom",
+    "group": "社区",
+    "url": "https://status.zoom.us/api/v2/summary.json",
+    "page": "https://www.zoomstatus.com"
+  }
+]

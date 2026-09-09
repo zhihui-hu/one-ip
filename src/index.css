@@ -1,0 +1,340 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* Create Web Kit global styles */
+:root {
+  --radius: 0.5rem;
+}
+
+:root[data-color] {
+  --primary-foreground: white;
+}
+:root[data-color="yellow"],
+:root[data-color="green"],
+:root[data-color="rose"],
+:root[data-color="orange"] {
+  --primary-foreground: black;
+}
+
+:root[data-color="zinc"] {
+  --primary: hsl(240 5% 26%);
+}
+
+:root[data-color="red"] {
+  --primary: hsl(0 84% 60%);
+}
+
+:root[data-color="rose"] {
+  --primary: hsl(340 82% 65%);
+}
+
+:root[data-color="orange"] {
+  --primary: hsl(24 94% 53%);
+}
+
+:root[data-color="green"] {
+  --primary: hsl(142 71% 45%);
+}
+
+:root[data-color="blue"] {
+  --primary: hsl(221 83% 53%);
+}
+
+:root[data-color="yellow"] {
+  --primary: hsl(47 95% 53%);
+}
+
+:root[data-color="violet"] {
+  --primary: hsl(262 83% 58%);
+}
+
+/* 圆角（shadcn 默认用 --radius 作基准） */
+:root[data-radius="0"] {
+  --radius: 0rem;
+}
+
+:root[data-radius="0.25"] {
+  --radius: 0.25rem;
+}
+
+:root[data-radius="0.5"] {
+  --radius: 0.5rem;
+}
+
+:root[data-radius="0.75"] {
+  --radius: 0.75rem;
+}
+
+:root[data-radius="1"] {
+  --radius: 1rem;
+}
+
+/* 布局示例：你可以自己按需求调整 */
+:root[data-layout="full"] .app-container {
+  max-width: 100%;
+}
+
+:root[data-layout="centered"] .app-container {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+:root[data-font-size="sm"] {
+  --app-font-size: 14px;
+}
+
+:root[data-font-size="md"] {
+  --app-font-size: 16px;
+}
+
+:root[data-font-size="lg"] {
+  --app-font-size: 18px;
+}
+
+html {
+  font-size: var(--app-font-size, 16px);
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+.app-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: calc(5rem + env(safe-area-inset-top, 0px))
+    calc(1.5rem + env(safe-area-inset-right, 0px))
+    calc(5rem + env(safe-area-inset-bottom, 0px))
+    calc(1.5rem + env(safe-area-inset-left, 0px));
+}
+/* iOS Safari zooms focused text fields smaller than 16px. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+  }
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
+}
+::view-transition-group(root) {
+  animation-duration: 0s;
+}
+
+/* NProgress: one global stylesheet, themed bar without a spinner. */
+#nprogress {
+  pointer-events: none;
+}
+#nprogress .bar {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--primary);
+}
+#nprogress .peg {
+  position: absolute;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  box-shadow:
+    0 0 10px var(--primary),
+    0 0 5px var(--primary);
+  opacity: 1;
+  transform: rotate(3deg) translate(0, -4px);
+}
+@media (prefers-reduced-motion: reduce) {
+  #nprogress,
+  #nprogress * {
+    transition: none !important;
+  }
+}
+
+@keyframes sweep-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.sweep-shine {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+      90deg,
+      currentColor 0%,
+      currentColor 40%,
+      rgba(255, 255, 255, 0.9) 50%,
+      currentColor 60%,
+      currentColor 100%
+    )
+    0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: 4s linear infinite sweep-shine;
+}
+.sweep-shine-surface {
+  background: linear-gradient(
+      90deg,
+      var(--muted) 0%,
+      var(--muted) 40%,
+      color-mix(in oklch, var(--muted), var(--foreground) 16%) 50%,
+      var(--muted) 60%,
+      var(--muted) 100%
+    )
+    0 0 / 200% 100%;
+  animation: 4s linear infinite sweep-shine;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sweep-shine {
+    animation: none;
+    -webkit-text-fill-color: currentColor;
+    background: none;
+  }
+  .sweep-shine-surface {
+    animation: none;
+    background: var(--muted);
+  }
+}

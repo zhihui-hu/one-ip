@@ -1,0 +1,162 @@
+[
+  {
+    "id": "n01",
+    "name": "中国上海",
+    "cc": "cn",
+    "city": "Shanghai",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n02",
+    "name": "中国香港",
+    "cc": "hk",
+    "city": "Hong Kong",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n03",
+    "name": "日本东京",
+    "cc": "jp",
+    "city": "Tokyo",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n04",
+    "name": "新加坡",
+    "cc": "sg",
+    "city": "Singapore",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n05",
+    "name": "越南胡志明",
+    "cc": "vn",
+    "city": "Ho Chi Minh City",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n06",
+    "name": "印尼雅加达",
+    "cc": "id",
+    "city": "Jakarta",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n07",
+    "name": "印度德里",
+    "cc": "in",
+    "city": "Delhi",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n08",
+    "name": "阿联酋迪拜",
+    "cc": "ae",
+    "city": "Dubai",
+    "continent": "亚洲",
+    "cIcon": "🌏"
+  },
+  {
+    "id": "n09",
+    "name": "美国洛杉矶",
+    "cc": "us",
+    "city": "Los Angeles",
+    "continent": "美洲",
+    "cIcon": "🌎"
+  },
+  {
+    "id": "n10",
+    "name": "美国亚特兰大",
+    "cc": "us",
+    "city": "Atlanta",
+    "continent": "美洲",
+    "cIcon": "🌎"
+  },
+  {
+    "id": "n11",
+    "name": "加拿大温哥华",
+    "cc": "ca",
+    "city": "Vancouver",
+    "continent": "美洲",
+    "cIcon": "🌎"
+  },
+  {
+    "id": "n12",
+    "name": "巴西圣保罗",
+    "cc": "br",
+    "city": "Sao Paulo",
+    "continent": "美洲",
+    "cIcon": "🌎"
+  },
+  {
+    "id": "n13",
+    "name": "德国法兰克福",
+    "cc": "de",
+    "city": "Frankfurt",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n14",
+    "name": "荷兰阿姆斯特丹",
+    "cc": "nl",
+    "city": "Amsterdam",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n15",
+    "name": "法国巴黎",
+    "cc": "fr",
+    "city": "Paris",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n16",
+    "name": "瑞典斯德哥尔摩",
+    "cc": "se",
+    "city": "Stockholm",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n17",
+    "name": "瑞士苏黎世",
+    "cc": "ch",
+    "city": "Zurich",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n18",
+    "name": "西班牙马德里",
+    "cc": "es",
+    "city": "Madrid",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n19",
+    "name": "俄罗斯莫斯科",
+    "cc": "ru",
+    "city": "Moscow",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  },
+  {
+    "id": "n20",
+    "name": "土耳其伊斯坦布尔",
+    "cc": "tr",
+    "city": "Istanbul",
+    "continent": "欧洲",
+    "cIcon": "🌍"
+  }
+]

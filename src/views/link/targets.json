@@ -1,0 +1,351 @@
+[
+  {
+    "cc": "cn",
+    "name": "DeepSeek",
+    "slug": "deepseek",
+    "host": "www.deepseek.com",
+    "url": "https://www.deepseek.com/favicon.ico",
+    "icon": "/favicons/link/deepseek.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "抖音",
+    "slug": "douyin",
+    "host": "www.douyin.com",
+    "url": "https://lf3-static.bytednsdoc.com/obj/eden-cn/favicon.ico",
+    "icon": "/favicons/link/douyin.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "哔哩哔哩",
+    "slug": "bilibili",
+    "host": "www.bilibili.com",
+    "url": "https://www.bilibili.com/favicon.ico",
+    "icon": "/favicons/link/bilibili.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "京东",
+    "slug": "jd",
+    "host": "www.jd.com",
+    "url": "https://www.jd.com/favicon.ico",
+    "icon": "/favicons/link/jd.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "腾讯QQ",
+    "host": "www.qq.com",
+    "url": "https://www.qq.com/favicon.ico",
+    "icon": "/favicons/tencent.webp"
+  },
+  {
+    "cc": "cn",
+    "name": "微信",
+    "url": "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico",
+    "icon": "/favicons/weixin.webp"
+  },
+  {
+    "cc": "cn",
+    "name": "小红书",
+    "slug": "xiaohongshu",
+    "url": "https://fe-static.xhscdn.com/favicon.ico",
+    "icon": "/favicons/link/xiaohongshu.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "新浪微博",
+    "slug": "weibo",
+    "host": "weibo.com",
+    "url": "https://tva1.sinaimg.cn/favicon.ico",
+    "icon": "/favicons/link/weibo.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "百度",
+    "slug": "baidu",
+    "host": "www.baidu.com",
+    "url": "https://www.baidu.com/favicon.ico",
+    "icon": "/favicons/link/baidu.ico"
+  },
+  {
+    "cc": "cn",
+    "name": "网易",
+    "host": "www.163.com",
+    "url": "https://www.163.com/favicon.ico",
+    "icon": "/favicons/netease.webp"
+  },
+  {
+    "cc": "cn",
+    "name": "淘宝",
+    "host": "www.taobao.com",
+    "url": "https://www.taobao.com/favicon.ico",
+    "icon": "/favicons/taobao.webp"
+  },
+  {
+    "cc": "cn",
+    "name": "小米",
+    "slug": "mi",
+    "host": "www.mi.com",
+    "url": "https://www.mi.com/favicon.ico",
+    "icon": "/favicons/link/mi.ico"
+  },
+  {
+    "cc": "jp",
+    "name": "Sony",
+    "slug": "sony",
+    "host": "www.sony.jp",
+    "url": "https://www.sony.jp/favicon.ico",
+    "icon": "/favicons/link/sony.ico"
+  },
+  {
+    "cc": "jp",
+    "name": "任天堂",
+    "slug": "nintendo",
+    "host": "www.nintendo.co.jp",
+    "url": "https://www.nintendo.co.jp/favicon.ico",
+    "icon": "/favicons/link/nintendo.ico"
+  },
+  {
+    "cc": "jp",
+    "name": "Yahoo! JP",
+    "slug": "yahoojp",
+    "host": "www.yahoo.co.jp",
+    "url": "https://www.yahoo.co.jp/favicon.ico",
+    "icon": "/favicons/link/yahoojp.ico"
+  },
+  {
+    "cc": "jp",
+    "name": "LINE",
+    "slug": "line",
+    "host": "line.me",
+    "url": "https://line.me/favicon.ico",
+    "icon": "/favicons/link/line.png"
+  },
+  {
+    "cc": "us",
+    "name": "Apple",
+    "slug": "apple",
+    "host": "www.apple.com",
+    "url": "https://www.apple.com/favicon.ico",
+    "icon": "/favicons/link/apple.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Google",
+    "slug": "google",
+    "url": "https://www.google.com/generate_204",
+    "icon": "/favicons/link/google.ico"
+  },
+  {
+    "cc": "us",
+    "name": "YouTube",
+    "url": "https://www.youtube.com/generate_204",
+    "icon": "/favicons/youtube.webp"
+  },
+  {
+    "cc": "us",
+    "name": "GitHub",
+    "url": "https://github.com/generate_204",
+    "icon": "/favicons/github.webp"
+  },
+  {
+    "cc": "us",
+    "name": "Cloudflare",
+    "url": "https://1.1.1.1/cdn-cgi/trace",
+    "icon": "/favicons/cloudflare.webp"
+  },
+  {
+    "cc": "us",
+    "name": "Claude",
+    "url": "https://api.anthropic.com/favicon.ico",
+    "icon": "/favicons/claude.webp"
+  },
+  {
+    "cc": "us",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com/cdn-cgi/trace",
+    "icon": "/favicons/chatgpt.webp"
+  },
+  {
+    "cc": "us",
+    "name": "AI Studio",
+    "slug": "gemini",
+    "url": "https://generativelanguage.googleapis.com/favicon.ico",
+    "icon": "/favicons/link/gemini.png"
+  },
+  {
+    "cc": "us",
+    "name": "Amazon",
+    "slug": "amazon",
+    "host": "www.amazon.com",
+    "url": "https://www.amazon.com/favicon.ico",
+    "icon": "/favicons/link/amazon.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Bing",
+    "slug": "bing",
+    "url": "https://www.bing.com/favicon.ico",
+    "icon": "/favicons/link/bing.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Steam",
+    "slug": "steam",
+    "host": "store.steampowered.com",
+    "url": "https://store.steampowered.com/favicon.ico",
+    "icon": "/favicons/link/steam.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Oracle",
+    "slug": "oracle",
+    "host": "www.oracle.com",
+    "url": "https://www.oracle.com/favicon.ico",
+    "icon": "/favicons/link/oracle.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Zoom",
+    "url": "https://st1.zoom.us/favicon.ico",
+    "icon": "/favicons/zoom.webp"
+  },
+  {
+    "cc": "us",
+    "name": "Facebook",
+    "slug": "facebook",
+    "host": "www.facebook.com",
+    "url": "https://static.xx.fbcdn.net/rsrc.php/yb/r/hLRJ1GG_y0J.ico",
+    "icon": "/favicons/link/facebook.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Instagram",
+    "slug": "instagram",
+    "host": "www.instagram.com",
+    "url": "https://static.cdninstagram.com/rsrc.php/yb/r/hLRJ1GG_y0J.ico",
+    "icon": "/favicons/link/instagram.png"
+  },
+  {
+    "cc": "us",
+    "name": "X",
+    "url": "https://abs.twimg.com/favicons/twitter.3.ico",
+    "icon": "/favicons/x.webp"
+  },
+  {
+    "cc": "us",
+    "name": "Reddit",
+    "slug": "reddit",
+    "host": "www.reddit.com",
+    "url": "https://www.reddit.com/favicon.ico",
+    "icon": "/favicons/link/reddit.png"
+  },
+  {
+    "cc": "us",
+    "name": "LinkedIn",
+    "slug": "linkedin",
+    "host": "www.linkedin.com",
+    "url": "https://static.licdn.com/favicon.ico",
+    "icon": "/favicons/link/linkedin.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Twitch",
+    "slug": "twitch",
+    "host": "www.twitch.tv",
+    "url": "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png",
+    "icon": "/favicons/link/twitch.ico"
+  },
+  {
+    "cc": "us",
+    "name": "Netflix",
+    "slug": "netflix",
+    "host": "www.netflix.com",
+    "url": "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico",
+    "icon": "/favicons/link/netflix.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "TikTok",
+    "slug": "tiktok",
+    "url": "https://www.tiktok.com/favicon.ico",
+    "icon": "/favicons/link/tiktok.png"
+  },
+  {
+    "cc": "gl",
+    "name": "Spotify",
+    "slug": "spotify",
+    "url": "https://open.spotify.com/favicon.ico",
+    "icon": "/favicons/link/spotify.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "npm",
+    "slug": "npm",
+    "url": "https://registry.npmjs.org/",
+    "icon": "/favicons/link/npm.png"
+  },
+  {
+    "cc": "gl",
+    "name": "Takealot",
+    "slug": "takealot",
+    "url": "https://static.takealot.com/favicon.ico",
+    "icon": "/favicons/link/takealot.png"
+  },
+  {
+    "cc": "gl",
+    "name": "PixPix",
+    "slug": "pixpix",
+    "url": "https://www.pixpix.com/favicon.ico",
+    "icon": "/favicons/link/pixpix.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "Naver",
+    "slug": "naver",
+    "url": "https://www.naver.com/favicon.ico",
+    "icon": "/favicons/link/naver.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "Noon",
+    "slug": "noon",
+    "url": "https://www.noon.com/favicon.ico",
+    "icon": "/favicons/link/noon.png"
+  },
+  {
+    "cc": "gl",
+    "name": "Wikipedia",
+    "slug": "wikipedia",
+    "url": "https://www.wikipedia.org/static/favicon/wikipedia.ico",
+    "icon": "/favicons/link/wikipedia.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "BBC",
+    "slug": "bbc",
+    "url": "https://www.bbc.com/favicon.ico",
+    "icon": "/favicons/link/bbc.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "Mistral AI",
+    "slug": "mistral",
+    "url": "https://mistral.ai/favicon.ico",
+    "icon": "/favicons/link/mistral.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "Yandex",
+    "slug": "yandex",
+    "url": "https://yastatic.net/favicon.ico",
+    "icon": "/favicons/link/yandex.ico"
+  },
+  {
+    "cc": "gl",
+    "name": "MercadoLibre",
+    "slug": "mercadolibre",
+    "url": "https://http2.mlstatic.com/favicon.ico",
+    "icon": "/favicons/link/mercadolibre.ico"
+  }
+]

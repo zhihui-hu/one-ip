@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="React Vite Starter" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>React Vite Starter</title>
+    <script>
+      // Classic ES5 script: IE cannot execute the application's module bundle.
+      (function () {
+        var root = document.documentElement;
+        // Fallback only: production must also send frame-ancestors / X-Frame-Options.
+        if (window.self !== window.top) {
+          root.className = "embedded-browser";
+          return;
+        }
+        if (document.documentMode || /MSIE|Trident/.test(navigator.userAgent)) {
+          root.className = "unsupported-browser";
+          return;
+        }
+        try {
+          var theme = localStorage.getItem("theme") || "system";
+          var dark = theme === "dark" || (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+          ["color", "radius", "layout", "font-size"].forEach(function (key) {
+            var value = localStorage.getItem("ui-" + key);
+            if (value && value !== "default") root.setAttribute("data-" + key, value);
+          });
+        } catch (error) {
+          // Keep the page usable when browser storage is unavailable.
+        }
+      })();
+    </script>
+    <style>
+      html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+      .embedded-browser body { display: none !important; }
+      #unsupported-browser { display: none; }
+      .unsupported-browser #root { display: none; }
+      .unsupported-browser #unsupported-browser { display: block; max-width: 640px; margin: 80px auto; padding: 24px; font-family: sans-serif; line-height: 1.8; color: #171717; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <div id="unsupported-browser" role="alert">
+      <h1>不支持 Internet Explorer</h1>
+      <p>请使用最新版 Microsoft Edge、Google Chrome、Firefox 或 Safari 访问本站。</p>
+      <a href="https://www.microsoft.com/edge">下载 Microsoft Edge</a>
+    </div>
+    <noscript>请启用 JavaScript，并使用现代浏览器访问本站。</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

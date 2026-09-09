@@ -1,0 +1,246 @@
+[
+  {
+    "name": "网易",
+    "type": "domestic",
+    "method": "netease",
+    "icon": "/favicons/netease.webp"
+  },
+  {
+    "name": "字节跳动",
+    "type": "domestic",
+    "method": "bytedance",
+    "url": "https://perfops.byte-test.com/500b-bench.jpg",
+    "icon": "/favicons/bytedance.webp"
+  },
+  {
+    "name": "Cloudflare中国",
+    "type": "domestic",
+    "method": "cftrace",
+    "domain": "www.cloudflare-cn.com",
+    "icon": "/favicons/cloudflare.webp"
+  },
+  {
+    "name": "高通中国",
+    "type": "domestic",
+    "method": "cftrace",
+    "domain": "www.qualcomm.cn",
+    "icon": "/favicons/qualcomm.webp"
+  },
+  {
+    "name": "discord.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "gateway.discord.gg",
+    "icon": "/favicons/discord.webp"
+  },
+  {
+    "name": "x.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "x.com",
+    "icon": "/favicons/x.webp"
+  },
+  {
+    "name": "medium.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "medium.com",
+    "icon": "/favicons/medium.webp"
+  },
+  {
+    "name": "anthropic.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "anthropic.com",
+    "icon": "/favicons/anthropic.webp"
+  },
+  {
+    "name": "claude.ai",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "claude.ai",
+    "icon": "/favicons/claude.webp"
+  },
+  {
+    "name": "chatgpt.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "chatgpt.com",
+    "icon": "/favicons/chatgpt.webp"
+  },
+  {
+    "name": "openai.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "openai.com",
+    "icon": "/favicons/openai.webp"
+  },
+  {
+    "name": "sora.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "sora.com",
+    "icon": "/favicons/sora.webp"
+  },
+  {
+    "name": "grok.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "grok.com",
+    "icon": "/favicons/grok.webp"
+  },
+  {
+    "name": "pixpix.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "pixpix.com",
+    "icon": "/favicons/pixpix.webp"
+  },
+  {
+    "name": "perplexity.ai",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.perplexity.ai",
+    "icon": "/favicons/perplexity.webp"
+  },
+  {
+    "name": "midjourney.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "midjourney.com",
+    "icon": "/favicons/midjourney.webp"
+  },
+  {
+    "name": "coinbase.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "coinbase.com",
+    "icon": "/favicons/coinbase.webp"
+  },
+  {
+    "name": "www.okx.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.okx.com",
+    "icon": "/favicons/okx.webp"
+  },
+  {
+    "name": "binance.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.binance.info",
+    "icon": "/favicons/binance.webp"
+  },
+  {
+    "name": "crypto.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "crypto.com",
+    "icon": "/favicons/crypto.webp"
+  },
+  {
+    "name": "zoom.us",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "zoom.us",
+    "icon": "/favicons/zoom.webp"
+  },
+  {
+    "name": "1password.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "1password.com",
+    "icon": "/favicons/1password.webp"
+  },
+  {
+    "name": "wise.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "wise.com",
+    "icon": "/favicons/wise.webp"
+  },
+  {
+    "name": "notion.so",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "notion.so",
+    "icon": "/favicons/notion.webp"
+  },
+  {
+    "name": "shopify.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "shopify.com",
+    "icon": "/favicons/shopify.webp"
+  },
+  {
+    "name": "godaddy.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "godaddy.com",
+    "icon": "/favicons/godaddy.webp"
+  },
+  {
+    "name": "producthunt.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "producthunt.com",
+    "icon": "/favicons/producthunt.webp"
+  },
+  {
+    "name": "cloudflare.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.cloudflare.com",
+    "icon": "/favicons/cloudflare.webp"
+  },
+  {
+    "name": "cloudflare cdnjs",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "cdnjs.cloudflare.com",
+    "icon": "/favicons/cdnjs.webp"
+  },
+  {
+    "name": "npm registry",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "registry.npmjs.org",
+    "icon": "/favicons/npmjs.webp"
+  },
+  {
+    "name": "kali.download",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "kali.download",
+    "icon": "/favicons/kali.webp"
+  },
+  {
+    "name": "unpkg.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "unpkg.com",
+    "icon": "/favicons/unpkg.webp"
+  },
+  {
+    "name": "nodejs.org",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "nodejs.org",
+    "icon": "/favicons/nodejs.webp"
+  },
+  {
+    "name": "gitlab.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "gitlab.com",
+    "icon": "/favicons/gitlab.webp"
+  },
+  {
+    "name": "crunchyroll.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "crunchyroll.com",
+    "icon": "/favicons/crunchyroll.webp"
+  }
+]
