@@ -5,9 +5,9 @@ import { Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { withDetectionAnimation } from "@/views/browser/with-feedback";
-import { testConnectivity } from "@/views/link/api";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { probeAiDomain } from "./probe";
 
 export function AiNetworkCheck({
   domains,
@@ -18,13 +18,9 @@ export function AiNetworkCheck({
 }) {
   const [refreshing, setRefreshing] = useState(false);
   const query = useQuery({
-    queryKey: ["ai-network", ...domains],
+    queryKey: ["ai-network", "v3", ...domains],
     queryFn: ({ signal }) =>
-      Promise.all(
-        domains.map((domain) =>
-          testConnectivity(`https://${domain}/favicon.ico`, signal),
-        ),
-      ),
+      Promise.all(domains.map((domain) => probeAiDomain(domain, signal))),
     staleTime: 60_000,
     retry: false,
     refetchOnWindowFocus: false,
@@ -82,14 +78,26 @@ export function AiNetworkCheck({
                 <SiteLogo website={`https://${domain}`} />
                 <span className="truncate">{domain}</span>
               </span>
-              {result ? (
-                <LatencyBadge result={result} running={false} />
+              {busy ? (
+                <Pending>检测中…</Pending>
+              ) : result?.median != null ? (
+                <span title={result.description}>
+                  <LatencyBadge result={result} running={false} />
+                </span>
               ) : (
-                <span className="text-muted-foreground">—</span>
+                <span
+                  className="text-xs text-muted-foreground"
+                  title={result?.description}
+                >
+                  {result?.status === "restricted" ? "检测受限" : "未确认"}
+                </span>
               )}
             </div>
           ))}
         </div>
+        <p className="small muted mt-2">
+          检测的是站点资源响应，不等于登录或对话可用；跨站限制和超时不会判为“未连通”。
+        </p>
         {query.error && (
           <p className="small text-destructive">网络检测失败，请重试。</p>
         )}

@@ -4,13 +4,6 @@ import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { CountryFlag } from "@/components/country-flag";
 import { IpText, Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableHead,
-  TableBody,
-  TableRow,
-} from "@/components/ui/table";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
@@ -106,42 +99,36 @@ export function HomePage() {
                     </span>
                   )}
                 </div>
-                {(geo || query.isPending) && (
-                  <dl className="primary-ip-details">
-                    <div>
-                      <dt>归属地</dt>
-                      <dd>
-                        {loading ? (
-                          <Pending>加载中...</Pending>
-                        ) : (
-                          [geo?.country, geo?.region, geo?.city]
-                            .filter(Boolean)
-                            .join(" · ") || "未知"
-                        )}
-                      </dd>
+                <div className="primary-ip-meta text-sm text-muted-foreground">
+                  {loading ? (
+                    <Pending>正在查询归属信息…</Pending>
+                  ) : geo?.country || geo?.city || geo?.isp ? (
+                    <>
+                      <p>
+                        {[geo.country, geo.region, geo.city]
+                          .filter(Boolean)
+                          .filter((item, i, all) => all.indexOf(item) === i)
+                          .join(" · ")}
+                      </p>
+                      <p className="mt-1 text-xs">
+                        {[geo.isp, geo.asn ? `AS${geo.asn}` : undefined]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </>
+                  ) : query.data ? (
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <span>归属信息暂不可用</span>
+                      <button
+                        type="button"
+                        className="shrink-0 text-primary"
+                        onClick={() => geoByIp.get(query.data!.ip)?.refetch()}
+                      >
+                        重试
+                      </button>
                     </div>
-                    <div>
-                      <dt>运营商</dt>
-                      <dd>
-                        {loading ? (
-                          <Pending>加载中...</Pending>
-                        ) : (
-                          (geo?.isp ?? "未知")
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>ASN</dt>
-                      <dd>
-                        {loading ? (
-                          <Pending>加载中...</Pending>
-                        ) : (
-                          (geo?.asn ?? "未知")
-                        )}
-                      </dd>
-                    </div>
-                  </dl>
-                )}
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           );
@@ -159,38 +146,17 @@ export function HomePage() {
           </CardHeader>
           <CardContent>
             <div ref={connectivityRef}>
-              {mobile ? (
-                <Table className="home-connectivity-table">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>网站</TableHead>
-                      <TableHead>测试记录</TableHead>
-                      <TableHead>延迟</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {orderedTargets.map(({ target }) => (
-                      <ConnectivityTile
-                        table
-                        target={target}
-                        key={target.name}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="ping-grid">
-                  {orderedTargets.map(({ target }) => (
-                    <ConnectivityTile target={target} key={target.name} />
-                  ))}
-                </div>
-              )}
+              <div className="ping-grid">
+                {orderedTargets.map(({ target }) => (
+                  <ConnectivityTile target={target} key={target.name} />
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
-      <PlatformSummary />
       <SplitResults summary />
+      <PlatformSummary />
       <QuickChecks />
       <BrowserSummary />
       <section className="home-shortcuts">

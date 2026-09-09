@@ -5,8 +5,8 @@ import { Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
-import { probe } from "@/lib/network";
 import { aiPlatforms } from "@/views/ai/platforms";
+import { probeAiDomain } from "@/views/ai/probe";
 import { getStatus } from "@/views/status/api";
 import { statusOrder } from "@/views/status/order";
 import services from "@/views/status/services.json";
@@ -38,9 +38,9 @@ export function PlatformSummary() {
   }, []);
   const connectivity = useQueries({
     queries: aiPlatforms.map((platform) => ({
-      queryKey: ["ai-preview", platform.id],
+      queryKey: ["ai-preview", "v3", platform.id],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
-        probe(`https://${platform.domain}/favicon.ico`, signal),
+        probeAiDomain(platform.domain, signal),
       enabled: visible,
       staleTime: 120_000,
       retry: false,
@@ -68,10 +68,8 @@ export function PlatformSummary() {
     )
   )
     orderedPlatforms.sort((a, b) => {
-      const left =
-        a.query.data != null && a.query.data >= 0 ? a.query.data : Infinity;
-      const right =
-        b.query.data != null && b.query.data >= 0 ? b.query.data : Infinity;
+      const left = a.query.data?.median ?? Infinity;
+      const right = b.query.data?.median ?? Infinity;
       return left - right;
     });
   const sortRef = useSortAnimation(
@@ -86,10 +84,10 @@ export function PlatformSummary() {
         <CardContent>
           <div
             ref={sortRef}
-            className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2"
+            className="grid grid-cols-2 gap-x-3 md:grid-cols-1 lg:grid-cols-2"
           >
             {orderedPlatforms.map(({ platform, query }) => {
-              const latency = query.data;
+              const latency = query.data?.median;
               return (
                 <div
                   key={platform.id}
@@ -108,11 +106,12 @@ export function PlatformSummary() {
                   </UnderlineHover>
                   <span
                     className="shrink-0"
+                    title={query.data?.description}
                     style={{
                       color: query.isPending
                         ? "var(--muted-foreground)"
                         : latency == null || latency < 0
-                          ? "var(--danger)"
+                          ? "var(--muted-foreground)"
                           : latency < 100
                             ? "var(--success)"
                             : latency < 400
@@ -123,7 +122,11 @@ export function PlatformSummary() {
                     {query.isPending ? (
                       <Pending>待检测</Pending>
                     ) : latency == null || latency < 0 ? (
-                      "未连通"
+                      query.data?.status === "restricted" ? (
+                        "检测受限"
+                      ) : (
+                        "未确认"
+                      )
                     ) : (
                       `${latency} ms`
                     )}
@@ -132,8 +135,9 @@ export function PlatformSummary() {
               );
             })}
           </div>
-          <p className="small muted mt-3">
-            单次 HTTP 请求耗时；点击平台查看完整检测，不代表账号或模型可用。
+          <p className="home-note mt-3">
+            显示探测资源的 HTTP
+            响应耗时；检测受限或未确认不代表网站打不开。点击平台可查看说明并打开官网。
           </p>
         </CardContent>
       </Card>
@@ -149,7 +153,7 @@ export function PlatformSummary() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+          <div className="grid grid-cols-2 gap-x-3 md:grid-cols-1 lg:grid-cols-2">
             {featured
               .map((service, index) => ({ service, query: statuses[index] }))
               .sort(
@@ -196,7 +200,7 @@ export function PlatformSummary() {
                 );
               })}
           </div>
-          <p className="small muted mt-3">
+          <p className="home-note mt-3">
             来自官方状态源；点击服务查看组件与事件。
           </p>
         </CardContent>

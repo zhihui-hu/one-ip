@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BuildInfo } from "@/components/build-info";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
@@ -7,11 +7,14 @@ import { Pending } from "@/components/toolkit";
 import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UnderlineHover } from "@/components/underline-hover";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/hooks/use-theme";
 import { Search, Globe, Cable, Activity, Bot } from "lucide-react";
 import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
 import { activeNavigationRoute, navigationRoutes } from "./routes";
+
+const MobileNavGlass = lazy(() => import("@/components/mobile-nav-glass"));
 
 const menuIcons = {
   "/": Search,
@@ -37,6 +40,7 @@ const options = navigationRoutes.map((route) => {
 
 export function AppLayout() {
   const { resolvedTheme } = useTheme();
+  const mobile = useIsMobile();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const navRef = useRef<HTMLElement>(null);
@@ -71,6 +75,16 @@ export function AppLayout() {
   return (
     <>
       <div className="coffee-container">
+        <header className="mobile-site-header">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm font-semibold"
+            aria-label="IP 网络工具首页"
+          >
+            <img src="/icon.svg" width="24" height="24" alt="" />
+          </Link>
+          <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
+        </header>
         <AnimatedSegmentedTabs
           label="网络诊断工具"
           options={options}
@@ -85,10 +99,15 @@ export function AppLayout() {
           triggerClassName="h-9 flex-none rounded-lg border-0 px-2 text-[13px] text-muted-foreground hover:bg-accent/50 data-[state=active]:font-semibold data-[state=active]:text-primary"
           renderList={(list) => (
             <nav ref={navRef} className="coffee-nav" aria-label="主导航">
+              {mobile && (
+                <Suspense fallback={null}>
+                  <MobileNavGlass light={resolvedTheme === "light"} />
+                </Suspense>
+              )}
               <Link
                 to="/"
                 aria-label="IP 网络工具首页"
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
+                className="site-home-link flex size-9 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <img src="/icon.svg" alt="" width="32" height="32" />
               </Link>

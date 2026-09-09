@@ -3,8 +3,49 @@ import type { Geo } from "@/lib/types";
 
 export const getMyIp = (signal?: AbortSignal) =>
   endpoint<Geo>("/me", { signal });
-export const getGeo = (ip: string, signal?: AbortSignal) =>
-  endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, { signal });
+export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
+  const options = () => ({
+    signal: signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
+      : AbortSignal.timeout(5000),
+  });
+  try {
+    const data = await request<Geo>(
+      `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
+      options(),
+    );
+    if (!data.ip || (!data.country && !data.isp))
+      throw new Error("归属信息不完整");
+    return { ...data, ip, source: "ip.sb" };
+  } catch {
+    signal?.throwIfAborted();
+    const data = await request<{
+      success: boolean;
+      country?: string;
+      country_code?: string;
+      region?: string;
+      city?: string;
+      connection?: { isp?: string; asn?: number };
+      latitude?: number;
+      longitude?: number;
+      timezone?: { id?: string };
+    }>(`https://ipwho.is/${encodeURIComponent(ip)}`, options());
+    if (!data.success) throw new Error("归属信息暂不可用，请稍后重试");
+    return {
+      ip,
+      country: data.country,
+      country_code: data.country_code,
+      region: data.region,
+      city: data.city,
+      isp: data.connection?.isp,
+      asn: data.connection?.asn,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      timezone: data.timezone?.id,
+      source: "ipwho.is",
+    };
+  }
+}
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   for (const url of ["https://2026.ip138.com/", "https://my.ip.cn/"]) {
     try {

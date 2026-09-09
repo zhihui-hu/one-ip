@@ -113,7 +113,7 @@ export function QuickChecks() {
               <CompactText text={dns.data.geo} />
             </p>
           )}
-          <p className="small muted mt-3">
+          <p className="home-note mt-3">
             DNS 单次采样；未采集到地址不代表没有泄漏，点击查看完整检测。
           </p>
         </CardContent>
@@ -175,7 +175,7 @@ export function QuickChecks() {
               </Button>
             </div>
           </form>
-          <p className="small muted mt-3">
+          <p className="home-note mt-3">
             进入详情后选择地区并开始测量，默认优选模式。
           </p>
         </CardContent>

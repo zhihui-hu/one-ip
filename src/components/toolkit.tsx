@@ -37,7 +37,7 @@ export function PageHeading({
   privacy?: boolean;
 }) {
   useEffect(() => {
-    document.title = `${title} - Net.Coffee 复刻版`;
+    document.title = `${title}`;
   }, [title]);
   return (
     <>

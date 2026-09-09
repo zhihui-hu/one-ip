@@ -223,7 +223,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 </UnderlineHover>
               </div>
             ))}
-            <p className="small muted col-span-full pt-1">
+            <p className="home-note col-span-full pt-1">
               {pending ? (
                 <Pending>正在检测分流出口…</Pending>
               ) : (
