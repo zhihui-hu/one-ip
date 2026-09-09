@@ -13,6 +13,12 @@ import { statusOrder } from "@/views/status/order";
 import rawservices from "@/views/status/services.json";
 import { useQueries } from "@tanstack/react-query";
 
+const services = rawservices.map((item) => ({
+  ...item,
+  name: t(item.name),
+  note: item.note ? t(item.note) : item.note,
+}));
+
 const featured = ["9", "4", "10", "5", "0", "19", "15", "1"].map((id) =>
   services.find((service) => service.id === id)!,
 );
@@ -213,9 +219,3 @@ export function PlatformSummary() {
     </div>
   );
 }
-
-const services = rawservices.map((item) => ({
-  ...item,
-  name: t(item.name),
-  note: item.note ? t(item.note) : item.note,
-}));

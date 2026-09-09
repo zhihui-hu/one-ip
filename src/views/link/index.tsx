@@ -16,6 +16,8 @@ import { testConnectivity, type ProbeResult } from "./api";
 import { connectivityRoundAtom } from "./store";
 import rawtargets from "./targets.json";
 
+const targets = rawtargets.map((item) => ({ ...item, name: t(item.name) }));
+
 const groups = [
   ["cn", t("中国")],
   ["jp", t("日本")],
@@ -261,5 +263,3 @@ export default function LinkPage() {
     </>
   );
 }
-
-const targets = rawtargets.map((item) => ({ ...item, name: t(item.name) }));

@@ -15,6 +15,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { detectSite, getGeo, type Site } from "./api";
 import rawsites from "./sites.json";
 
+const sites = rawsites.map((item) => ({ ...item, name: t(item.name) }));
+
 interface Row extends Site {
   onDetail: (name: string) => void;
   visible: boolean;
@@ -300,5 +302,3 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     </Card>
   );
 }
-
-const sites = rawsites.map((item) => ({ ...item, name: t(item.name) }));

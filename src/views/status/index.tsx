@@ -22,6 +22,12 @@ import { getStatus } from "./api";
 import { statusOrder } from "./order";
 import rawservices from "./services.json";
 
+const services = rawservices.map((item) => ({
+  ...item,
+  name: t(item.name),
+  note: item.note ? t(item.note) : item.note,
+}));
+
 const componentLabels: Record<string, string> = {
   operational: t("正常运行"),
   degraded_performance: t("性能下降"),
@@ -390,9 +396,3 @@ export default function StatusPage() {
     </div>
   );
 }
-
-const services = rawservices.map((item) => ({
-  ...item,
-  name: t(item.name),
-  note: item.note ? t(item.note) : item.note,
-}));
