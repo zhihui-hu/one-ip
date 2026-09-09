@@ -1,4 +1,4 @@
-name: Build and deploy site
+name: Build and deploy one-ip
 
 on:
   pull_request:
@@ -7,135 +7,75 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
-  group: site-deploy-${{ github.ref }}
-  cancel-in-progress: false
+  group: one-ip-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HUSKY: 0
+  TZ: Asia/Shanghai
+  WRANGLER_SEND_METRICS: false
 
 jobs:
   build:
-    name: Test and build
+    name: Build and test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-    env:
-      HUSKY: 0
-      TZ: Asia/Shanghai
+    timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-
-      - name: Test
-        run: pnpm test
-
-      - name: Build
+      - name: Build SPA
         run: pnpm build
-
-      - name: Upload site artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
-
-      - name: Upload reusable site artifact
-        if: github.event_name != 'pull_request'
+      - name: Test Worker and application
+        run: pnpm test
+      - name: Upload static assets
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: site-dist
+          name: one-ip-dist
           path: dist
           if-no-files-found: error
+          retention-days: 3
 
-  github-pages:
-    name: Deploy to GitHub Pages
-    if: github.event_name != 'pull_request'
+  deploy:
+    name: Create or update one-ip Worker
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 15
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-  cloudflare-pages:
-    name: Deploy to Cloudflare Pages
-    if: github.event_name != 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      deployments: write
-    environment:
-      name: cloudflare-pages
-      url: ${{ steps.deployment.outputs.deployment-url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Download site artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: site-dist
+          name: one-ip-dist
           path: dist
-
-      - name: Ensure Pages project exists
+      - name: Deploy Worker and static assets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          projects_json="$(pnpm exec wrangler pages project list --json)"
-          if ! PROJECTS_JSON="$projects_json" node --input-type=module -e '
-            const projects = JSON.parse(process.env.PROJECTS_JSON ?? "[]");
-            const exists = projects.some((project) =>
-              (project.name ?? project["Project Name"]) === "one-transfer"
-            );
-            process.exit(exists ? 0 : 1);
-          '; then
-            pnpm exec wrangler pages project create one-transfer --production-branch main
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository secrets."
+            exit 1
           fi
-
-      - name: Deploy one-transfer Pages project
-        id: deployment
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          packageManager: pnpm
-          command: pages deploy dist --project-name=one-transfer --branch=main --commit-hash=${{ github.sha }}
+          pnpm exec wrangler deploy --env=""

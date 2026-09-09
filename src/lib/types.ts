@@ -28,15 +28,6 @@ export interface Lookup {
   sources: Geo[];
   risk: Risk;
   rdap?: Record<string, unknown>;
-  unavailable: string[];
-}
-export interface DnsResult {
-  resolvers: Geo[];
-  complete: boolean;
-}
-export interface DnsSession {
-  token: string;
-  probeUrls: string[];
 }
 export interface RtcResult {
   ip: string;

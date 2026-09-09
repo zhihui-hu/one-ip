@@ -1,129 +1,138 @@
-import { useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { Suspense, useEffect, useRef } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BuildInfo } from "@/components/build-info";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
+import { Pending } from "@/components/toolkit";
+import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useTheme } from "@/hooks/use-theme";
-import { Moon, Sun, Monitor, ChevronDown } from "lucide-react";
+import { Search, Globe, Cable, Activity, Bot } from "lucide-react";
+import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
+import { activeNavigationRoute, navigationRoutes } from "./routes";
 
-const routes = [
-  ["/", "IP查询", "查询"],
-  ["/claude/", "Claude AI IP 检测", "Claude"],
-  ["/ip/", "IP评分", "评分"],
-  ["/gpt/", "GPT 检测", "GPT"],
-  ["/link/", "网络连通", "连通"],
-  ["/dns/", "DNS泄露", "DNS"],
-  ["/webrtc/", "WebRTC", "UDP"],
-  ["/ping/", "全球Ping", "Ping"],
-  ["/status/", "服务状态", "状态"],
-];
-const more = [
-  ["/whois/", "Whois查询"],
-  ["/news/", "AI资讯"],
-  ["/card/", "IP卡片"],
-];
+const menuIcons = {
+  "/": Search,
+  "/browser/": Globe,
+  "/network/": Cable,
+  "/ai/": Bot,
+  "/status/": Activity,
+};
+
+const options = navigationRoutes.map((route) => {
+  const Icon = menuIcons[route.value];
+  return {
+    value: route.value,
+    label: (
+      <>
+        <Icon className="size-4" strokeWidth={1.75} aria-hidden="true" />
+        <span className="nav-full">{route.label}</span>
+        <span className="nav-short">{route.short}</span>
+      </>
+    ),
+  };
+});
+
 export function AppLayout() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const navRef = useRef<HTMLElement>(null);
+  const activeRoute = activeNavigationRoute(pathname);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    const viewport = navRef.current?.querySelector<HTMLElement>(
+      "[data-slot=scroll-area-viewport]",
+    );
+    const trigger = navRef.current?.querySelector<HTMLElement>(
+      "[role=tab][data-state=active]",
+    );
+    if (!viewport || !trigger) return;
+    const parent = viewport.getBoundingClientRect();
+    const child = trigger.getBoundingClientRect();
+    const offset =
+      child.left < parent.left
+        ? child.left - parent.left - 8
+        : child.right > parent.right
+          ? child.right - parent.right + 8
+          : 0;
+    if (offset)
+      viewport.scrollBy({
+        left: offset,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
   }, [pathname]);
-  const ThemeIcon =
-    theme === "system" ? Monitor : theme === "dark" ? Moon : Sun;
+
   return (
     <>
       <div className="coffee-container">
-        <nav className="coffee-nav" aria-label="主导航">
-          <div className="nav-scroll">
-            {routes.map(([path, label, short]) => (
-              <UnderlineHover asChild key={path}>
-                <NavLink to={path} end={path === "/"}>
-                  <span className="nav-full">{label}</span>
-                  <span className="nav-short">{short}</span>
-                </NavLink>
-              </UnderlineHover>
-            ))}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="nav-more">
-                更多
-                <ChevronDown data-icon="inline-end" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                {more.map(([path, label]) => (
-                  <DropdownMenuItem asChild key={path}>
-                    <Link to={path}>{label}</Link>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                className="theme-button"
-                aria-label="切换主题模式"
+        <AnimatedSegmentedTabs
+          label="网络诊断工具"
+          options={options}
+          value={activeRoute}
+          onValueChange={(value) => {
+            if (value !== activeRoute) navigate(value);
+          }}
+          activationMode="manual"
+          className="min-w-0"
+          listClassName="h-9 w-max justify-start gap-0.5 bg-transparent p-0"
+          highlightClassName="rounded-lg bg-primary/10 shadow-none ring-0"
+          triggerClassName="h-9 flex-none rounded-lg border-0 px-2 text-[13px] text-muted-foreground hover:bg-accent/50 data-[state=active]:font-semibold data-[state=active]:text-primary"
+          renderList={(list) => (
+            <nav ref={navRef} className="coffee-nav" aria-label="主导航">
+              <Link
+                to="/"
+                aria-label="IP 网络工具首页"
+                className="flex size-9 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
               >
-                <ThemeIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                {(
-                  [
-                    ["light", "亮色模式", Sun],
-                    ["dark", "暗黑模式", Moon],
-                    ["system", "跟随系统", Monitor],
-                  ] as const
-                ).map(([mode, label, Icon]) => (
-                  <DropdownMenuItem key={mode} onSelect={() => setTheme(mode)}>
-                    <Icon />
-                    {label}
-                    {theme === mode && " ✓"}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </nav>
-        <main>
-          <Outlet />
-        </main>
+                <img src="/icon.svg" alt="" width="32" height="32" />
+              </Link>
+              <ScrollArea className="nav-tabs-scroll">
+                {list}
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+              <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
+            </nav>
+          )}
+        >
+          <Tabs.Content value={activeRoute} asChild>
+            <main className="outline-none">
+              <Suspense
+                fallback={
+                  <p className="status-line">
+                    <Pending>正在加载页面…</Pending>
+                  </p>
+                }
+              >
+                <Outlet />
+              </Suspense>
+            </main>
+          </Tabs.Content>
+        </AnimatedSegmentedTabs>
         <footer className="coffee-footer">
-          © {new Date().getFullYear()} Net.Coffee 复刻版 ·{" "}
+          © {new Date().getFullYear()} IP 网络工具 ·{" "}
           <UnderlineHover asChild>
-            <Link to="/">IP查询</Link>
+            <Link to="/">IP 查询</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/claude/">Claude AI 检测</Link>
+            <Link to="/browser/privacy/">WebRTC 检测</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/ip/">IP评分</Link>
+            <Link to="/network/whois/">WHOIS 查询</Link>
           </UnderlineHover>
-          <div className="build-meta">
-            <BuildInfo />
-          </div>
         </footer>
       </div>
       <aside aria-label="站点通知" className="update-notices">
         <AppUpdateChecker />
       </aside>
+      <BuildInfo />
       <Toaster theme={resolvedTheme} position="top-right" />
     </>
   );

@@ -18,14 +18,24 @@ export function json(data, status = 200) {
 export function publicIp(value) {
   if (!isIP(value))
     throw new HttpError(400, "请输入有效的公网 IPv4 或 IPv6 地址");
-  const ip = value.toLowerCase();
+  const ip =
+    isIP(value) === 6
+      ? new URL(`https://[${value}]/`).hostname.slice(1, -1)
+      : value;
   if (isIP(ip) === 6) {
     if (ip.startsWith("::ffff:")) {
-      const mapped = ip.slice(7);
-      if (isIP(mapped) === 4) publicIp(mapped);
-      else throw new HttpError(400, "不支持映射 IPv6 地址，请输入 IPv4");
+      const [high, low] = ip
+        .slice(7)
+        .split(":")
+        .map((v) => parseInt(v, 16));
+      return publicIp(`${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`);
     }
-    if (ip === "::" || ip === "::1" || /^(fc|fd|fe[89ab]|ff)/.test(ip))
+    // Accept global unicast only; reject local, documentation and benchmark ranges.
+    if (
+      !/^[23]/.test(ip) ||
+      /^2001:(db8|2|10|20):/.test(ip) ||
+      /^2001::/.test(ip)
+    )
       throw new HttpError(400, "不支持私有、回环或保留地址");
   } else {
     const [a, b, c] = ip.split(".").map(Number);
@@ -59,9 +69,13 @@ export function target(value) {
     throw new HttpError(400, "请输入公网域名，不包含协议、路径或端口");
   return normalized;
 }
-export async function boundedJson(response, maxBytes = 2_000_000) {
+export async function boundedJson(
+  response,
+  maxBytes = 2_000_000,
+  errorStatus = 502,
+) {
   const reader = response.body?.getReader();
-  if (!reader) throw new HttpError(502, "数据源返回空响应");
+  if (!reader) throw new HttpError(errorStatus, "JSON 内容为空");
   let size = 0;
   const chunks = [];
   try {
@@ -69,7 +83,11 @@ export async function boundedJson(response, maxBytes = 2_000_000) {
       const { done, value } = await reader.read();
       if (done) break;
       size += value.byteLength;
-      if (size > maxBytes) throw new HttpError(502, "数据源响应过大");
+      if (size > maxBytes)
+        throw new HttpError(
+          errorStatus === 400 ? 413 : errorStatus,
+          "JSON 内容过大",
+        );
       chunks.push(value);
     }
   } finally {
@@ -84,10 +102,10 @@ export async function boundedJson(response, maxBytes = 2_000_000) {
   try {
     return JSON.parse(new TextDecoder().decode(bytes));
   } catch {
-    throw new HttpError(502, "数据源没有返回有效 JSON");
+    throw new HttpError(errorStatus, "内容不是有效 JSON");
   }
 }
-export async function upstream(url, init = {}) {
+export async function upstream(url, init = {}, maxBytes = 2_000_000) {
   let response;
   try {
     response = await fetch(url, {
@@ -106,10 +124,13 @@ export async function upstream(url, init = {}) {
         : `外部数据源暂不可用 (${response.status})`,
     );
   }
-  return boundedJson(response);
+  return boundedJson(response, maxBytes);
 }
 export async function inputJson(request) {
   if (!request.headers.get("Content-Type")?.includes("application/json"))
     throw new HttpError(415, "需要 application/json");
-  return boundedJson(request, 4096);
+  const value = await boundedJson(request, 4096, 400);
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new HttpError(400, "需要 JSON 对象");
+  return value;
 }

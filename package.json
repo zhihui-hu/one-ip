@@ -6,20 +6,26 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:stage": "tsc -b && vite build --mode stage",
+    "worker:dev": "node scripts/worker-dev.mjs",
+    "worker:types": "wrangler types",
+    "test": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "browser:build": "node scripts/build-browser-diagnostics.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@fingerprintjs/fingerprintjs": "5.2.0",
     "@fontsource-variable/geist": "^5.3.0",
     "@gsap/react": "latest",
     "@hookform/resolvers": "latest",
     "@shadcn/react": "^0.3.1",
     "@tanstack/react-query": "latest",
     "@tanstack/react-query-devtools": "latest",
-    "@tanstack/react-table": "latest",
+    "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.1.1",
     "cn": "^0.2.6",
@@ -59,12 +65,13 @@
     "oxlint": "^1.79.0",
     "prettier": "latest",
     "prettier-plugin-tailwindcss": "latest",
+    "rollup": "4.63.1",
     "tailwindcss": "latest",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
     "wrangler": "^4.130.0"
   },
-  "description": "React + Vite starter with shadcn/ui, TanStack Query, and SPA-ready defaults",
+  "description": "IP diagnostics SPA with Cloudflare Workers, inspired by Net.Coffee",
   "keywords": [
     "react",
     "vite",

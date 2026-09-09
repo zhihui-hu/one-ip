@@ -1,16 +1,26 @@
-import { startDns, dnsResult } from "./dns.js";
+import { challengeConfig, verifyChallenge } from "./challenges.js";
 import { cfGeo, geoIp, secondaryGeo, riskIp } from "./geo.js";
 import { HttpError, inputJson, json, publicIp, upstream } from "./http.js";
-import { startPing, pingResult } from "./ping.js";
+import { startPing, pingResult, pingNodes } from "./ping.js";
+import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
 import { lookupRegistration } from "./whois.js";
 
+/** @type {ExportedHandler<Env & {IPQS_KEY?: string, GLOBALPING_TOKEN?: string}>} */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/worker" || url.pathname.startsWith("/worker/"))
       return new Response("Not found", { status: 404 });
-    if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
+    if (!url.pathname.startsWith("/api/")) {
+      if (env.APP_ENV === "dev") {
+        url.hostname = "127.0.0.1";
+        url.port = "5137";
+        url.protocol = "http:";
+        return fetch(new Request(url, request));
+      }
+      return env.ASSETS.fetch(request);
+    }
     try {
       const origin = request.headers.get("Origin");
       if (origin && origin !== url.origin)
@@ -23,15 +33,24 @@ export default {
       if (limiter && !(await limiter.limit({ key })).success)
         throw new HttpError(429, "请求过于频繁，请一分钟后重试");
       const path = url.pathname.slice(4).replace(/\/$/, "");
-      const isAction = path === "/ping/start" || path === "/dns/start";
+      if (path === "/dns" || path.startsWith("/dns/"))
+        throw new HttpError(404, "接口不存在");
+      const isAction =
+        path === "/ping/start" || path === "/browser/challenges/verify";
       if (
         (isAction && request.method !== "POST") ||
         (!isAction && request.method !== "GET")
       )
         throw new HttpError(405, "不支持此请求方法");
+      if (path === "/browser/challenges")
+        return json(challengeConfig(env, url.hostname));
+      if (path === "/browser/challenges/verify")
+        return json(
+          await verifyChallenge(await inputJson(request), env, url.hostname),
+        );
       if (path === "/me") {
         const data = cfGeo(request);
-        if (!data.ip || key === "local")
+        if (!data.ip || key === "local" || env.APP_ENV === "dev")
           throw new HttpError(
             503,
             "本地环境没有真实访客 IP，请部署 Worker 后检测；不会使用示例 IP。",
@@ -56,10 +75,6 @@ export default {
         const sources = [primary, secondary].flatMap((r) =>
           r.status === "fulfilled" ? [r.value] : [],
         );
-        const unavailable = [
-          "端口扫描、VPN 溯源、关联域名及位置/ASN/企业历史尚未接入专业数据源",
-        ];
-        if (sources.length < 2) unavailable.push("部分归属地数据源查询失败");
         return json({
           geo: sources[0] ?? { ip },
           sources,
@@ -71,21 +86,17 @@ export default {
             registration.status === "fulfilled"
               ? registration.value.data
               : undefined,
-          unavailable,
         });
       }
       if (path.startsWith("/whois/lookup/"))
         return json(
           await lookupRegistration(decodeURIComponent(path.slice(14))),
         );
+      if (path === "/ping/nodes") return json(await pingNodes());
       if (path === "/ping/start")
         return json(await startPing(await inputJson(request), env));
       if (path.startsWith("/ping/result/"))
         return json(await pingResult(path.slice(13), env));
-      if (path === "/dns/start")
-        return json(await startDns(await inputJson(request), env));
-      if (path.startsWith("/dns/result/"))
-        return json(await dnsResult(path.slice(12), env));
       if (path.startsWith("/status/")) {
         const service = services.find((s) => s.id === path.slice(8));
         if (!service) throw new HttpError(404, "未知服务");
@@ -96,7 +107,7 @@ export default {
           );
         const data = await upstream(service.url);
         return json({
-          ...data,
+          ...normalizeStatus(data),
           fetchedAt: new Date().toISOString(),
           source: service.url,
         });

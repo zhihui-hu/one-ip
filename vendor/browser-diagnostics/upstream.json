@@ -1,0 +1,27 @@
+{
+  "repository": "https://github.com/abrahamjuliot/creepjs",
+  "commit": "10aa6724cd33a1015db1574211890518cd04f0cc",
+  "files": {
+    "audio/index.ts": "5e9e9973235a2213ab7406f49723a4b2128f1702dc59e4a452791a89eefe7f2f",
+    "canvas/index.ts": "6bb5e580122bb26343e1fd8108fb2db6e5a719ab8beebf04394779f06139047d",
+    "domrect/index.ts": "6287e354100ca504af0f3936901f52697540a8aee1e808d737bacd169a1c484a",
+    "errors/index.ts": "cbf1ffa265a6e52e46da7c2fd07ffe2f9491e923187f904c183517c2681cb5ab",
+    "fonts/index.ts": "ce2bcefd13e41cef79bfdf63634ad17ca7f641ee2e88c0ef720c2d38938dbf11",
+    "headless/constants.ts": "cbd41e1fcfde4bc3d9b2afc9b73ca67f0eb3b8cebbc7fda034231dff6cc044a1",
+    "headless/getPlatformEstimate.ts": "6a0044664d2583cf80e025daf442fcc146cdf18fae2fd027d3c51fc755363ac3",
+    "headless/getSystemFonts.ts": "833e47662bbfcd27630fe0992d9518a670c6882ab68954fa0134818156787125",
+    "headless/index.ts": "5641e78ae81b85576cd06ad3bf31b60e2ad73d7ab373451181938d9b99724a23",
+    "lies/index.ts": "83c83ceecc6f4b87c189df71a97589b9581368cb8a3dce1052f0c39fce4f15c0",
+    "navigator/index.ts": "627a8e352c5977d313b96a336e6ca9f7a2208ab491c4a414d5ba9e42923e5749",
+    "screen/index.ts": "951753041cdb15338abd482d2de14590ad6715b2a4315cfe38af7d1a3f5f5829",
+    "timezone/index.ts": "c485f72e08aa775ba2f2947b57a63f31221a80b0bdd0c426747f436c9685a753",
+    "trash/index.ts": "c3ae172a67cc34921965905faf0750ee66fa7f05f9b728ccb98de62b6a9c5c8b",
+    "utils/crypto.ts": "68df0c1ef0ef7a5b252935b714c7ca28c2046bc7ca8c43cb4a5c52b768bd9415",
+    "utils/fonts.ts": "f7d528e0b19e399772fd1444c2c68a7601caa8333a968bf437f54a1107a3081d",
+    "utils/helpers.ts": "5aee9412a4025f2ed391188e4a6900898305feb5c0a75364d4be763db41a7cc9",
+    "utils/html.ts": "c0884e56e275f4331f85dfd64175554b998ad47ecdb3bfd1622d0e64532b5617",
+    "utils/types.ts": "45cd519f8d8f2184107b70403f478e73cfeaa7156830ae2d431935d04526ff15",
+    "webgl/index.ts": "0482602f844b227aeb25b44c268c09a26ca642f93fcb1f8f58fcdaf80f10e238",
+    "worker/index.ts": "0599255c8661c1c6fcbe3cf2f069a8c32a03fc21a788be9fcbb9c3e3fd641d61"
+  }
+}

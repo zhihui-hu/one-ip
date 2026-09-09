@@ -1,6 +1,9 @@
-import { Pending } from "@/components/toolkit";
-import { testConnectivity } from "@/views/link/api";
-import { useQuery } from "@tanstack/react-query";
+import { CompactText } from "@/components/compact-text";
+import { LatencyBadge } from "@/components/latency-badge";
+import { SiteLogo } from "@/components/site-logo";
+import { TableRow, TableCell } from "@/components/ui/table";
+import { testConnectivity, type ProbeResult } from "@/views/link/api";
+import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface Target {
   name: string;
@@ -10,80 +13,96 @@ export interface Target {
 export function ConnectivityTile({
   target,
   round = 0,
+  table = false,
 }: {
   target: Target;
   round?: number;
+  table?: boolean;
 }) {
+  const client = useQueryClient();
+  const progressKey = ["connectivity-progress", target.url, round];
+  const progress = useQuery<ProbeResult>({
+    queryKey: progressKey,
+    enabled: false,
+    queryFn: skipToken,
+  });
   const query = useQuery({
     queryKey: ["connectivity", target.url, round],
-    queryFn: ({ signal }) => testConnectivity(target.url, signal),
+    queryFn: ({ signal }) =>
+      testConnectivity(target.url, signal, (result) =>
+        client.setQueryData(progressKey, result),
+      ),
     staleTime: 60_000,
     retry: false,
   });
-  return (
-    <div className="ping-item">
-      {target.icon && (
-        <img
-          className="site-icon"
-          src={target.icon}
-          alt=""
-          onError={(e) => {
-            e.currentTarget.style.visibility = "hidden";
-          }}
+  const result = query.isFetching ? progress.data : query.data;
+  const name = (
+    <span className="site-cell">
+      <SiteLogo src={target.icon} website={target.url} />
+      <CompactText text={target.name} />
+    </span>
+  );
+  const dots = (
+    <div className="ping-dots">
+      {Array.from({ length: 8 }, (_, i) => (
+        <span
+          key={i}
+          className={`ping-dot ${result?.samples[i] !== undefined ? (result.samples[i] < 0 ? "dot-fail" : result.samples[i] < 100 ? "dot-good" : result.samples[i] < 400 ? "dot-warn" : "dot-slow") : ""}`}
         />
-      )}
+      ))}
+    </div>
+  );
+  const latency = <LatencyBadge result={result} running={query.isFetching} />;
+  return table ? (
+    <TableRow data-sort-id={target.name} aria-busy={query.isFetching}>
+      <TableCell>{name}</TableCell>
+      <TableCell>{dots}</TableCell>
+      <TableCell>{latency}</TableCell>
+    </TableRow>
+  ) : (
+    <div
+      data-sort-id={target.name}
+      className="ping-item"
+      aria-busy={query.isFetching}
+    >
       <div className="ping-label">
-        <div>{target.name}</div>
-        <div className="ping-dots">
-          {Array.from({ length: 8 }, (_, i) => (
-            <span
-              key={i}
-              className={`ping-dot ${query.data ? (query.data.samples[i] < 0 ? "dot-fail" : query.data.samples[i] < 100 ? "dot-good" : query.data.samples[i] < 400 ? "dot-warn" : "dot-slow") : ""}`}
-            />
-          ))}
-        </div>
+        {name}
+        {dots}
       </div>
-      <span className="ping-ms" title="浏览器 HTTP 请求耗时，非 ICMP 延迟">
-        {query.isPending ? (
-          <Pending>···</Pending>
-        ) : query.data?.median != null ? (
-          `${query.data.median}ms`
-        ) : (
-          "未知"
-        )}
-      </span>
+      {latency}
     </div>
   );
 }
+
 export const homeTargets: Target[] = [
   {
     name: "字节跳动",
-    icon: "/favicons/bytedance.webp",
+    icon: "https://icons.duckduckgo.com/ip3/bytedance.com.ico",
     url: "https://perfops.byte-test.com/500b-bench.jpg",
   },
   {
     name: "淘宝",
-    icon: "/favicons/taobao.webp",
+    icon: "https://icons.duckduckgo.com/ip3/taobao.com.ico",
     url: "https://www.taobao.com/favicon.ico",
   },
   {
     name: "微信",
-    icon: "/favicons/weixin.webp",
+    icon: "https://icons.duckduckgo.com/ip3/weixin.qq.com.ico",
     url: "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico",
   },
   {
     name: "GitHub",
-    icon: "/favicons/github.webp",
+    icon: "https://icons.duckduckgo.com/ip3/github.com.ico",
     url: "https://github.com/generate_204",
   },
   {
     name: "Cloudflare",
-    icon: "/favicons/cloudflare.webp",
+    icon: "https://icons.duckduckgo.com/ip3/cloudflare.com.ico",
     url: "https://1.1.1.1/cdn-cgi/trace",
   },
   {
     name: "YouTube",
-    icon: "/favicons/youtube.webp",
+    icon: "https://icons.duckduckgo.com/ip3/youtube.com.ico",
     url: "https://www.youtube.com/generate_204",
   },
 ];

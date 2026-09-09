@@ -1,5 +1,0 @@
-{
-  "title": "ChatGPT · Codex 服务状态监控",
-  "html": "<div class=\"container\">\n\n\n\n<div>\n<a class=\"back-link\" href=\"/gpt/\">← 返回 ChatGPT · Codex IP 检测</a>\n<a class=\"back-link\" href=\"/status/\">更多服务状态 →</a>\n</div>\n<h1>ChatGPT · Codex 服务状态监控</h1>\n<p class=\"desc\">该页面会实时关注ChatGPT 服务状态，并自动更新</p>\n<div class=\"overall-card overall-loading\" id=\"overall\">\n<div class=\"overall-dot dot-loading\"></div>\n<div>\n<div class=\"overall-text\">加载中...</div>\n<div class=\"overall-time\" id=\"fetch-time\"></div>\n</div>\n</div>\n<div class=\"section-title\">服务组件</div>\n<div class=\"comp-grid\" id=\"components\">\n<div class=\"comp-card\"><div class=\"comp-name\">加载中...</div></div>\n</div>\n<div class=\"section-title\">\n<span>近期事件</span>\n<a href=\"/gpt/codex.html\">如还是无法正常使用 Codex 点击这里</a>\n</div>\n<div id=\"incidents\">\n<div class=\"no-incidents\">加载中...</div>\n</div>\n<div class=\"source-note\">\n    数据来源：OpenAI | 自动更新无需刷新\n  </div>\n</div>",
-  "source": "https://ip.net.coffee/gpt/status.html"
-}

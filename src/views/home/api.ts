@@ -40,7 +40,32 @@ export async function detectSite(
   let geo: Geo;
   if (site.method === "cftrace" && site.domain)
     geo = await trace(site.domain, signal);
-  else {
+  else if (
+    (site.method === "ip-text" || site.method === "ip-json") &&
+    site.url
+  ) {
+    let ip: string | undefined;
+    if (site.method === "ip-json") {
+      const data = await request<{ ip?: string }>(site.url, {
+        signal,
+        cache: "no-store",
+      });
+      ip = data.ip;
+    } else {
+      const html = await request<string>(
+        site.url,
+        { signal, cache: "no-store" },
+        "text",
+      );
+      const text = html.replace(/<[^>]*>/g, " ");
+      ip = text.match(
+        /(?:IP(?:地址)?|ip)[^\d]{0,30}((?:\d{1,3}\.){3}\d{1,3})/i,
+      )?.[1];
+    }
+    if (!ip || !/^[\da-fA-F:.]+$/.test(ip))
+      throw new Error("未获取到可读取的出口 IP");
+    geo = { ip, source: site.name };
+  } else {
     const url =
       site.url ??
       "https://necaptcha.nosdn.127.net/ab7f4275c1744aa28e0a8f3a1c58c532.png";
@@ -57,10 +82,28 @@ export async function detectSite(
       throw new Error("未获取到可读取的出口 IP");
     geo = { ip, source: site.name };
   }
-  try {
-    return { ...geo, ...(await getGeo(geo.ip, signal)) };
-  } catch (error) {
-    if (signal?.aborted) throw error;
-    return geo;
-  }
+  return geo;
+}
+
+export async function getBrowserIp(
+  version: 4 | 6,
+  signal?: AbortSignal,
+): Promise<Geo> {
+  const data = await request<{ ip: string }>(
+    `https://${version === 4 ? "api4" : "api6"}.ipify.org?format=json`,
+    {
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(8000)])
+        : AbortSignal.timeout(8000),
+      cache: "no-store",
+    },
+  );
+  if (
+    !data.ip ||
+    (version === 6
+      ? !data.ip.includes(":")
+      : !/^\d{1,3}(\.\d{1,3}){3}$/.test(data.ip))
+  )
+    throw new Error("未获取到有效 IP");
+  return { ip: data.ip, source: "ipify" };
 }

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { LookupFaq } from "@/components/lookup-faq";
 import { LookupForm } from "@/components/lookup-form";
 import {
   PageHeading,
@@ -10,12 +10,16 @@ import {
   ErrorNotice,
   Pending,
 } from "@/components/toolkit";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDiagnostic } from "@/hooks/use-diagnostic";
+import { Card, CardContent } from "@/components/ui/card";
+import { useLookupHistory } from "@/hooks/use-lookup-history";
+import type { Lookup } from "@/lib/types";
 import type { Geo } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { lookupIp, currentIp } from "./api";
+import { lookupIp } from "./api";
+import { LocationMap } from "./location-map";
 
 const columns: ColumnDef<Geo>[] = [
   { accessorKey: "source", header: "数据源" },
@@ -27,48 +31,71 @@ const columns: ColumnDef<Geo>[] = [
 export default function IpPage() {
   const { ip = "" } = useParams();
   const navigate = useNavigate();
-  const me = useDiagnostic((_: void, signal) => currentIp(signal));
-  useEffect(() => {
-    if (me.data?.ip) navigate(`/ip/${encodeURIComponent(me.data.ip)}`);
-  }, [me.data, navigate]);
+  const history = useLookupHistory<Lookup>("ip-tools:ip-history:v1");
+  const cached = history.find(ip);
   const query = useQuery({
     queryKey: ["lookup-ip", ip],
     enabled: !!ip,
-    queryFn: ({ signal }) => lookupIp(ip, signal),
+    initialData: cached?.data,
+    initialDataUpdatedAt: cached?.savedAt,
+    staleTime: Infinity,
+    queryFn: async ({ signal }) => {
+      const result = await lookupIp(ip, signal);
+      history.save(ip, result);
+      return result;
+    },
     retry: false,
   });
   const data = query.data;
   return (
-    <>
-      <PageHeading
-        title="IP 评分查询"
-        description="IP深度查询，家宽 or 机房 、人机流量、多源比对、地理经纬度、端口、滥用、黑名单、全球延迟一手掌握"
-        privacy
-      />
-      <LookupForm
-        value={ip}
-        placeholder="输入 IPv4 或 IPv6 地址"
-        busy={query.isFetching}
-        onSubmit={(value) => navigate(`/ip/${encodeURIComponent(value)}`)}
-      />
-      <div className="examples">
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={me.isPending}
-          onClick={() => me.mutate()}
-        >
-          {me.isPending ? <Pending>获取本机 IP…</Pending> : "查询我的 IP"}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/ip/1.1.1.1")}
-        >
-          1.1.1.1
-        </Button>
+    <div className="lookup-page">
+      <div className="lookup-search-card">
+        <PageHeading
+          title="IP 信息查询"
+          description="归属地、运营商与注册信息"
+        />
+        <LookupForm
+          grouped
+          value={ip}
+          placeholder="输入 IPv4 或 IPv6 地址"
+          busy={query.isFetching}
+          onSubmit={(value) =>
+            value === ip
+              ? void query.refetch()
+              : navigate(`/network/ip/${encodeURIComponent(value)}`)
+          }
+        />
       </div>
-      <ErrorNotice error={query.error ?? me.error} />
+      <Card className="mt-3">
+        <CardContent>
+          <div className="examples lookup-history">
+            <span>{history.entries.length ? "最近查询" : "推荐查询"}</span>
+            {(history.entries.length
+              ? history.entries.map((entry) => entry.query)
+              : ["1.1.1.1", "8.8.8.8", "223.5.5.5"]
+            ).map((value) => (
+              <Badge key={value} variant="secondary" asChild>
+                <button
+                  type="button"
+                  className="cursor-pointer rounded-md px-2 py-1 h-auto hover:bg-accent"
+                  onClick={() =>
+                    navigate(`/network/ip/${encodeURIComponent(value)}`)
+                  }
+                >
+                  <IpText ip={value} link={false} />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          {cached && (
+            <p className="small muted">
+              已保存的查询结果 ·{" "}
+              {new Date(cached.savedAt).toLocaleString("zh-CN")}，点击查询可更新
+            </p>
+          )}
+        </CardContent>
+      </Card>
+      <ErrorNotice error={query.error} />
       {query.isFetching && (
         <p className="status-line">
           <Pending>正在查询多源 IP 情报…</Pending>
@@ -81,45 +108,51 @@ export default function IpPage() {
               <IpText ip={data.geo.ip} link={false} />
             </h2>
             <Button variant="outline" asChild>
-              <Link to={`/ping/?host=${encodeURIComponent(data.geo.ip)}`}>
+              <Link
+                to={`/network/ping/?host=${encodeURIComponent(data.geo.ip)}`}
+              >
                 全球延迟测试
               </Link>
             </Button>
           </div>
-          <div className="three-grid">
-            <ToolCard title="风险评分">
-              <div className="gauge-score">
-                {data.risk.available ? (data.risk.fraud_score ?? "—") : "—"}
-              </div>
-              <p className="small muted">
-                {data.risk.available
-                  ? `${data.risk.source} · 风险越低越好`
-                  : data.risk.reason}
-              </p>
-            </ToolCard>
-            <ToolCard title="使用场景 / 类型">
-              <Facts
-                rows={[
-                  ["IP 属性", data.risk.connection_type ?? "未提供"],
-                  [
-                    "VPN",
-                    data.risk.vpn == null
-                      ? "未知"
-                      : data.risk.vpn
-                        ? "是"
-                        : "否",
-                  ],
-                  [
-                    "代理",
-                    data.risk.proxy == null
-                      ? "未知"
-                      : data.risk.proxy
-                        ? "是"
-                        : "否",
-                  ],
-                ]}
-              />
-            </ToolCard>
+          <div className="ip-result-grid">
+            {data.risk.available && (
+              <ToolCard title="风险评分">
+                <div className="gauge-score">
+                  {data.risk.available ? (data.risk.fraud_score ?? "—") : "—"}
+                </div>
+                <p className="small muted">
+                  {data.risk.available
+                    ? `${data.risk.source} · 风险越低越好`
+                    : data.risk.reason}
+                </p>
+              </ToolCard>
+            )}
+            {data.risk.available && (
+              <ToolCard title="使用场景 / 类型">
+                <Facts
+                  rows={[
+                    ["IP 属性", data.risk.connection_type ?? "未提供"],
+                    [
+                      "VPN",
+                      data.risk.vpn == null
+                        ? "未知"
+                        : data.risk.vpn
+                          ? "是"
+                          : "否",
+                    ],
+                    [
+                      "代理",
+                      data.risk.proxy == null
+                        ? "未知"
+                        : data.risk.proxy
+                          ? "是"
+                          : "否",
+                    ],
+                  ]}
+                />
+              </ToolCard>
+            )}
             <ToolCard title="ASN / 运营商">
               <Facts
                 rows={[
@@ -129,16 +162,6 @@ export default function IpPage() {
                 ]}
               />
             </ToolCard>
-          </div>
-          <section className="reading">
-            <h2>地理位置（多源对比）</h2>
-            <DataTable
-              columns={columns}
-              data={data.sources}
-              empty="未获取到归属地数据"
-            />
-          </section>
-          <div className="two-grid">
             <ToolCard title="技术指标">
               <Facts
                 rows={[
@@ -148,69 +171,86 @@ export default function IpPage() {
                 ]}
               />
             </ToolCard>
-            <ToolCard title="IP 情报（威胁指标）">
-              <Facts
-                rows={[
-                  [
-                    "Tor",
-                    data.risk.tor == null
-                      ? "未知"
-                      : data.risk.tor
-                        ? "是"
-                        : "否",
-                  ],
-                  [
-                    "机器人",
-                    data.risk.bot_status == null
-                      ? "未知"
-                      : data.risk.bot_status
-                        ? "是"
-                        : "否",
-                  ],
-                  [
-                    "近期滥用",
-                    data.risk.recent_abuse == null
-                      ? "未知"
-                      : data.risk.recent_abuse
-                        ? "是"
-                        : "否",
-                  ],
-                ]}
-              />
-            </ToolCard>
+            {data.risk.available && (
+              <ToolCard title="IP 情报（威胁指标）">
+                <Facts
+                  rows={[
+                    [
+                      "Tor",
+                      data.risk.tor == null
+                        ? "未知"
+                        : data.risk.tor
+                          ? "是"
+                          : "否",
+                    ],
+                    [
+                      "机器人",
+                      data.risk.bot_status == null
+                        ? "未知"
+                        : data.risk.bot_status
+                          ? "是"
+                          : "否",
+                    ],
+                    [
+                      "近期滥用",
+                      data.risk.recent_abuse == null
+                        ? "未知"
+                        : data.risk.recent_abuse
+                          ? "是"
+                          : "否",
+                    ],
+                  ]}
+                />
+              </ToolCard>
+            )}
+            {data.rdap && (
+              <ToolCard title="注册信息（RDAP）">
+                <Button variant="outline" asChild>
+                  <Link to={`/network/whois/?q=${encodeURIComponent(ip)}`}>
+                    查看完整注册信息
+                  </Link>
+                </Button>
+              </ToolCard>
+            )}
           </div>
-          <section className="reading">
-            <h2>风险深度检测</h2>
-            <p className="principle">
-              {data.unavailable.join("；")}。未提供不等于无风险。
-            </p>
-            <div className="two-grid">
-              {[
-                "VPN 溯源",
-                "关联域名",
-                "位置历史",
-                "ASN 历史",
-                "企业历史",
-                "同机房 / 客户活跃",
-              ].map((title) => (
-                <ToolCard key={title} title={title}>
-                  <p className="muted">尚未接入该情报数据源</p>
-                </ToolCard>
-              ))}
-            </div>
-          </section>
-          {data.rdap && (
-            <section className="reading">
-              <h2>注册信息（RDAP）</h2>
-              <Button variant="outline" asChild>
-                <Link to={`/whois/?q=${encodeURIComponent(ip)}`}>
-                  查看完整注册信息
-                </Link>
-              </Button>
-            </section>
-          )}
+          <LocationMap geo={data.geo} />
+          <ToolCard title="地理位置 · 多源对比">
+            <DataTable
+              columns={columns}
+              data={data.sources}
+              empty="未获取到归属地数据"
+            />
+          </ToolCard>
         </div>
       )}
-    </>
+      <LookupFaq
+        items={[
+          {
+            title: "支持哪些 IP 地址？",
+            text: "支持公网 IPv4 和 IPv6。请只输入地址，不要附加协议、端口或路径；私有、回环及保留地址无法进行公网归属查询。\n\n例如 1.1.1.1、8.8.8.8；IPv6 可直接粘贴完整地址。192.168.x.x、10.x.x.x 和 127.0.0.1 等地址只在本地网络中有意义，不能据此判断公网位置。",
+          },
+          {
+            title: "为什么多个数据源给出的归属地不同？",
+            text: "各数据源的采集方式和更新时间不同。IP 归属地是网络地址的估计位置，不等同于设备的精确位置；运营商名称也可能显示机房或上游网络。\n\n判断时可以对比国家、城市、运营商和 ASN，而不要只看城市名称。代理、移动网络、云服务器及地址重新分配都可能使数据库记录与实际使用位置存在差异。",
+          },
+          {
+            title: "ASN、运营商和地址类型分别是什么？",
+            text: "ASN 标识负责路由该地址的自治系统；运营商表示数据源记录的网络组织；IPv4、IPv6 表示地址协议版本。\n\n同一运营商可能拥有多个 ASN，同一 ASN 也可能覆盖多个城市。注册组织、路由运营方和最终使用者并不总是同一个主体，因此组织名称不等于设备或用户身份。",
+          },
+          {
+            title: "为什么风险评分或部分字段没有显示？",
+            text: "只有数据源实际返回的信息才会展示。缺少风险评分、经纬度或代理标记，不表示该 IP 安全，也不表示它一定存在风险。\n\n评分和 VPN、代理等标记属于特定数据源的判断，不能作为单独的安全结论。字段缺失可能是数据源未提供、查询失败或服务未配置；不要把“未知”解读成“否”或零风险。",
+          },
+          {
+            title: "如何查看当前网络的出口 IP？",
+            text: "首页的 IPv4、IPv6 卡片会通过浏览器检测当前出口。需要查看详细归属信息时，可以点击地址进入 IP 信息页。\n\n使用代理或分流时，不同网站可能走不同出口。可结合首页的网站分流结果，选择需要查询的具体地址。",
+          },
+          {
+            title: "最近查询保存在哪里，如何更新？",
+            text: "本浏览器保留最近 10 条成功查询及结果，点击历史直接读取缓存，再点击“查询”可更新。\n\n历史保存在当前浏览器的 localStorage，不会在设备间同步。清除本站数据可移除本地历史；查询地址也可能出现在地址栏与浏览器历史中。",
+          },
+        ]}
+      />
+    </div>
   );
 }

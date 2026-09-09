@@ -5,7 +5,7 @@
     "slug": "deepseek",
     "host": "www.deepseek.com",
     "url": "https://www.deepseek.com/favicon.ico",
-    "icon": "/favicons/link/deepseek.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.deepseek.com.ico"
   },
   {
     "cc": "cn",
@@ -13,7 +13,7 @@
     "slug": "douyin",
     "host": "www.douyin.com",
     "url": "https://lf3-static.bytednsdoc.com/obj/eden-cn/favicon.ico",
-    "icon": "/favicons/link/douyin.ico"
+    "icon": "https://www.douyin.com/favicon.ico"
   },
   {
     "cc": "cn",
@@ -21,7 +21,7 @@
     "slug": "bilibili",
     "host": "www.bilibili.com",
     "url": "https://www.bilibili.com/favicon.ico",
-    "icon": "/favicons/link/bilibili.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.bilibili.com.ico"
   },
   {
     "cc": "cn",
@@ -29,27 +29,27 @@
     "slug": "jd",
     "host": "www.jd.com",
     "url": "https://www.jd.com/favicon.ico",
-    "icon": "/favicons/link/jd.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.jd.com.ico"
   },
   {
     "cc": "cn",
     "name": "腾讯QQ",
     "host": "www.qq.com",
     "url": "https://www.qq.com/favicon.ico",
-    "icon": "/favicons/tencent.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/qq.com.ico"
   },
   {
     "cc": "cn",
     "name": "微信",
     "url": "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico",
-    "icon": "/favicons/weixin.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/weixin.qq.com.ico"
   },
   {
     "cc": "cn",
     "name": "小红书",
     "slug": "xiaohongshu",
     "url": "https://fe-static.xhscdn.com/favicon.ico",
-    "icon": "/favicons/link/xiaohongshu.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/xiaohongshu.com.ico"
   },
   {
     "cc": "cn",
@@ -57,7 +57,7 @@
     "slug": "weibo",
     "host": "weibo.com",
     "url": "https://tva1.sinaimg.cn/favicon.ico",
-    "icon": "/favicons/link/weibo.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/weibo.com.ico"
   },
   {
     "cc": "cn",
@@ -65,21 +65,21 @@
     "slug": "baidu",
     "host": "www.baidu.com",
     "url": "https://www.baidu.com/favicon.ico",
-    "icon": "/favicons/link/baidu.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.baidu.com.ico"
   },
   {
     "cc": "cn",
     "name": "网易",
     "host": "www.163.com",
     "url": "https://www.163.com/favicon.ico",
-    "icon": "/favicons/netease.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/163.com.ico"
   },
   {
     "cc": "cn",
     "name": "淘宝",
     "host": "www.taobao.com",
     "url": "https://www.taobao.com/favicon.ico",
-    "icon": "/favicons/taobao.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/www.taobao.com.ico"
   },
   {
     "cc": "cn",
@@ -87,7 +87,7 @@
     "slug": "mi",
     "host": "www.mi.com",
     "url": "https://www.mi.com/favicon.ico",
-    "icon": "/favicons/link/mi.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.mi.com.ico"
   },
   {
     "cc": "jp",
@@ -95,7 +95,7 @@
     "slug": "sony",
     "host": "www.sony.jp",
     "url": "https://www.sony.jp/favicon.ico",
-    "icon": "/favicons/link/sony.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.sony.jp.ico"
   },
   {
     "cc": "jp",
@@ -103,7 +103,7 @@
     "slug": "nintendo",
     "host": "www.nintendo.co.jp",
     "url": "https://www.nintendo.co.jp/favicon.ico",
-    "icon": "/favicons/link/nintendo.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.nintendo.co.jp.ico"
   },
   {
     "cc": "jp",
@@ -111,7 +111,7 @@
     "slug": "yahoojp",
     "host": "www.yahoo.co.jp",
     "url": "https://www.yahoo.co.jp/favicon.ico",
-    "icon": "/favicons/link/yahoojp.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.yahoo.co.jp.ico"
   },
   {
     "cc": "jp",
@@ -119,7 +119,7 @@
     "slug": "line",
     "host": "line.me",
     "url": "https://line.me/favicon.ico",
-    "icon": "/favicons/link/line.png"
+    "icon": "https://icons.duckduckgo.com/ip3/line.me.ico"
   },
   {
     "cc": "us",
@@ -127,51 +127,51 @@
     "slug": "apple",
     "host": "www.apple.com",
     "url": "https://www.apple.com/favicon.ico",
-    "icon": "/favicons/link/apple.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.apple.com.ico"
   },
   {
     "cc": "us",
     "name": "Google",
     "slug": "google",
     "url": "https://www.google.com/generate_204",
-    "icon": "/favicons/link/google.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.google.com.ico"
   },
   {
     "cc": "us",
     "name": "YouTube",
     "url": "https://www.youtube.com/generate_204",
-    "icon": "/favicons/youtube.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico"
   },
   {
     "cc": "us",
     "name": "GitHub",
     "url": "https://github.com/generate_204",
-    "icon": "/favicons/github.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/github.com.ico"
   },
   {
     "cc": "us",
     "name": "Cloudflare",
     "url": "https://1.1.1.1/cdn-cgi/trace",
-    "icon": "/favicons/cloudflare.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/cloudflare.com.ico"
   },
   {
     "cc": "us",
     "name": "Claude",
     "url": "https://api.anthropic.com/favicon.ico",
-    "icon": "/favicons/claude.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/claude.ai.ico"
   },
   {
     "cc": "us",
     "name": "ChatGPT",
     "url": "https://chatgpt.com/cdn-cgi/trace",
-    "icon": "/favicons/chatgpt.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/chatgpt.com.ico"
   },
   {
     "cc": "us",
     "name": "AI Studio",
     "slug": "gemini",
     "url": "https://generativelanguage.googleapis.com/favicon.ico",
-    "icon": "/favicons/link/gemini.png"
+    "icon": "https://icons.duckduckgo.com/ip3/gemini.google.com.ico"
   },
   {
     "cc": "us",
@@ -179,14 +179,14 @@
     "slug": "amazon",
     "host": "www.amazon.com",
     "url": "https://www.amazon.com/favicon.ico",
-    "icon": "/favicons/link/amazon.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.amazon.com.ico"
   },
   {
     "cc": "us",
     "name": "Bing",
     "slug": "bing",
     "url": "https://www.bing.com/favicon.ico",
-    "icon": "/favicons/link/bing.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.bing.com.ico"
   },
   {
     "cc": "us",
@@ -194,7 +194,7 @@
     "slug": "steam",
     "host": "store.steampowered.com",
     "url": "https://store.steampowered.com/favicon.ico",
-    "icon": "/favicons/link/steam.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/store.steampowered.com.ico"
   },
   {
     "cc": "us",
@@ -202,13 +202,13 @@
     "slug": "oracle",
     "host": "www.oracle.com",
     "url": "https://www.oracle.com/favicon.ico",
-    "icon": "/favicons/link/oracle.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.oracle.com.ico"
   },
   {
     "cc": "us",
     "name": "Zoom",
     "url": "https://st1.zoom.us/favicon.ico",
-    "icon": "/favicons/zoom.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/zoom.us.ico"
   },
   {
     "cc": "us",
@@ -216,7 +216,7 @@
     "slug": "facebook",
     "host": "www.facebook.com",
     "url": "https://static.xx.fbcdn.net/rsrc.php/yb/r/hLRJ1GG_y0J.ico",
-    "icon": "/favicons/link/facebook.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.facebook.com.ico"
   },
   {
     "cc": "us",
@@ -224,13 +224,13 @@
     "slug": "instagram",
     "host": "www.instagram.com",
     "url": "https://static.cdninstagram.com/rsrc.php/yb/r/hLRJ1GG_y0J.ico",
-    "icon": "/favicons/link/instagram.png"
+    "icon": "https://icons.duckduckgo.com/ip3/www.instagram.com.ico"
   },
   {
     "cc": "us",
     "name": "X",
     "url": "https://abs.twimg.com/favicons/twitter.3.ico",
-    "icon": "/favicons/x.webp"
+    "icon": "https://icons.duckduckgo.com/ip3/x.com.ico"
   },
   {
     "cc": "us",
@@ -238,7 +238,7 @@
     "slug": "reddit",
     "host": "www.reddit.com",
     "url": "https://www.reddit.com/favicon.ico",
-    "icon": "/favicons/link/reddit.png"
+    "icon": "https://icons.duckduckgo.com/ip3/www.reddit.com.ico"
   },
   {
     "cc": "us",
@@ -246,7 +246,7 @@
     "slug": "linkedin",
     "host": "www.linkedin.com",
     "url": "https://static.licdn.com/favicon.ico",
-    "icon": "/favicons/link/linkedin.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.linkedin.com.ico"
   },
   {
     "cc": "us",
@@ -254,7 +254,7 @@
     "slug": "twitch",
     "host": "www.twitch.tv",
     "url": "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png",
-    "icon": "/favicons/link/twitch.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.twitch.tv.ico"
   },
   {
     "cc": "us",
@@ -262,90 +262,90 @@
     "slug": "netflix",
     "host": "www.netflix.com",
     "url": "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico",
-    "icon": "/favicons/link/netflix.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.netflix.com.ico"
   },
   {
     "cc": "gl",
     "name": "TikTok",
     "slug": "tiktok",
     "url": "https://www.tiktok.com/favicon.ico",
-    "icon": "/favicons/link/tiktok.png"
+    "icon": "https://icons.duckduckgo.com/ip3/www.tiktok.com.ico"
   },
   {
     "cc": "gl",
     "name": "Spotify",
     "slug": "spotify",
     "url": "https://open.spotify.com/favicon.ico",
-    "icon": "/favicons/link/spotify.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/spotify.com.ico"
   },
   {
     "cc": "gl",
     "name": "npm",
     "slug": "npm",
     "url": "https://registry.npmjs.org/",
-    "icon": "/favicons/link/npm.png"
+    "icon": "https://icons.duckduckgo.com/ip3/npmjs.com.ico"
   },
   {
     "cc": "gl",
     "name": "Takealot",
     "slug": "takealot",
     "url": "https://static.takealot.com/favicon.ico",
-    "icon": "/favicons/link/takealot.png"
+    "icon": "https://icons.duckduckgo.com/ip3/static.takealot.com.ico"
   },
   {
     "cc": "gl",
     "name": "PixPix",
     "slug": "pixpix",
     "url": "https://www.pixpix.com/favicon.ico",
-    "icon": "/favicons/link/pixpix.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.pixpix.com.ico"
   },
   {
     "cc": "gl",
     "name": "Naver",
     "slug": "naver",
     "url": "https://www.naver.com/favicon.ico",
-    "icon": "/favicons/link/naver.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.naver.com.ico"
   },
   {
     "cc": "gl",
     "name": "Noon",
     "slug": "noon",
     "url": "https://www.noon.com/favicon.ico",
-    "icon": "/favicons/link/noon.png"
+    "icon": "https://icons.duckduckgo.com/ip3/www.noon.com.ico"
   },
   {
     "cc": "gl",
     "name": "Wikipedia",
     "slug": "wikipedia",
     "url": "https://www.wikipedia.org/static/favicon/wikipedia.ico",
-    "icon": "/favicons/link/wikipedia.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.wikipedia.org.ico"
   },
   {
     "cc": "gl",
     "name": "BBC",
     "slug": "bbc",
     "url": "https://www.bbc.com/favicon.ico",
-    "icon": "/favicons/link/bbc.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/www.bbc.com.ico"
   },
   {
     "cc": "gl",
     "name": "Mistral AI",
     "slug": "mistral",
     "url": "https://mistral.ai/favicon.ico",
-    "icon": "/favicons/link/mistral.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/mistral.ai.ico"
   },
   {
     "cc": "gl",
     "name": "Yandex",
     "slug": "yandex",
     "url": "https://yastatic.net/favicon.ico",
-    "icon": "/favicons/link/yandex.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/yandex.com.ico"
   },
   {
     "cc": "gl",
     "name": "MercadoLibre",
     "slug": "mercadolibre",
     "url": "https://http2.mlstatic.com/favicon.ico",
-    "icon": "/favicons/link/mercadolibre.ico"
+    "icon": "https://icons.duckduckgo.com/ip3/mercadolibre.com.ico"
   }
 ]

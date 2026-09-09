@@ -112,14 +112,3 @@ export function maskedIp(ip: string, hidden: boolean) {
         .map((x, i) => (i > 1 ? "*" : x))
         .join(".");
 }
-
-export function flag(code?: string) {
-  return code && /^[a-z]{2}$/i.test(code)
-    ? String.fromCodePoint(
-        ...code
-          .toUpperCase()
-          .split("")
-          .map((c) => 127397 + c.charCodeAt(0)),
-      )
-    : "🌐";
-}

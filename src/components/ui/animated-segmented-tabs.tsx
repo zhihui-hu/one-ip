@@ -27,6 +27,7 @@ type AnimatedSegmentedTabsProps<TValue extends string = string> = Omit<
   listClassName?: string;
   triggerClassName?: string;
   highlightClassName?: string;
+  renderList?: (list: React.ReactNode) => React.ReactNode;
 };
 
 export function AnimatedSegmentedTabs<TValue extends string = string>({
@@ -39,6 +40,7 @@ export function AnimatedSegmentedTabs<TValue extends string = string>({
   listClassName,
   triggerClassName,
   highlightClassName,
+  renderList,
   ...props
 }: AnimatedSegmentedTabsProps<TValue>) {
   const listRef = React.useRef<HTMLDivElement>(null);
@@ -133,70 +135,72 @@ export function AnimatedSegmentedTabs<TValue extends string = string>({
     };
   }, []);
 
+  const list = (
+    <TabsPrimitive.List
+      ref={listRef}
+      aria-label={label}
+      data-slot="animated-segmented-tabs-list"
+      className={cn(
+        "relative inline-flex h-8 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground",
+        listClassName,
+      )}
+    >
+      <span
+        ref={highlightRef}
+        aria-hidden="true"
+        data-slot="animated-segmented-tabs-highlight"
+        className={cn(
+          "pointer-events-none absolute left-0 top-0 z-0 rounded-md bg-background opacity-0 shadow-sm ring-1 ring-foreground/5 will-change-transform",
+          highlightClassName,
+        )}
+      />
+      <TooltipProvider>
+        {options.map((option) => {
+          const trigger = (
+            <TabsPrimitive.Trigger
+              key={option.value}
+              ref={setTriggerRef(option.value)}
+              value={option.value}
+              disabled={option.disabled}
+              data-slot="animated-segmented-tabs-trigger"
+              className={cn(
+                "relative z-10 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-3 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-colors outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 data-[state=active]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+                triggerClassName,
+              )}
+            >
+              {option.label}
+            </TabsPrimitive.Trigger>
+          );
+
+          if (!option.tooltip) {
+            return trigger;
+          }
+
+          return (
+            <Tooltip key={option.value}>
+              <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+              <TooltipContent side="top" sideOffset={6}>
+                {option.tooltip}
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </TooltipProvider>
+    </TabsPrimitive.List>
+  );
+
   return (
     <TabsPrimitive.Root
       data-slot="animated-segmented-tabs"
       value={value}
       onValueChange={(nextValue) => {
         const option = options.find((item) => item.value === nextValue);
-        if (option) {
-          onValueChange(option.value);
-        }
+        if (option) onValueChange(option.value);
       }}
       className={cn("shrink-0", className)}
       {...props}
     >
-      <TabsPrimitive.List
-        ref={listRef}
-        aria-label={label}
-        data-slot="animated-segmented-tabs-list"
-        className={cn(
-          "relative inline-flex h-8 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground",
-          listClassName,
-        )}
-      >
-        <span
-          ref={highlightRef}
-          aria-hidden="true"
-          data-slot="animated-segmented-tabs-highlight"
-          className={cn(
-            "pointer-events-none absolute left-0 top-0 z-0 rounded-md bg-background opacity-0 shadow-sm ring-1 ring-foreground/5 will-change-transform",
-            highlightClassName,
-          )}
-        />
-        <TooltipProvider>
-          {options.map((option) => {
-            const trigger = (
-              <TabsPrimitive.Trigger
-                key={option.value}
-                ref={setTriggerRef(option.value)}
-                value={option.value}
-                disabled={option.disabled}
-                data-slot="animated-segmented-tabs-trigger"
-                className={cn(
-                  "relative z-10 inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-3 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-colors outline-none hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 data-[state=active]:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-                  triggerClassName,
-                )}
-              >
-                {option.label}
-              </TabsPrimitive.Trigger>
-            );
-
-            if (!option.tooltip) {
-              return trigger;
-            }
-
-            return (
-              <Tooltip key={option.value}>
-                <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-                <TooltipContent side="top" sideOffset={6}>
-                  {option.tooltip}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-        </TooltipProvider>
-      </TabsPrimitive.List>
+      {renderList ? renderList(list) : list}
       {children}
     </TabsPrimitive.Root>
   );

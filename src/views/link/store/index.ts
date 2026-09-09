@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const connectivityRoundAtom = atom(0);
+export const connectivityRoundAtom = atom<Record<string, number>>({});

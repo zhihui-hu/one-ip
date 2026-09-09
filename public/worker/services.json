@@ -32,7 +32,8 @@
     "name": "Claude (Anthropic)",
     "group": "AI",
     "url": "https://status.claude.com/api/v2/summary.json",
-    "page": "https://status.claude.com"
+    "page": "https://status.claude.com",
+    "icon": "https://icons.duckduckgo.com/ip3/claude.ai.ico"
   },
   {
     "id": "5",
@@ -49,13 +50,6 @@
     "page": "https://status.elevenlabs.io/"
   },
   {
-    "id": "7",
-    "name": "Grok",
-    "group": "AI",
-    "url": "",
-    "page": "https://status.x.ai"
-  },
-  {
     "id": "8",
     "name": "Groq",
     "group": "AI",
@@ -67,14 +61,16 @@
     "name": "OpenAI",
     "group": "AI",
     "url": "https://status.openai.com/api/v2/summary.json",
-    "page": "https://status.openai.com/"
+    "page": "https://status.openai.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/openai.com.ico"
   },
   {
     "id": "10",
     "name": "Perplexity",
     "group": "AI",
-    "url": "https://status.perplexity.com/api/v2/summary.json",
-    "page": "https://status.perplexity.com"
+    "url": "https://status.perplexity.com/summary.json",
+    "page": "https://status.perplexity.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.perplexity.ai.ico"
   },
   {
     "id": "11",
@@ -215,5 +211,55 @@
     "group": "社区",
     "url": "https://status.zoom.us/api/v2/summary.json",
     "page": "https://www.zoomstatus.com"
+  },
+  {
+    "id": "31",
+    "name": "Gemini",
+    "group": "AI",
+    "url": "",
+    "page": "https://aistudio.google.com/status",
+    "icon": "https://icons.duckduckgo.com/ip3/gemini.google.com.ico",
+    "note": "仅涵盖 AI Studio / Gemini API，未接入可读取的状态接口。",
+    "officialStatus": true
+  },
+  {
+    "id": "32",
+    "name": "DeepSeek",
+    "group": "AI",
+    "url": "",
+    "page": "https://status.deepseek.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.deepseek.com.ico",
+    "note": "官方状态页使用 Flashduty，暂未接入结构化状态接口。",
+    "officialStatus": true
+  },
+  {
+    "id": "33",
+    "name": "Grok",
+    "group": "AI",
+    "url": "",
+    "page": "https://status.x.ai",
+    "icon": "https://icons.duckduckgo.com/ip3/grok.com.ico",
+    "note": "官方状态页暂未接入结构化状态接口。",
+    "officialStatus": true
+  },
+  {
+    "id": "34",
+    "name": "通义千问",
+    "group": "AI",
+    "url": "",
+    "page": "https://chat.qwen.ai",
+    "icon": "https://icons.duckduckgo.com/ip3/chat.qwen.ai.ico",
+    "note": "暂未确认独立的公开状态页，可前往平台官网查看。",
+    "officialStatus": false
+  },
+  {
+    "id": "35",
+    "name": "Kimi",
+    "group": "AI",
+    "url": "",
+    "page": "https://www.kimi.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.kimi.com.ico",
+    "note": "暂未确认独立的公开状态页，可前往平台官网查看。",
+    "officialStatus": false
   }
 ]

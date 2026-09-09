@@ -2,6 +2,11 @@ import { useEffect } from "react";
 import { ActionButton } from "@/components/toolkit";
 import { Field, FieldGroup, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+} from "@/components/ui/input-group";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -15,7 +20,9 @@ export function LookupForm({
   busy,
   label = "查询",
   onSubmit,
+  grouped = false,
 }: {
+  grouped?: boolean;
   value?: string;
   placeholder: string;
   busy: boolean;
@@ -29,12 +36,16 @@ export function LookupForm({
   useEffect(() => {
     form.reset({ query: value });
   }, [value, form]);
+  const Container = grouped ? InputGroup : "div";
+  const Control = grouped ? InputGroupInput : Input;
   return (
     <form onSubmit={form.handleSubmit((data) => onSubmit(data.query))}>
       <FieldGroup>
         <Field data-invalid={!!form.formState.errors.query}>
-          <div className="lookup-form">
-            <Input
+          <Container
+            className={grouped ? "lookup-input-group h-9" : "lookup-form"}
+          >
+            <Control
               aria-label={placeholder}
               placeholder={placeholder}
               aria-invalid={!!form.formState.errors.query}
@@ -43,10 +54,23 @@ export function LookupForm({
               spellCheck={false}
               {...form.register("query")}
             />
-            <ActionButton type="submit" busy={busy}>
-              {label}
-            </ActionButton>
-          </div>
+            {grouped ? (
+              <InputGroupAddon align="inline-end">
+                <ActionButton
+                  className="h-7 min-w-14 px-3"
+                  size="sm"
+                  type="submit"
+                  busy={busy}
+                >
+                  {busy ? "查询中..." : label}
+                </ActionButton>
+              </InputGroupAddon>
+            ) : (
+              <ActionButton type="submit" busy={busy}>
+                {label}
+              </ActionButton>
+            )}
+          </Container>
           <FieldError errors={[form.formState.errors.query]} />
         </Field>
       </FieldGroup>

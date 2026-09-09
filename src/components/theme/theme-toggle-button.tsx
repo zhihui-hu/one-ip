@@ -2,6 +2,8 @@ import { useEffect, useRef, type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { themeTransitionPendingAtom } from "@/store/theme";
+import { useAtom } from "jotai";
 import { Moon, Sun } from "lucide-react";
 import { flushSync } from "react-dom";
 
@@ -22,6 +24,7 @@ export function ThemeToggleButton({
   label?: string;
 }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const [pending, setPending] = useAtom(themeTransitionPendingAtom);
   const busy = useRef(false);
   const transitionRef = useRef<ThemeTransition | null>(null);
   const animationRef = useRef<Animation | null>(null);
@@ -32,8 +35,10 @@ export function ThemeToggleButton({
     () => () => {
       animationRef.current?.cancel();
       transitionRef.current?.skipTransition();
+      busy.current = false;
+      setPending(false);
     },
-    [],
+    [setPending],
   );
 
   async function handleToggle(event: MouseEvent<HTMLButtonElement>) {
@@ -60,6 +65,7 @@ export function ThemeToggleButton({
       Math.max(y, window.innerHeight - y),
     );
     busy.current = true;
+    setPending(true);
     try {
       const transition = transitionDocument.startViewTransition(updateTheme);
       transitionRef.current = transition;
@@ -73,8 +79,8 @@ export function ThemeToggleButton({
           ],
         },
         {
-          duration: 420,
-          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+          duration: 580,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
           fill: "both",
           pseudoElement: "::view-transition-new(root)",
         },
@@ -94,6 +100,7 @@ export function ThemeToggleButton({
       animationRef.current = null;
       transitionRef.current = null;
       busy.current = false;
+      setPending(false);
     }
   }
 
@@ -102,6 +109,8 @@ export function ThemeToggleButton({
       type="button"
       aria-label={buttonLabel}
       title={buttonLabel}
+      disabled={pending}
+      aria-busy={pending}
       className={cn("shrink-0 rounded-lg shadow-none", className)}
       onClick={(event) => void handleToggle(event)}
       size="icon-sm"

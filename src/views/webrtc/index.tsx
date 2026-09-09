@@ -1,14 +1,18 @@
-import { Explanation } from "@/components/explanation";
+import { useState } from "react";
+import { AnimatedValue } from "@/components/animated-value";
+import { CountryFlag } from "@/components/country-flag";
+import { LookupFaq } from "@/components/lookup-faq";
 import {
-  PageHeading,
   ActionButton,
   ErrorNotice,
   DataTable,
   IpText,
+  Pending,
 } from "@/components/toolkit";
-import { useDiagnostic } from "@/hooks/use-diagnostic";
-import { flag } from "@/lib/network";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { RtcResult } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { runWebRtc } from "./api";
 
@@ -24,9 +28,14 @@ const columns: ColumnDef<RtcResult>[] = [
     id: "geo",
     header: "归属地",
     cell: ({ row }) =>
-      row.original.geo
-        ? `${flag(row.original.geo.country_code)} ${row.original.geo.country ?? ""} ${row.original.geo.city ?? ""}`
-        : "未知",
+      row.original.geo ? (
+        <>
+          <CountryFlag code={row.original.geo.country_code} />{" "}
+          {row.original.geo.country ?? ""} {row.original.geo.city ?? ""}
+        </>
+      ) : (
+        "未知"
+      ),
   },
   {
     id: "state",
@@ -35,46 +44,69 @@ const columns: ColumnDef<RtcResult>[] = [
   },
 ];
 export default function WebRtcPage() {
-  const query = useDiagnostic(runWebRtc);
+  const [round, setRound] = useState(0);
+  const query = useQuery({
+    queryKey: ["webrtc-diagnostic", round],
+    queryFn: ({ signal }) => runWebRtc(undefined, signal),
+    retry: false,
+    staleTime: 0,
+    refetchOnWindowFocus: false,
+  });
   return (
     <>
-      <PageHeading
-        title="WebRTC 泄露检测"
-        description="WebRTC 是浏览器内置的实时通信技术，它可能绕过代理直接暴露你的真实 IP。点击下方按钮，检测你的浏览器是否存在 WebRTC 泄露。"
-      />
-      <div className="feature-strip two">
-        <div>
-          🔍<strong>STUN 多节点探测</strong>
-          <small>全球多 STUN 服务器快速交叉验证</small>
-        </div>
-        <div>
-          🛡️<strong>UDP 分流校验</strong>
-          <small>检测是否接管 UDP 流量，验证分流规则</small>
-        </div>
-      </div>
-      <div className="center-actions">
-        <ActionButton busy={query.isPending} onClick={() => query.mutate()}>
-          {query.data ? "重新检测" : "开始检测"}
-        </ActionButton>
-      </div>
+      <Card className="mb-3">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-sm">WebRTC 出口检测</CardTitle>
+            <ActionButton
+              size="sm"
+              busy={query.isFetching}
+              onClick={() => setRound((n) => n + 1)}
+            >
+              {query.isFetching ? "检测中..." : "重新检测"}
+            </ActionButton>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div role="status">
+            <AnimatedValue value={query.data?.verdict ?? query.isFetching}>
+              {query.isFetching ? (
+                <Pending>正在采集 ICE 候选地址...</Pending>
+              ) : (
+                (query.data?.verdict ?? "未完成检测")
+              )}
+            </AnimatedValue>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted-foreground">HTTP 基准出口</span>
+            {query.data?.baseline ? (
+              <IpText ip={query.data.baseline.ip} />
+            ) : query.isFetching ? (
+              <Pending>加载中...</Pending>
+            ) : (
+              "未知"
+            )}
+            <Badge variant="secondary">
+              {query.data?.results.length ?? 0} 个地址
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
       <ErrorNotice error={query.error} />
-      <p className="status-line" role="status">
-        {query.isPending
-          ? "正在采集 ICE 候选地址，请稍候…"
-          : (query.data?.verdict ?? "点击上方按钮，立即检测 WebRTC 是否泄露")}
-      </p>
-      {query.data?.baseline && (
-        <p className="status-line">
-          HTTP 基准出口：
-          <IpText ip={query.data.baseline.ip} />
-        </p>
+      {Boolean(query.data?.results.length) && (
+        <Card>
+          <CardContent>
+            <DataTable
+              data={query.data?.results ?? []}
+              columns={columns}
+              getRowId={(row) => row.ip}
+              animateChanges={false}
+              animateEntries
+            />
+          </CardContent>
+        </Card>
       )}
-      <DataTable
-        data={query.data?.results ?? []}
-        columns={columns}
-        empty="等待检测 / 尚未发现候选地址"
-      />
-      <Explanation
+      <LookupFaq
         items={[
           {
             title: "WebRTC 泄露是怎么回事？",

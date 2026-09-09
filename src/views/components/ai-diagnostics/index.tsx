@@ -1,27 +1,32 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ConnectivityTile } from "@/components/connectivity";
+import { CountryFlag } from "@/components/country-flag";
+import { NumberTicker } from "@/components/number-ticker";
 import {
+  PrivacyToggle,
   PageHeading,
   ToolCard,
   Facts,
   IpText,
   Pending,
-  ReadingLinks,
 } from "@/components/toolkit";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { UnderlineHover } from "@/components/underline-hover";
-import { flag } from "@/lib/network";
 import type { Risk } from "@/lib/types";
+import { AiNetworkCheck } from "@/views/ai/network-check";
+import { AiPlatformLinks } from "@/views/ai/platform-links";
+import { aiPlatforms } from "@/views/ai/platforms";
 import { claudeApi } from "@/views/claude/api";
 import { claudeHistoryAtom } from "@/views/claude/store";
 import { gptApi } from "@/views/gpt/api";
 import { gptHistoryAtom } from "@/views/gpt/store";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { deviceInfo } from "./device";
-import readings from "./readings.json";
 
 function riskLabel(value: boolean | undefined) {
   return value === undefined ? (
@@ -79,12 +84,6 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
     queryFn: ({ signal }) => api.risk(ip!, signal),
     retry: false,
   });
-  const device = useQuery({
-    queryKey: ["device-local"],
-    queryFn: deviceInfo,
-    staleTime: Infinity,
-    retry: false,
-  });
   useEffect(() => {
     if (ip)
       setHistory((previous) =>
@@ -98,176 +97,170 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
       ? 100 - risk.data.fraud_score
       : null;
   return (
-    <>
+    <div className="ai-diagnostics">
       <PageHeading
         title={
-          kind === "claude"
-            ? "Claude AI IP 风险检测"
-            : "ChatGPT · Codex IP 风险检测"
+          kind === "claude" ? "Claude AI 网络检测" : "ChatGPT · Codex 网络检测"
         }
-        description={`检测当前${label}出口 IP 的纯净度、风险、IP 属性（住宅/机房/原生）、DNS、UDP、指纹、历史和安全性`}
-        privacy
+        description=""
       />
-      <div className="three-grid ip-heroes">
-        {[
-          [domestic, "中国出口IPv4"],
-          [cf, "Cloudflare 出口IP"],
-          [exit, `${label}出口IP`],
-        ].map(([raw, heading]) => {
-          const query = raw as typeof domestic;
-          return (
-            <ToolCard title={heading as string} key={heading as string}>
-              <div className="ip-value">
-                {query.isPending ? (
-                  <Pending>查询中…</Pending>
-                ) : (
-                  <IpText ip={query.data?.ip} />
-                )}
-              </div>
-              <p className="muted small">
-                {query.data
-                  ? `${flag(query.data.country_code)} ${query.data.country ?? query.data.country_code ?? "归属地查询中"}`
-                  : query.isError
-                    ? "未知：连接失败或跨域限制"
-                    : "正在检测出口"}
-              </p>
-            </ToolCard>
-          );
-        })}
-      </div>
-      <div className="three-grid">
-        <ToolCard title={`${label}信任评分 (Trust Score)`}>
-          <div className="gauge-score">
-            {risk.isFetching ? <Pending>检测中…</Pending> : (score ?? "—")}
-          </div>
-          <p className="small muted">
-            {score !== null
-              ? "100 − IPQS 风险分；非平台官方评分"
-              : (risk.data?.reason ?? "无法获得风险数据，不计算评分")}
-          </p>
-          <div className="gauge-bar">
-            {score !== null && (
-              <span style={{ left: `${Math.max(0, Math.min(100, score))}%` }} />
-            )}
-          </div>
-          <div className="gauge-labels">
-            <span>0 高危</span>
-            <span>25</span>
-            <span>50</span>
-            <span>75</span>
-            <span>100 可信</span>
-          </div>
-          <Facts
-            rows={[
-              [
-                `${label}支持地区`,
-                <UnderlineHover asChild>
-                  <a
-                    href={
-                      kind === "claude"
-                        ? "https://www.anthropic.com/supported-countries"
-                        : "https://platform.openai.com/docs/supported-countries"
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    查看官方名单 ↗
-                  </a>
-                </UnderlineHover>,
-              ],
-            ]}
-          />
-        </ToolCard>
-        <ToolCard title={`${label}出口IP 属性`}>
-          <Facts
-            rows={[
-              ["地区", geo.data?.country],
-              ["城市", geo.data?.city],
-              ["IP 属性", risk.data?.connection_type ?? "未知"],
-              ["ASN", geo.data?.asn],
-              ["运营商", geo.data?.isp],
-            ]}
-          />
-        </ToolCard>
-        <ToolCard title={`${label}出口IP安全检测`}>
-          <RiskFacts risk={risk.data} />
-        </ToolCard>
+      <div className="ai-overview">
         <ToolCard
           title={
-            kind === "claude" ? "Claude 可用性检测" : "GPT · Codex 可用检测"
+            <div className="flex items-center justify-between gap-3">
+              <span>{label} 出口</span>
+              <PrivacyToggle />
+            </div>
           }
         >
-          {(kind === "claude"
-            ? ["claude.ai", "anthropic.com"]
-            : ["chatgpt.com", "api.openai.com"]
-          ).map((domain) => (
-            <ConnectivityTile
-              key={domain}
-              target={{ name: domain, url: `https://${domain}/favicon.ico` }}
-            />
-          ))}
-          <p className="small muted">
-            仅检测浏览器 HTTP 连通情况，不代表账号可用或模型权限。
-          </p>
-        </ToolCard>
-        <ToolCard title="DNS 泄露检测">
+          <div className="ip-value text-primary">
+            {exit.isPending ? (
+              <Pending>正在检测出口…</Pending>
+            ) : (
+              <IpText ip={ip} />
+            )}
+          </div>
+          {exit.isError ? (
+            <p className="small muted">暂未获取出口，可能受连接或跨域限制。</p>
+          ) : geo.isFetching ? (
+            <p className="small muted">
+              <Pending>正在查询归属信息…</Pending>
+            </p>
+          ) : geo.isError ? (
+            <p className="small muted">归属信息暂不可用。</p>
+          ) : (
+            <p className="small muted">
+              <CountryFlag
+                code={geo.data?.country_code ?? exit.data?.country_code}
+              />{" "}
+              {[geo.data?.country ?? exit.data?.country_code, geo.data?.city]
+                .filter(Boolean)
+                .join(" · ") || "归属地未知"}
+            </p>
+          )}
           <Facts
             rows={[
-              ["状态", "未检测"],
-              ["DNS 出口 IP", "—"],
+              ["运营商", geo.data?.isp],
+              ["ASN", geo.data?.asn],
+              ...(risk.data?.connection_type
+                ? [["IP 属性", risk.data.connection_type] as [string, string]]
+                : []),
             ]}
           />
-          <Button variant="outline" asChild>
-            <Link to="/dns/">查询DNS安全</Link>
-          </Button>
-        </ToolCard>
-        <ToolCard title="WebRTC UDP 泄露检测">
-          <Facts
-            rows={[
-              ["状态", "未检测"],
-              ["UDP 出口 IP", "—"],
-            ]}
-          />
-          <Button variant="outline" asChild>
-            <Link to="/webrtc/">深度查询</Link>
-          </Button>
-        </ToolCard>
-      </div>
-      <ToolCard title={`${label}出口IP用户设备信息`} className="full-card">
-        {device.isPending ? (
-          <Pending>读取本机信息…</Pending>
-        ) : device.data ? (
-          <Facts rows={device.data} />
-        ) : (
-          <p>当前浏览器限制读取设备信息。</p>
-        )}
-        <p className="small muted">
-          设备信息和指纹仅在本地计算，不发送到后端。
-        </p>
-      </ToolCard>
-      <ToolCard title={`${label} 出口 IP 历史记录`} className="full-card">
-        <div className="row-between">
-          <p className="small muted">
-            历史数据仅保存在当前浏览器，最多 20 条，可随时清除
-          </p>
-          <Button variant="ghost" size="sm" onClick={() => setHistory([])}>
-            清除
-          </Button>
-        </div>
-        {history.length ? (
-          <div className="history-grid">
-            {history.map((item) => (
-              <div key={item.time}>
-                <IpText ip={item.ip} />
-                <time>{new Date(item.time).toLocaleString("zh-CN")}</time>
+          <div className="ai-exit-comparison">
+            <span className="small muted">其他出口对照</span>
+            {[
+              { query: domestic, title: "国内 IPv4" },
+              { query: cf, title: "Cloudflare" },
+            ].map(({ query, title }) => (
+              <div className="ai-exit-row" key={title}>
+                <span className="muted">{title}</span>
+                <span>
+                  {query.isPending ? (
+                    <Pending>检测中…</Pending>
+                  ) : query.isError ? (
+                    <span className="muted">暂不可用</span>
+                  ) : (
+                    <IpText ip={query.data?.ip} />
+                  )}
+                </span>
               </div>
             ))}
+            {(domestic.isError || cf.isError) && (
+              <p className="small muted">对照出口可能受连接或跨域限制。</p>
+            )}
           </div>
-        ) : (
-          <p className="muted">暂无历史记录</p>
-        )}
-      </ToolCard>
-      <ReadingLinks links={readings[kind]} />
-    </>
+        </ToolCard>
+        <AiNetworkCheck
+          domains={
+            kind === "claude"
+              ? ["claude.ai", "anthropic.com"]
+              : ["chatgpt.com", "api.openai.com"]
+          }
+        >
+          <p className="small muted mt-3">
+            浏览器 HTTP 探测，不代表账号可用或模型权限。
+          </p>
+          <AiPlatformLinks
+            platform={aiPlatforms.find((platform) => platform.id === kind)!}
+          />
+        </AiNetworkCheck>
+      </div>
+      <Accordion type="multiple" className="ai-details">
+        <AccordionItem value="risk">
+          <AccordionTrigger>
+            <span>
+              IP 风险参考{" "}
+              <span className="ai-detail-summary">
+                {risk.isFetching
+                  ? "检测中"
+                  : risk.data?.available
+                    ? "IPQualityScore"
+                    : "暂无数据"}
+              </span>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent>
+            {risk.isFetching ? (
+              <Pending>正在读取风险数据…</Pending>
+            ) : risk.data?.available ? (
+              <>
+                <p className="small muted mb-3">
+                  第三方参考分：
+                  <strong className="text-foreground">
+                    {score !== null ? <NumberTicker value={score} /> : "—"}
+                  </strong>{" "}
+                  / 100 · 100 − IPQS 风险分，非平台官方评分。
+                </p>
+                <RiskFacts risk={risk.data} />
+              </>
+            ) : (
+              <p className="small muted">
+                {risk.data?.reason ??
+                  (ip
+                    ? "风险数据源暂不可用。"
+                    : "获取平台出口后才能查询风险信息。")}
+              </p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="history">
+          <AccordionTrigger>
+            <span>
+              出口历史{" "}
+              <span className="ai-detail-summary">
+                {history.length} 条 · 当前浏览器
+              </span>
+            </span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="row-between">
+              <p className="small muted">仅保存在当前浏览器，最多 20 条</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={!history.length}
+                onClick={() => setHistory([])}
+              >
+                清除记录
+              </Button>
+            </div>
+            {history.length ? (
+              <div className="history-grid">
+                {history.map((item) => (
+                  <div key={item.time}>
+                    <IpText ip={item.ip} />
+                    <time>{new Date(item.time).toLocaleString("zh-CN")}</time>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="small muted">暂无历史记录</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 }

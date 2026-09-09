@@ -1,0 +1,206 @@
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { SiteLogo } from "@/components/site-logo";
+import { Pending } from "@/components/toolkit";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { UnderlineHover } from "@/components/underline-hover";
+import { useSortAnimation } from "@/hooks/use-sort-animation";
+import { probe } from "@/lib/network";
+import { aiPlatforms } from "@/views/ai/platforms";
+import { getStatus } from "@/views/status/api";
+import { statusOrder } from "@/views/status/order";
+import services from "@/views/status/services.json";
+import { useQueries } from "@tanstack/react-query";
+
+const featured = ["9", "4", "10", "5", "0", "19", "15", "1"].map((id) =>
+  services.find((service) => service.id === id)!,
+);
+const statusLabels: Record<string, string> = {
+  none: "正常运行",
+  minor: "轻微故障",
+  major: "严重故障",
+  critical: "重大故障",
+  maintenance: "维护中",
+};
+export function PlatformSummary() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setVisible(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  const connectivity = useQueries({
+    queries: aiPlatforms.map((platform) => ({
+      queryKey: ["ai-preview", platform.id],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        probe(`https://${platform.domain}/favicon.ico`, signal),
+      enabled: visible,
+      staleTime: 120_000,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })),
+  });
+  const statuses = useQueries({
+    queries: featured.map((service) => ({
+      queryKey: ["service-status", service.id],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        getStatus(service.id, signal),
+      enabled: visible,
+      staleTime: 120_000,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })),
+  });
+  const orderedPlatforms = aiPlatforms.map((platform, index) => ({
+    platform,
+    query: connectivity[index],
+  }));
+  if (
+    connectivity.every(
+      (query) => !query.isFetching && (query.isSuccess || query.isError),
+    )
+  )
+    orderedPlatforms.sort((a, b) => {
+      const left =
+        a.query.data != null && a.query.data >= 0 ? a.query.data : Infinity;
+      const right =
+        b.query.data != null && b.query.data >= 0 ? b.query.data : Infinity;
+      return left - right;
+    });
+  const sortRef = useSortAnimation(
+    orderedPlatforms.map(({ platform }) => platform.id).join("|"),
+  );
+  return (
+    <div ref={ref} className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>AI 访问概览</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            ref={sortRef}
+            className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2"
+          >
+            {orderedPlatforms.map(({ platform, query }) => {
+              const latency = query.data;
+              return (
+                <div
+                  key={platform.id}
+                  data-sort-id={platform.id}
+                  className="flex min-w-0 items-center justify-between gap-2 py-2 text-xs"
+                >
+                  <UnderlineHover asChild>
+                    <Link
+                      to={`/ai/${platform.id}`}
+                      className="flex min-w-0 items-center gap-2 text-primary"
+                      style={{ display: "flex" }}
+                    >
+                      <SiteLogo website={`https://${platform.domain}`} />
+                      <span className="truncate">{platform.name}</span>
+                    </Link>
+                  </UnderlineHover>
+                  <span
+                    className="shrink-0"
+                    style={{
+                      color: query.isPending
+                        ? "var(--muted-foreground)"
+                        : latency == null || latency < 0
+                          ? "var(--danger)"
+                          : latency < 100
+                            ? "var(--success)"
+                            : latency < 400
+                              ? "var(--good)"
+                              : "var(--warning)",
+                    }}
+                  >
+                    {query.isPending ? (
+                      <Pending>待检测</Pending>
+                    ) : latency == null || latency < 0 ? (
+                      "未连通"
+                    ) : (
+                      `${latency} ms`
+                    )}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p className="small muted mt-3">
+            单次 HTTP 请求耗时；点击平台查看完整检测，不代表账号或模型可用。
+          </p>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <div className="row-between">
+            <CardTitle>服务状态</CardTitle>
+            <UnderlineHover asChild>
+              <Link to="/status" className="small text-primary">
+                全部服务 ›
+              </Link>
+            </UnderlineHover>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
+            {featured
+              .map((service, index) => ({ service, query: statuses[index] }))
+              .sort(
+                (a, b) =>
+                  statusOrder(a.query.data?.status?.indicator) -
+                  statusOrder(b.query.data?.status?.indicator),
+              )
+              .map(({ service, query }) => {
+                const indicator = query.data?.status?.indicator;
+                return (
+                  <div
+                    key={service.id}
+                    className="flex min-w-0 items-center justify-between gap-2 py-2 text-xs"
+                  >
+                    <UnderlineHover asChild>
+                      <Link
+                        to={`/status?service=${service.id}`}
+                        className="flex min-w-0 items-center gap-2 text-primary"
+                        style={{ display: "flex" }}
+                      >
+                        <SiteLogo src={service.icon} website={service.page} />
+                        <span className="truncate">
+                          {service.name.replace(" (Anthropic)", "")}
+                        </span>
+                      </Link>
+                    </UnderlineHover>
+                    <span
+                      className="shrink-0"
+                      style={{
+                        color: !indicator
+                          ? "var(--muted-foreground)"
+                          : indicator === "none"
+                            ? "var(--success)"
+                            : "var(--danger)",
+                      }}
+                    >
+                      {query.isPending ? (
+                        <Pending>查询中</Pending>
+                      ) : (
+                        (statusLabels[indicator ?? ""] ?? "待确认")
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+          <p className="small muted mt-3">
+            来自官方状态源；点击服务查看组件与事件。
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

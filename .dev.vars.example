@@ -1,0 +1,9 @@
+
+# Browser challenge playground. Never put secrets in VITE_* variables.
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET=:
+TURNSTILE_HOSTNAMES=localhost,127.0.0.1,ip.huzhihui.com
+# reCAPTCHA v2 checkbox keys (not v3 / Enterprise assessment keys).
+RECAPTCHA_SITE_KEY=
+RECAPTCHA_SECRET=
+RECAPTCHA_HOSTNAMES=localhost,127.0.0.1,ip.huzhihui.com
