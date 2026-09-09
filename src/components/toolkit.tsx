@@ -17,6 +17,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t } from "@/i18n";
 import { maskedIp } from "@/lib/network";
 import { hideIpAtom } from "@/store/privacy";
 import {
@@ -54,9 +55,9 @@ export function PrivacyToggle() {
   const [hidden, setHidden] = useAtom(hideIpAtom);
   return (
     <label className="privacy-toggle">
-      <span>隐藏IP</span>
+      <span>{t("隐藏IP")}</span>
       <Switch
-        aria-label="隐藏 IP 地址"
+        aria-label={t("隐藏 IP 地址")}
         checked={hidden}
         onCheckedChange={setHidden}
       />
@@ -65,7 +66,7 @@ export function PrivacyToggle() {
 }
 export function IpText({ ip, link = true }: { ip?: string; link?: boolean }) {
   const hidden = useAtomValue(hideIpAtom);
-  if (!ip) return <span className="muted">未知</span>;
+  if (!ip) return <span className="muted">{t("未知")}</span>;
   const text = maskedIp(ip, hidden);
   return link && !hidden ? (
     <UnderlineHover asChild>
@@ -118,7 +119,7 @@ export function Facts({ rows }: { rows: [string, ReactNode][] }) {
               {typeof value === "number" ? (
                 <NumberTicker value={value} />
               ) : (
-                (value ?? "未知")
+                (value ?? t("未知"))
               )}
             </AnimatedValue>
           </dd>
@@ -127,7 +128,7 @@ export function Facts({ rows }: { rows: [string, ReactNode][] }) {
     </dl>
   );
 }
-export function Pending({ children = "检测中…" }: { children?: ReactNode }) {
+export function Pending({ children = t("检测中…") }: { children?: ReactNode }) {
   return <SweepShine role="status">{children}</SweepShine>;
 }
 export function ErrorNotice({ error }: { error: unknown }) {
@@ -171,7 +172,7 @@ export function ActionButton({
 export function DataTable<T>({
   data,
   columns,
-  empty = "暂无数据",
+  empty = t("暂无数据"),
   className = "",
   getRowId,
   getRowClassName,
@@ -307,7 +308,7 @@ export function DataTable<T>({
 }
 export function ReadingLinks({
   links,
-  title = "拓展阅读",
+  title = t("拓展阅读"),
 }: {
   links: { path: string; title: string }[];
   title?: string;

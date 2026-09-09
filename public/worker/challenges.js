@@ -31,9 +31,8 @@ function settings(env, id) {
   return { ...provider, sitekey, secret, hostnames: safeHosts };
 }
 export function challengeConfig(env, hostname) {
-  return Object.keys(providers).flatMap((id) => {
+  return Object.keys(providers).map((id) => {
     const config = settings(env, id);
-    if (!config.sitekey) return [];
     const configured = Boolean(
       config.sitekey && config.secret && config.hostnames.includes(hostname),
     );

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { compareContexts, comparePlatforms, type Check } from "./consistency";
 import { environmentSnapshot, type BrowserNavigator } from "./environment";
 
@@ -18,17 +19,17 @@ export async function consistencyChecks(): Promise<Check[]> {
         nav.userAgentData.platform,
         nav.maxTouchPoints,
       ),
-      name: "UA / Client Hints 平台",
+      name: t("UA / Client Hints 平台"),
     });
   } else
     checks.push({
-      name: "UA / Client Hints 平台",
+      name: t("UA / Client Hints 平台"),
       status: "无法检测",
-      detail: "浏览器未提供 Client Hints。",
+      detail: t("浏览器未提供 Client Hints。"),
     });
   const frame = document.createElement("iframe");
   frame.hidden = true;
-  frame.title = "环境一致性检测";
+  frame.title = t("环境一致性检测");
   try {
     document.body.append(frame);
     const win = frame.contentWindow as (Window & typeof globalThis) | null;
@@ -44,14 +45,14 @@ export async function consistencyChecks(): Promise<Check[]> {
           hardwareConcurrency: win.navigator.hardwareConcurrency,
           timezone: win.Intl.DateTimeFormat().resolvedOptions().timeZone,
         },
-        "主页面 / iframe",
+        t("主页面 / iframe"),
       ),
     );
   } catch {
     checks.push({
-      name: "主页面 / iframe",
+      name: t("主页面 / iframe"),
       status: "无法检测",
-      detail: "浏览器限制了子页面读取。",
+      detail: t("浏览器限制了子页面读取。"),
     });
   } finally {
     frame.remove();
@@ -70,25 +71,25 @@ export async function consistencyChecks(): Promise<Check[]> {
         worker!.postMessage("read");
       },
     );
-    checks.push(compareContexts(snapshot, data, "主页面 / Worker"));
+    checks.push(compareContexts(snapshot, data, t("主页面 / Worker")));
   } catch {
     checks.push({
-      name: "主页面 / Worker",
+      name: t("主页面 / Worker"),
       status: "无法检测",
-      detail: "Worker 未返回结果，可能被策略限制。",
+      detail: t("Worker 未返回结果，可能被策略限制。"),
     });
   } finally {
     clearTimeout(timeout);
     worker?.terminate();
   }
   checks.push({
-    name: "首选语言",
+    name: t("首选语言"),
     status: !nav.languages.length
       ? "无法检测"
       : nav.language === nav.languages[0]
         ? "一致"
         : "存在差异",
-    detail: `language: ${nav.language}；languages[0]: ${nav.languages[0] ?? "未提供"}。`,
+    detail: `language: ${nav.language}；languages[0]: ${nav.languages[0] ?? t("未提供")}。`,
   });
   return checks;
 }
@@ -102,23 +103,27 @@ export function automationChecks(): Check[] {
           : navigator.webdriver
             ? "检测到特征"
             : "未发现特征",
-      detail: `navigator.webdriver = ${String(navigator.webdriver)}；该值可被浏览器或扩展改变。`,
+      detail: t("navigator.webdriver = {0}；该值可被浏览器或扩展改变。", [
+        String(navigator.webdriver),
+      ]),
     },
     {
       name: "Headless UA",
       status: /HeadlessChrome/i.test(navigator.userAgent)
         ? "检测到特征"
         : "未发现特征",
-      detail: "检查 User-Agent 中是否明确包含 HeadlessChrome。",
+      detail: t("检查 User-Agent 中是否明确包含 HeadlessChrome。"),
     },
     {
-      name: "历史自动化全局标记",
+      name: t("历史自动化全局标记"),
       status: ["_phantom", "callPhantom", "__nightmare"].some(
         (key) => key in window,
       )
         ? "检测到特征"
         : "未发现特征",
-      detail: "仅检查 PhantomJS / Nightmare 常见标记，不能覆盖所有自动化工具。",
+      detail: t(
+        "仅检查 PhantomJS / Nightmare 常见标记，不能覆盖所有自动化工具。",
+      ),
     },
   ];
 }
@@ -127,9 +132,11 @@ export async function fingerprint() {
   const result = await (await load({ monitoring: false })).get();
   const components = Object.entries(result.components).map(([name, value]) => ({
     name,
-    value: "error" in value ? "无法检测" : hashComponents({ [name]: value }),
+    value: "error" in value ? t("无法检测") : hashComponents({ [name]: value }),
     detail:
-      "error" in value ? "浏览器未提供或限制读取" : JSON.stringify(value.value),
+      "error" in value
+        ? t("浏览器未提供或限制读取")
+        : JSON.stringify(value.value),
   }));
   const element = document.createElement("span");
   element.textContent = "Browser diagnostics 字体 Aa 0123";

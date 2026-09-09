@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t } from "@/i18n";
 import { toast } from "sonner";
 import {
   collectDeepDiagnostics,
@@ -40,12 +41,12 @@ export function DeepPanel() {
       );
       if (!active.signal.aborted) {
         setResult(next);
-        toast.success("深度检测完成");
+        toast.success(t("深度检测完成"));
       }
     } catch (error) {
       if (!active.signal.aborted) {
-        setError(error instanceof Error ? error : new Error("检测失败"));
-        toast.error("深度检测失败，请重试");
+        setError(error instanceof Error ? error : new Error(t("检测失败")));
+        toast.error(t("深度检测失败，请重试"));
       }
     } finally {
       if (!active.signal.aborted) setBusy(false);
@@ -58,32 +59,32 @@ export function DeepPanel() {
   const flagged = reports?.filter((module) => module.report.signal) ?? [];
   const readErrors = reports?.find(
     (module) =>
-      module.name === "errors" && module.report.status === "存在读取错误",
+      module.name === "errors" && module.report.status === t("存在读取错误"),
   );
   const unavailable =
     reports?.filter((module) => module.report.unavailable) ?? [];
   return (
     <div className="mt-3">
-      <ToolCard title="浏览器深度检测">
+      <ToolCard title={t("浏览器深度检测")}>
         <div className="row-between gap-3">
           <p className="small muted">
-            基于{" "}
+            {t("基于")}{" "}
             <a
               href="https://github.com/abrahamjuliot/creepjs"
               target="_blank"
               rel="noreferrer"
             >
-              CreepJS 开源检测模块
+              {t("CreepJS 开源检测模块")}
             </a>
-            ，由本站本地运行。
+            {t("，由本站本地运行。")}
           </p>
           <Button disabled={busy} onClick={run}>
             {busy ? (
-              <Pending>检测中…</Pending>
+              <Pending>{t("检测中…")}</Pending>
             ) : result ? (
-              "重新检测"
+              t("重新检测")
             ) : (
-              "开始深度检测"
+              t("开始深度检测")
             )}
           </Button>
         </div>
@@ -93,18 +94,20 @@ export function DeepPanel() {
             <div className="my-3 rounded-lg bg-muted/50 p-3" role="status">
               <p className="font-medium">
                 {flagged.length
-                  ? `${flagged.length} 个模块发现需要核对的信号`
+                  ? t("{0} 个模块发现需要核对的信号", [flagged.length])
                   : unavailable.length || readErrors
-                    ? "已完成的检查未发现异常信号，但检测结果不完整"
-                    : "本次检测未发现异常信号"}
+                    ? t("已完成的检查未发现异常信号，但检测结果不完整")
+                    : t("本次检测未发现异常信号")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {flagged.length
                   ? flagged
                       .map((module) => fieldLabel(module.name))
                       .join("、") +
-                    "。多个模块可能记录同一个原因，不代表存在多个独立问题。"
-                  : "此结论仅覆盖本次已执行的检查，不是浏览器真实性或安全性证明。"}
+                    t("。多个模块可能记录同一个原因，不代表存在多个独立问题。")
+                  : t(
+                      "此结论仅覆盖本次已执行的检查，不是浏览器真实性或安全性证明。",
+                    )}
               </p>
               {readErrors && (
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -113,7 +116,7 @@ export function DeepPanel() {
               )}
               {unavailable.length > 0 && (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  无法检测：
+                  {t("无法检测：")}
                   {unavailable
                     .map((module) => fieldLabel(module.name))
                     .join("、")}
@@ -131,11 +134,11 @@ export function DeepPanel() {
             </div>
             <Facts
               rows={[
-                ["源码版本", result.commit.slice(0, 12)],
-                ["检测耗时", `${result.duration} ms`],
+                [t("源码版本"), result.commit.slice(0, 12)],
+                [t("检测耗时"), `${result.duration} ms`],
                 [
-                  "已返回数据的模块",
-                  `${result.modules.filter((module) => module.status === "已完成").length}/${result.modules.length}`,
+                  t("已返回数据的模块"),
+                  `${result.modules.filter((module) => module.status === t("已完成")).length}/${result.modules.length}`,
                 ],
               ]}
             />
@@ -144,13 +147,15 @@ export function DeepPanel() {
               columns={[
                 {
                   accessorKey: "name",
-                  header: "检测模块",
+                  header: t("检测模块"),
                   cell: ({ row }) => (
                     <UnderlineHover asChild>
                       <button
                         type="button"
                         className="max-w-full truncate text-left text-primary focus-visible:outline-ring"
-                        aria-label={`查看 ${row.original.name} 深度检测详情`}
+                        aria-label={t("查看 {0} 深度检测详情", [
+                          row.original.name,
+                        ])}
                         onClick={() => setDetail(row.original)}
                       >
                         {fieldLabel(row.original.name)}
@@ -160,12 +165,12 @@ export function DeepPanel() {
                 },
                 {
                   id: "status",
-                  header: "检测结果",
+                  header: t("检测结果"),
                   cell: ({ row }) => row.original.report.status,
                 },
                 {
                   id: "summary",
-                  header: "结果说明",
+                  header: t("结果说明"),
                   cell: ({ row }) => (
                     <span className="text-sm text-muted-foreground">
                       {row.original.report.summary}
@@ -177,8 +182,9 @@ export function DeepPanel() {
           </>
         )}
         <p className="small muted mt-3">
-          结果来自同源独立检测上下文，可能与主页面或官方站点不同。异常信号不能证明使用了指纹浏览器。未包含官方联网评分和
-          Worker 检测。
+          {t(
+            "结果来自同源独立检测上下文，可能与主页面或官方站点不同。异常信号不能证明使用了指纹浏览器。未包含官方联网评分和 Worker 检测。",
+          )}
         </p>
       </ToolCard>
       <ResponsiveDialog
@@ -186,11 +192,13 @@ export function DeepPanel() {
         onOpenChange={(open) => {
           if (!open) setDetail(null);
         }}
-        title={`${detail ? fieldLabel(detail.name) : "深度检测"} · 详情`}
+        title={t("{0} · 详情", [
+          detail ? fieldLabel(detail.name) : t("深度检测"),
+        ])}
         description={
           detail
             ? moduleReport(detail.name, parseDetail(detail.detail)).summary
-            : "本次检测结果"
+            : t("本次检测结果")
         }
       >
         {detail && (

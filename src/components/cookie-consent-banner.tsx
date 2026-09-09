@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { t } from "@/i18n";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ShieldCheck } from "lucide-react";
@@ -158,7 +159,7 @@ export function CookieConsentBanner() {
         ref={wrapperRef}
         role="region"
         aria-live="polite"
-        aria-label="必要存储说明"
+        aria-label={t("必要存储说明")}
         className="pointer-events-auto w-full"
       >
         <Card
@@ -172,17 +173,17 @@ export function CookieConsentBanner() {
               aria-hidden="true"
             />
             <div className="min-w-0 flex-1">
-              <CardTitle className="leading-5">尊重你的隐私</CardTitle>
+              <CardTitle className="leading-5">{t("尊重你的隐私")}</CardTitle>
               <CardDescription className="mt-0.5 text-xs leading-5">
-                仅保存界面偏好，不用于广告追踪。
+                {t("仅保存界面偏好，不用于广告追踪。")}
                 <DialogTrigger asChild>
                   <Button
                     type="button"
                     variant="link"
                     className="h-auto p-0 text-xs leading-5"
-                    aria-label="查看浏览器存储说明"
+                    aria-label={t("查看浏览器存储说明")}
                   >
-                    说明
+                    {t("说明")}
                   </Button>
                 </DialogTrigger>
               </CardDescription>
@@ -194,19 +195,19 @@ export function CookieConsentBanner() {
               onClick={handleAccept}
               disabled={accepting}
               aria-busy={accepting}
-              aria-label="确认已阅读必要存储说明"
+              aria-label={t("确认已阅读必要存储说明")}
             >
-              知道了
+              {t("知道了")}
             </Button>
           </CardHeader>
         </Card>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>浏览器存储说明</DialogTitle>
+            <DialogTitle>{t("浏览器存储说明")}</DialogTitle>
             <DialogDescription className="pt-2 leading-6">
-              本站用本地存储记住主题和界面偏好；确认此提示后，会写入
-              starter_cookie_consent 标记和一年有效的同名
-              Cookie。你可以通过浏览器的网站数据设置清除这些信息。模板不包含广告或行为分析，“知道了”不代表同意非必要追踪。
+              {t(
+                "本站用本地存储记住主题和界面偏好；确认此提示后，会写入 starter_cookie_consent 标记和一年有效的同名 Cookie。你可以通过浏览器的网站数据设置清除这些信息。模板不包含广告或行为分析，“知道了”不代表同意非必要追踪。",
+              )}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

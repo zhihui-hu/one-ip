@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
 import { cn } from "cn";
 import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
@@ -73,7 +74,7 @@ function SheetContent({
               size="icon-sm"
             >
               <XIcon />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("关闭")}</span>
             </Button>
           </SheetPrimitive.Close>
         )}

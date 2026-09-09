@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -29,20 +30,24 @@ import {
 import { withDetectionAnimation } from "./with-feedback";
 
 const columns: ColumnDef<Check>[] = [
-  { accessorKey: "name", header: "项目" },
-  { accessorKey: "status", header: "结果" },
+  { accessorKey: "name", header: t("项目") },
+  {
+    accessorKey: "status",
+    header: t("结果"),
+    cell: ({ row }) => t(row.original.status),
+  },
   {
     accessorKey: "detail",
-    header: "说明",
+    header: t("说明"),
     cell: ({ row }) => <CompactText text={row.original.detail} />,
   },
 ];
 const titles: Record<string, string> = {
-  environment: "环境信息",
-  fingerprint: "指纹检测",
-  consistency: "环境一致性",
-  automation: "自动化特征",
-  privacy: "权限与隐私",
+  environment: t("环境信息"),
+  fingerprint: t("指纹检测"),
+  consistency: t("环境一致性"),
+  automation: t("自动化特征"),
+  privacy: t("权限与隐私"),
 };
 function FingerprintPanel() {
   const [result, setResult] =
@@ -66,7 +71,7 @@ function FingerprintPanel() {
       },
       () => {
         if (active) {
-          setError(new Error("指纹检测未完成，请检查浏览器限制后重试。"));
+          setError(new Error(t("指纹检测未完成，请检查浏览器限制后重试。")));
           setBusy(false);
         }
       },
@@ -82,26 +87,28 @@ function FingerprintPanel() {
       const next = await withDetectionAnimation(fingerprint);
       setPrevious(result);
       setResult(next);
-      toast.success("指纹检测完成");
+      toast.success(t("指纹检测完成"));
     } catch {
-      toast.error("指纹检测失败，请重试");
-      setError(new Error("指纹检测未完成，请检查浏览器限制后重试。"));
+      toast.error(t("指纹检测失败，请重试"));
+      setError(new Error(t("指纹检测未完成，请检查浏览器限制后重试。")));
     } finally {
       setBusy(false);
     }
   }
   return (
     <>
-      <ToolCard title="浏览器指纹">
+      <ToolCard title={t("浏览器指纹")}>
         <div className="row-between gap-3">
-          <p className="small muted">在本地计算，仅比较当前页面内的结果。</p>
+          <p className="small muted">
+            {t("在本地计算，仅比较当前页面内的结果。")}
+          </p>
           <Button disabled={busy} onClick={run}>
             {busy ? (
-              <Pending>检测中…</Pending>
+              <Pending>{t("检测中…")}</Pending>
             ) : result ? (
-              "再次检测"
+              t("再次检测")
             ) : (
-              "开始检测"
+              t("开始检测")
             )}
           </Button>
         </div>
@@ -109,26 +116,26 @@ function FingerprintPanel() {
         {result && (
           <Facts
             rows={[
-              ["FingerprintJS 版本", result.version],
+              [t("FingerprintJS 版本"), result.version],
               ["Visitor ID", result.visitorId],
               [
-                "与上次比较",
+                t("与上次比较"),
                 previous
                   ? previous.visitorId === result.visitorId
-                    ? "相同"
-                    : "发生变化"
-                  : "尚无上次结果",
+                    ? t("相同")
+                    : t("发生变化")
+                  : t("尚无上次结果"),
               ],
             ]}
           />
         )}
         <p className="small muted mt-2">
-          标识相同不代表同一设备；指纹不是验证码，也没有“通过”结论。
+          {t("标识相同不代表同一设备；指纹不是验证码，也没有“通过”结论。")}
         </p>
       </ToolCard>
       {result && (
         <div className="mt-3">
-          <ToolCard title="指纹组成">
+          <ToolCard title={t("指纹组成")}>
             <DataTable
               className="fingerprint-table"
               getRowId={(row) => row.name}
@@ -138,14 +145,14 @@ function FingerprintPanel() {
               columns={[
                 {
                   accessorKey: "name",
-                  header: "项目",
+                  header: t("项目"),
                   cell: ({ row }) => (
                     <UnderlineHover asChild>
                       <button
                         type="button"
                         className="max-w-full truncate text-left text-primary focus-visible:outline-ring"
                         onClick={() => setDetail(row.original)}
-                        aria-label={`查看 ${row.original.name} 详情`}
+                        aria-label={t("查看 {0} 详情", [row.original.name])}
                       >
                         {fieldLabel(row.original.name)}
                       </button>
@@ -154,7 +161,7 @@ function FingerprintPanel() {
                 },
                 {
                   accessorKey: "value",
-                  header: "检测数据",
+                  header: t("检测数据"),
                   cell: ({ row }) => (
                     <CompactText
                       text={fingerprintSummary(
@@ -166,15 +173,15 @@ function FingerprintPanel() {
                 },
                 {
                   id: "change",
-                  header: "与上次比较",
+                  header: t("与上次比较"),
                   cell: ({ row }) => {
                     const before = previous?.components.find(
                       (item) => item.name === row.original.name,
                     );
                     return before
                       ? before.value === row.original.value
-                        ? "相同"
-                        : "变化"
+                        ? t("相同")
+                        : t("变化")
                       : "—";
                   },
                 },
@@ -188,8 +195,8 @@ function FingerprintPanel() {
         onOpenChange={(open) => {
           if (!open) setDetail(null);
         }}
-        title={`${detail ? fieldLabel(detail.name) : "指纹"} · 详情`}
-        description="本次检测读取的指纹组成数据。"
+        title={t("{0} · 详情", [detail ? fieldLabel(detail.name) : t("指纹")])}
+        description={t("本次检测读取的指纹组成数据。")}
       >
         {detail && (
           <FormattedResult
@@ -228,18 +235,18 @@ function Checks({ page }: { page: string }) {
                 await withDetectionAnimation(() =>
                   query.refetch({ throwOnError: true }),
                 );
-                toast.success(`${titles[page]}检测完成`);
+                toast.success(t("{0}检测完成", [titles[page]]));
               } catch {
-                toast.error("检测失败，请重试");
+                toast.error(t("检测失败，请重试"));
               } finally {
                 setRefreshing(false);
               }
             }}
           >
             {query.isFetching || refreshing ? (
-              <Pending>检测中…</Pending>
+              <Pending>{t("检测中…")}</Pending>
             ) : (
-              "重新检测"
+              t("重新检测")
             )}
           </Button>
         </div>
@@ -249,10 +256,14 @@ function Checks({ page }: { page: string }) {
       <DataTable
         data={query.data ?? []}
         columns={columns}
-        empty={query.isFetching ? <Pending>检测中…</Pending> : "暂无结果"}
+        empty={
+          query.isFetching ? <Pending>{t("检测中…")}</Pending> : t("暂无结果")
+        }
       />
       <p className="small muted mt-3">
-        仅展示可观察到的信号，不能据此判断浏览器品牌、真人身份或验证码通过率。
+        {t(
+          "仅展示可观察到的信号，不能据此判断浏览器品牌、真人身份或验证码通过率。",
+        )}
       </p>
     </ToolCard>
   );
@@ -262,7 +273,7 @@ export default function BrowserPage({ page }: { page: string }) {
     <div className="browser-diagnostics">
       <PageHeading title={titles[page]} description="" />
       {page === "environment" ? (
-        <ToolCard title="浏览器环境">
+        <ToolCard title={t("浏览器环境")}>
           <Facts
             rows={environmentRows().map(([name, value]) => [
               name,

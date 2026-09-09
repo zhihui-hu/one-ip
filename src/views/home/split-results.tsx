@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t } from "@/i18n";
 import type { Geo } from "@/lib/types";
 import { useQueries } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { detectSite, getGeo, type Site } from "./api";
-import sites from "./sites.json";
+import rawsites from "./sites.json";
 
 interface Row extends Site {
   onDetail: (name: string) => void;
@@ -54,7 +55,7 @@ function VisibleSite({ row }: { row: Row }) {
           row.type === "domestic" ? "tag-domestic" : "tag-international"
         }
       >
-        {row.type === "domestic" ? "国内" : "国际"}
+        {row.type === "domestic" ? t("国内") : t("国际")}
       </Badge>
     </div>
   );
@@ -63,7 +64,7 @@ function VisibleSite({ row }: { row: Row }) {
 const columns: ColumnDef<Row>[] = [
   {
     accessorKey: "name",
-    header: "网站",
+    header: t("网站"),
     cell: ({ row }) => <VisibleSite row={row.original} />,
   },
   {
@@ -90,13 +91,13 @@ const columns: ColumnDef<Row>[] = [
   },
   {
     id: "geo",
-    header: "归属地",
+    header: t("归属地"),
     cell: ({ row }) => (
       <span className="muted">
         {!row.original.visible ? (
           "—"
         ) : row.original.geoPending ? (
-          <Pending>查询中…</Pending>
+          <Pending>{t("查询中…")}</Pending>
         ) : row.original.geo ? (
           <CompactText
             text={
@@ -106,11 +107,11 @@ const columns: ColumnDef<Row>[] = [
                 row.original.geo.isp,
               ]
                 .filter(Boolean)
-                .join(" · ") || "归属地未知"
+                .join(" · ") || t("归属地未知")
             }
           />
         ) : (
-          <CompactText text="未知（跨域限制或连接失败）" />
+          <CompactText text={t("未知（跨域限制或连接失败）")} />
         )}
       </span>
     ),
@@ -189,10 +190,10 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     <Card ref={container} className="mb-3">
       <CardHeader>
         <div className="row-between">
-          <CardTitle>网站分流出口</CardTitle>
+          <CardTitle>{t("网站分流出口")}</CardTitle>
           {summary && (
             <Link className="small muted" to="/network/connectivity?view=exits">
-              查看全部 ›
+              {t("查看全部 ›")}
             </Link>
           )}
         </div>
@@ -218,16 +219,21 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                       setDetailIp(geo.ip);
                     }}
                   >
-                    {rows.filter((row) => row.geo?.ip === geo.ip).length} 个站点
+                    {rows.filter((row) => row.geo?.ip === geo.ip).length}
+                    {t("个站点")}
                   </button>
                 </UnderlineHover>
               </div>
             ))}
             <p className="home-note col-span-full pt-1">
               {pending ? (
-                <Pending>正在检测分流出口…</Pending>
+                <Pending>{t("正在检测分流出口…")}</Pending>
               ) : (
-                `已读取 ${rows.filter((row) => row.geo).length}/${sites.length} 个站点的出口${!exits.length ? "，暂无可显示结果" : ""}`
+                t("已读取 {0}/{1} 个站点的出口{2}", [
+                  rows.filter((row) => row.geo).length,
+                  sites.length,
+                  !exits.length ? t("，暂无可显示结果") : "",
+                ])
               )}
             </p>
           </div>
@@ -243,30 +249,30 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             setDetailIp(null);
           }
         }}
-        title={detail?.name ?? "出口站点"}
+        title={detail?.name ?? t("出口站点")}
         description={
           detail
-            ? "该站点观察到的出口信息。"
-            : "使用此出口的站点，点击名称查看详情。"
+            ? t("该站点观察到的出口信息。")
+            : t("使用此出口的站点，点击名称查看详情。")
         }
       >
         {detail ? (
           <div className="space-y-3 text-sm">
             <div>
-              出口 IP：
+              {t("出口 IP：")}
               <IpText ip={detail.geo?.ip} />
             </div>
             <p>
               {[detail.geo?.country, detail.geo?.city, detail.geo?.isp]
                 .filter(Boolean)
-                .join(" · ") || "归属信息暂不可用"}
+                .join(" · ") || t("归属信息暂不可用")}
             </p>
             <p className="text-muted-foreground">
               {detail.pending
-                ? "检测中…"
+                ? t("检测中…")
                 : detail.geo
-                  ? "已读取出口"
-                  : "未获取到出口，可能受跨域或连接限制。"}
+                  ? t("已读取出口")
+                  : t("未获取到出口，可能受跨域或连接限制。")}
             </p>
           </div>
         ) : (
@@ -294,3 +300,5 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     </Card>
   );
 }
+
+const sites = rawsites.map((item) => ({ ...item, name: t(item.name) }));

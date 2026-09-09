@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { t } from "@/i18n";
 import NProgress from "nprogress";
 
 export function RouteProgress() {
@@ -15,8 +16,9 @@ export function RouteProgress() {
       barSelector: '[role="progressbar"]',
       trickle: !reducedMotion,
       speed: reducedMotion ? 0 : 200,
-      template:
+      template: t(
         '<div class="bar" role="progressbar" aria-label="页面切换"><div class="peg"></div></div>',
+      ),
     });
     return () => {
       NProgress.done();

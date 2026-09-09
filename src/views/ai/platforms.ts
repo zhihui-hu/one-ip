@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export const aiPlatforms = [
   {
     id: "gpt",
@@ -44,7 +46,7 @@ export const aiPlatforms = [
     name: "Gemini",
     domain: "gemini.google.com",
     statusPage: "https://aistudio.google.com/status",
-    statusLabel: "AI Studio / Gemini API 状态",
+    statusLabel: t("AI Studio / Gemini API 状态"),
   },
   {
     id: "deepseek",
@@ -61,7 +63,7 @@ export const aiPlatforms = [
     docsUrl:
       "https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope",
     statusId: "34",
-    name: "通义千问",
+    name: t("通义千问"),
     domain: "chat.qwen.ai",
   },
   {

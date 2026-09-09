@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export type ResponseMode = "json" | "text" | "opaque" | "headers";
 
 /** Only HTTP transport for browser probes and API calls. Never proxy browser probes. */
@@ -13,10 +15,10 @@ export async function request<T>(
   const response = await fetch(url, { ...init, signal });
   if (mode === "opaque") return undefined as T;
   if (!response.ok) {
-    let message = `请求失败 (${response.status})`;
+    let message = t("请求失败 ({0})", [response.status]);
     try {
       const body = await response.json();
-      if (typeof body.error === "string") message = body.error;
+      if (typeof body.error === "string") message = t(body.error);
     } catch {
       /* Non-JSON upstream. */
     }
@@ -44,7 +46,7 @@ export function parseTrace(text: string) {
       }),
   );
   if (!fields.ip || !/^[\da-fA-F:.]+$/.test(fields.ip))
-    throw new Error("目标站点未返回可读取的出口 IP");
+    throw new Error(t("目标站点未返回可读取的出口 IP"));
   return {
     ip: fields.ip,
     country_code: fields.loc,

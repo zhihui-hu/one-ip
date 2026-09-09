@@ -11,6 +11,7 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t } from "@/i18n";
 import { request } from "@/lib/network";
 import { runWebRtc } from "@/views/webrtc/api";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +32,7 @@ export function QuickChecks() {
         `https://${token}.edns.ip-api.com/json`,
         { signal, cache: "no-store" },
       );
-      if (!data.dns?.ip) throw new Error("未获取到 DNS 出口");
+      if (!data.dns?.ip) throw new Error(t("未获取到 DNS 出口"));
       return data.dns;
     },
   });
@@ -49,7 +50,7 @@ export function QuickChecks() {
       <Card>
         <CardHeader>
           <div className="row-between">
-            <CardTitle>DNS / WebRTC 出口</CardTitle>
+            <CardTitle>{t("DNS / WebRTC 出口")}</CardTitle>
             <Button
               size="sm"
               variant="secondary"
@@ -62,11 +63,11 @@ export function QuickChecks() {
               }}
             >
               {busy ? (
-                <Pending>检测中…</Pending>
+                <Pending>{t("检测中…")}</Pending>
               ) : started ? (
-                "重新检测"
+                t("重新检测")
               ) : (
-                "一键检测"
+                t("一键检测")
               )}
             </Button>
           </div>
@@ -75,18 +76,18 @@ export function QuickChecks() {
           <div className="flex justify-between gap-3 py-2 text-sm">
             <UnderlineHover asChild>
               <Link className="shrink-0 text-primary" to="/network/dns">
-                DNS 出口
+                {t("DNS 出口")}
               </Link>
             </UnderlineHover>
             <span className="min-w-0">
               {!started ? (
-                "未检测"
+                t("未检测")
               ) : dns.isFetching ? (
-                <Pending>采样中…</Pending>
+                <Pending>{t("采样中…")}</Pending>
               ) : dns.data ? (
                 <IpText ip={dns.data.ip} />
               ) : (
-                "暂不可用"
+                t("暂不可用")
               )}
             </span>
           </div>
@@ -98,13 +99,13 @@ export function QuickChecks() {
             </UnderlineHover>
             <span className="min-w-0">
               {!started ? (
-                "未检测"
+                t("未检测")
               ) : rtc.isFetching ? (
-                <Pending>采样中…</Pending>
+                <Pending>{t("采样中…")}</Pending>
               ) : rtc.data ? (
                 <CompactText text={rtc.data.verdict} />
               ) : (
-                "暂不可用"
+                t("暂不可用")
               )}
             </span>
           </div>
@@ -114,13 +115,13 @@ export function QuickChecks() {
             </p>
           )}
           <p className="home-note mt-3">
-            DNS 单次采样；未采集到地址不代表没有泄漏，点击查看完整检测。
+            {t("DNS 单次采样；未采集到地址不代表没有泄漏，点击查看完整检测。")}
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>全球 Ping / 地址查询</CardTitle>
+          <CardTitle>{t("全球 Ping / 地址查询")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -134,15 +135,15 @@ export function QuickChecks() {
           >
             <InputGroup>
               <InputGroupInput
-                aria-label="快速查询 IP 或域名"
-                placeholder="输入 IP 或域名"
+                aria-label={t("快速查询 IP 或域名")}
+                placeholder={t("输入 IP 或域名")}
                 value={target}
                 onChange={(event) => setTarget(event.target.value)}
               />
               {target.trim() && (
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton type="submit" variant="ghost">
-                    全球 Ping
+                    {t("全球 Ping")}
                   </InputGroupButton>
                 </InputGroupAddon>
               )}
@@ -160,7 +161,7 @@ export function QuickChecks() {
                   )
                 }
               >
-                IP 信息
+                {t("IP 信息")}
               </Button>
               <Button type="button" variant="outline" size="sm" asChild>
                 <Link
@@ -170,13 +171,13 @@ export function QuickChecks() {
                       : "/network/whois"
                   }
                 >
-                  WHOIS 查询
+                  {t("WHOIS 查询")}
                 </Link>
               </Button>
             </div>
           </form>
           <p className="home-note mt-3">
-            进入详情后选择地区并开始测量，默认优选模式。
+            {t("进入详情后选择地区并开始测量，默认优选模式。")}
           </p>
         </CardContent>
       </Card>

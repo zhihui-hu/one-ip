@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MouseEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { themeTransitionPendingAtom } from "@/store/theme";
 import { useAtom } from "jotai";
@@ -29,7 +30,8 @@ export function ThemeToggleButton({
   const transitionRef = useRef<ThemeTransition | null>(null);
   const animationRef = useRef<Animation | null>(null);
   const buttonLabel =
-    label ?? (resolvedTheme === "dark" ? "切换为浅色模式" : "切换为深色模式");
+    label ??
+    (resolvedTheme === "dark" ? t("切换为浅色模式") : t("切换为深色模式"));
 
   useEffect(
     () => () => {

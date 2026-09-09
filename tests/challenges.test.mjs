@@ -175,10 +175,11 @@ test("Worker exposes config read-only and enforces origin and POST on verificati
 });
 
 
-test("empty site keys hide only the corresponding challenge provider", () => {
-  assert.deepEqual(challengeConfig({}, hostname), []);
-  assert.deepEqual(challengeConfig({ ...env, TURNSTILE_SITE_KEY: "  " }, hostname).map((item) => item.id), ["recaptcha"]);
-  assert.deepEqual(challengeConfig({ ...env, RECAPTCHA_SITE_KEY: "" }, hostname).map((item) => item.id), ["turnstile"]);
+test("missing configuration keeps providers visible with actionable reasons", () => {
+  assert.equal(challengeConfig({}, hostname).length, 2);
+  assert.ok(challengeConfig({}, hostname).every((item) => !item.configured && item.reason.includes("Key")));
+  assert.deepEqual(challengeConfig({ ...env, TURNSTILE_SITE_KEY: "  " }, hostname).map((item) => item.id), ["turnstile", "recaptcha"]);
+  assert.deepEqual(challengeConfig({ ...env, RECAPTCHA_SITE_KEY: "" }, hostname).map((item) => item.id), ["turnstile", "recaptcha"]);
   const invalid = challengeConfig({ ...env, TURNSTILE_SECRET: "" }, hostname);
   assert.equal(invalid.length, 2);
   assert.equal(invalid[0].configured, false);

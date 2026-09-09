@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { endpoint, trace } from "@/lib/network";
 import type { Geo, RtcResult } from "@/lib/types";
 
@@ -34,7 +35,7 @@ export async function collectCandidates(
   signal: AbortSignal,
 ): Promise<RtcResult[]> {
   if (typeof RTCPeerConnection === "undefined")
-    throw new Error("当前浏览器不支持 WebRTC，无法完成检测。");
+    throw new Error(t("当前浏览器不支持 WebRTC，无法完成检测。"));
   const pc = new RTCPeerConnection({
     iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
@@ -49,7 +50,7 @@ export async function collectCandidates(
     const gathered = new Promise<void>((resolve, reject) => {
       abort = () => {
         pc.close();
-        reject(new DOMException("已取消", "AbortError"));
+        reject(new DOMException(t("已取消"), "AbortError"));
       };
       signal.addEventListener("abort", abort, { once: true });
       timer = setTimeout(resolve, 7000);
@@ -65,10 +66,10 @@ export async function collectCandidates(
           ip,
           type:
             type === "srflx"
-              ? "公网 (STUN)"
+              ? t("公网 (STUN)")
               : type === "relay"
-                ? "中继 (TURN)"
-                : "本地",
+                ? t("中继 (TURN)")
+                : t("本地"),
           public: isPublicCandidate(ip),
         });
       };
@@ -116,11 +117,15 @@ export async function runWebRtc(_: void, signal: AbortSignal) {
     (row) => row.public && baseline && row.ip !== baseline.ip,
   );
   const verdict = !results.some((row) => row.public)
-    ? "未采集到公网候选地址。可能被浏览器限制、UDP 阻断或 WebRTC 禁用，不能据此判定安全。"
+    ? t(
+        "未采集到公网候选地址。可能被浏览器限制、UDP 阻断或 WebRTC 禁用，不能据此判定安全。",
+      )
     : !baseline
-      ? "已采集到 UDP 出口，但 HTTP 基准获取失败，无法判断是否一致。"
+      ? t("已采集到 UDP 出口，但 HTTP 基准获取失败，无法判断是否一致。")
       : different
-        ? "发现与 HTTP 出口不同的 UDP 地址，请对照代理分流规则确认；不同出口不一定是泄露。"
-        : "本次采样的公网 UDP 出口与 HTTP 出口一致。";
+        ? t(
+            "发现与 HTTP 出口不同的 UDP 地址，请对照代理分流规则确认；不同出口不一定是泄露。",
+          )
+        : t("本次采样的公网 UDP 出口与 HTTP 出口一致。");
   return { baseline, results, verdict, different };
 }

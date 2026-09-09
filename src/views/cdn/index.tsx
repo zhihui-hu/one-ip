@@ -8,6 +8,7 @@ import {
   DataTable,
 } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
+import { t } from "@/i18n";
 import { request } from "@/lib/network";
 import { useQueries } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -23,39 +24,39 @@ type Row = {
 const columns: ColumnDef<Row>[] = [
   {
     accessorKey: "name",
-    header: "厂商",
+    header: t("厂商"),
     cell: ({ row }) => (
       <span className="site-cell">
         <SiteLogo website={providerWebsite(row.original.name)} />
-        <DetailText text={row.original.name} title="CDN 厂商" />
+        <DetailText text={row.original.name} title={t("CDN 厂商")} />
       </span>
     ),
   },
   {
     id: "node",
-    header: "节点 / 响应标识",
+    header: t("节点 / 响应标识"),
     cell: ({ row }) =>
       row.original.loading ? (
-        <Pending>检测中...</Pending>
+        <Pending>{t("检测中...")}</Pending>
       ) : (
-        <DetailText text={row.original.node ?? "未知"} />
+        <DetailText text={row.original.node ?? t("未知")} />
       ),
   },
   {
     accessorKey: "cache",
-    header: "缓存",
+    header: t("缓存"),
     cell: ({ row }) => (
-      <DetailText text={row.original.cache ?? "—"} title="缓存状态" />
+      <DetailText text={row.original.cache ?? "—"} title={t("缓存状态")} />
     ),
   },
   {
     id: "status",
-    header: "状态",
+    header: t("状态"),
     cell: ({ row }) =>
       row.original.loading ? (
-        <Pending>检测中...</Pending>
+        <Pending>{t("检测中...")}</Pending>
       ) : (
-        <DetailText text={row.original.error ?? "已完成"} />
+        <DetailText text={row.original.error ?? t("已完成")} />
       ),
   },
 ];
@@ -78,7 +79,7 @@ export default function CdnPage() {
             ? text.match(/^colo=(.+)$/m)?.[1]?.trim()
             : text.trim();
           if (!node || node.length > 200 || node.includes("<"))
-            throw new Error("未返回有效节点标识");
+            throw new Error(t("未返回有效节点标识"));
           return { node, cache: "—" };
         }
         const headers = await request<Headers>(
@@ -99,7 +100,7 @@ export default function CdnPage() {
           if (key === "server" && !/bunnycdn-[\w-]+/i.test(value)) return [];
           return [`${key}: ${value}`];
         });
-        if (!values.length) throw new Error("节点头未公开或跨域受限");
+        if (!values.length) throw new Error(t("节点头未公开或跨域受限"));
         return {
           node: values.join(" · "),
           cache:
@@ -111,14 +112,14 @@ export default function CdnPage() {
   const busy = queries.some((query) => query.isFetching);
   return (
     <>
-      <PageHeading title="CDN 命中节点" description="" />
+      <PageHeading title={t("CDN 命中节点")} description="" />
       <div className="toolbar">
         <ActionButton busy={busy} onClick={() => setRound((n) => n + 1)}>
-          {busy ? "检测中..." : "重新检测"}
+          {busy ? t("检测中...") : t("重新检测")}
         </ActionButton>
         <span className="small muted">
           {queries.filter((query) => query.isSuccess).length}/{providers.length}{" "}
-          可读取
+          {t("可读取")}
         </span>
       </div>
       <Card>

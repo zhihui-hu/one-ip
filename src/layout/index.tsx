@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BuildInfo } from "@/components/build-info";
+import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
 import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
 import { Pending } from "@/components/toolkit";
@@ -9,6 +10,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/hooks/use-theme";
+import { t } from "@/i18n";
 import { Search, Globe, Cable, Activity, Sparkles } from "lucide-react";
 import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
@@ -79,14 +81,17 @@ export function AppLayout() {
           <Link
             to="/"
             className="flex items-center gap-2 text-sm font-semibold"
-            aria-label="IP 网络工具概览"
+            aria-label={t("IP 网络工具概览")}
           >
             <img src="/icon.svg" width="24" height="24" alt="" />
           </Link>
-          <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
+          <div className="flex items-center gap-1">
+            <LanguageSelect />
+            <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
+          </div>
         </header>
         <AnimatedSegmentedTabs
-          label="网络诊断工具"
+          label={t("网络诊断工具")}
           options={options}
           value={activeRoute}
           onValueChange={(value) => {
@@ -98,7 +103,7 @@ export function AppLayout() {
           highlightClassName="rounded-lg bg-primary/10 shadow-none ring-0"
           triggerClassName="h-9 flex-none rounded-lg border-0 px-2 text-[13px] text-muted-foreground hover:bg-accent/50 data-[state=active]:font-semibold data-[state=active]:text-primary"
           renderList={(list) => (
-            <nav ref={navRef} className="coffee-nav" aria-label="主导航">
+            <nav ref={navRef} className="coffee-nav" aria-label={t("主导航")}>
               {mobile && (
                 <Suspense fallback={null}>
                   <MobileNavGlass light={resolvedTheme === "light"} />
@@ -106,7 +111,7 @@ export function AppLayout() {
               )}
               <Link
                 to="/"
-                aria-label="IP 网络工具概览"
+                aria-label={t("IP 网络工具概览")}
                 className="site-home-link flex size-9 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
               >
                 <img src="/icon.svg" alt="" width="32" height="32" />
@@ -115,7 +120,10 @@ export function AppLayout() {
                 {list}
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
+              <div className="desktop-preferences flex items-center gap-1">
+                <LanguageSelect />
+                <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
+              </div>
             </nav>
           )}
         >
@@ -124,7 +132,7 @@ export function AppLayout() {
               <Suspense
                 fallback={
                   <p className="status-line">
-                    <Pending>正在加载页面…</Pending>
+                    <Pending>{t("正在加载页面…")}</Pending>
                   </p>
                 }
               >
@@ -134,21 +142,21 @@ export function AppLayout() {
           </Tabs.Content>
         </AnimatedSegmentedTabs>
         <footer className="coffee-footer">
-          © {new Date().getFullYear()} IP 网络工具 ·{" "}
+          © {new Date().getFullYear()} {t("IP 网络工具 ·")}{" "}
           <UnderlineHover asChild>
-            <Link to="/">IP 查询</Link>
+            <Link to="/">{t("IP 查询")}</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/browser/privacy/">WebRTC 检测</Link>
+            <Link to="/browser/privacy/">{t("WebRTC 检测")}</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/network/whois/">WHOIS 查询</Link>
+            <Link to="/network/whois/">{t("WHOIS 查询")}</Link>
           </UnderlineHover>
         </footer>
       </div>
-      <aside aria-label="站点通知" className="update-notices">
+      <aside aria-label={t("站点通知")} className="update-notices">
         <AppUpdateChecker />
       </aside>
       <BuildInfo />

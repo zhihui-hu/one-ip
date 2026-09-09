@@ -4,6 +4,7 @@ import { SiteLogo } from "@/components/site-logo";
 import { Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
+import { t } from "@/i18n";
 import { withDetectionAnimation } from "@/views/browser/with-feedback";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -41,7 +42,7 @@ export function AiNetworkCheck({
     <Card className="ai-network-check">
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
-          <CardTitle>网络连通性</CardTitle>
+          <CardTitle>{t("网络连通性")}</CardTitle>
           <button
             type="button"
             className="shrink-0 text-xs font-normal text-primary enabled:hover:underline underline-offset-4"
@@ -53,16 +54,16 @@ export function AiNetworkCheck({
                   query.refetch({ throwOnError: true }),
                 );
                 if (next.data?.every((result) => result.median != null))
-                  toast.success("网络检测完成");
-                else toast.warning("检测完成，部分站点未获取到响应");
+                  toast.success(t("网络检测完成"));
+                else toast.warning(t("检测完成，部分站点未获取到响应"));
               } catch {
-                toast.error("网络检测失败，请重试");
+                toast.error(t("网络检测失败，请重试"));
               } finally {
                 setRefreshing(false);
               }
             }}
           >
-            {busy ? <Pending>检测中…</Pending> : "重新检测"}
+            {busy ? <Pending>{t("检测中…")}</Pending> : t("重新检测")}
           </button>
         </div>
       </CardHeader>
@@ -79,7 +80,7 @@ export function AiNetworkCheck({
                 <span className="truncate">{domain}</span>
               </span>
               {busy ? (
-                <Pending>检测中…</Pending>
+                <Pending>{t("检测中…")}</Pending>
               ) : result?.median != null ? (
                 <span title={result.description}>
                   <LatencyBadge result={result} running={false} />
@@ -89,17 +90,23 @@ export function AiNetworkCheck({
                   className="text-xs text-muted-foreground"
                   title={result?.description}
                 >
-                  {result?.status === "restricted" ? "检测受限" : "未确认"}
+                  {result?.status === "restricted"
+                    ? t("检测受限")
+                    : t("未确认")}
                 </span>
               )}
             </div>
           ))}
         </div>
         <p className="small muted mt-2">
-          检测的是站点资源响应，不等于登录或对话可用；跨站限制和超时不会判为“未连通”。
+          {t(
+            "检测的是站点资源响应，不等于登录或对话可用；跨站限制和超时不会判为“未连通”。",
+          )}
         </p>
         {query.error && (
-          <p className="small text-destructive">网络检测失败，请重试。</p>
+          <p className="small text-destructive">
+            {t("网络检测失败，请重试。")}
+          </p>
         )}
         {children}
       </CardContent>

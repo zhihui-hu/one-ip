@@ -2,6 +2,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SweepShine } from "@/components/ui/sweep-shine";
+import { t } from "@/i18n";
 import { updatePendingAtom } from "@/store/app-update";
 import { useAtom } from "jotai";
 import { X } from "lucide-react";
@@ -22,11 +23,11 @@ export function UpdateAvailableNotice({
   open,
   onOpenChange,
   onUpdate,
-  title = "发现新版本",
-  description = "新版本已经准备好，更新后即可使用。",
-  updateLabel = "更新",
-  updatingLabel = "正在更新…",
-  closeLabel = "关闭更新提示",
+  title = t("发现新版本"),
+  description = t("新版本已经准备好，更新后即可使用。"),
+  updateLabel = t("更新"),
+  updatingLabel = t("正在更新…"),
+  closeLabel = t("关闭更新提示"),
   resetUpdatingAfterUpdate = false,
 }: UpdateAvailableNoticeProps) {
   const [updating, setUpdating] = useAtom(updatePendingAtom);
@@ -39,7 +40,7 @@ export function UpdateAvailableNotice({
     try {
       await onUpdate?.();
     } catch {
-      setError("更新失败，请重试。");
+      setError(t("更新失败，请重试。"));
       setUpdating(false);
     } finally {
       if (resetUpdatingAfterUpdate) {

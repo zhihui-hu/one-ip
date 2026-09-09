@@ -6,6 +6,7 @@ import {
   Pending,
 } from "@/components/toolkit";
 import { UnderlineHover } from "@/components/underline-hover";
+import { t, locale } from "@/i18n";
 import { getStatus } from "@/views/status/api";
 import services from "@/views/status/services.json";
 import { useQuery } from "@tanstack/react-query";
@@ -25,27 +26,27 @@ export function ServiceStatusPage({
   return (
     <>
       <PageHeading
-        title={`${name} 实时服务状态监控`}
-        description="来自官方状态接口的当前运行状态、组件状态与事件"
+        title={t("{0} 实时服务状态监控", [name])}
+        description={t("来自官方状态接口的当前运行状态、组件状态与事件")}
       />
       <ErrorNotice error={query.error} />
       {query.isPending ? (
-        <Pending>正在读取官方状态…</Pending>
+        <Pending>{t("正在读取官方状态…")}</Pending>
       ) : query.data ? (
         <>
-          <ToolCard title="当前状态">
+          <ToolCard title={t("当前状态")}>
             <Facts
               rows={[
-                ["状态", query.data.status?.description ?? "未知"],
+                [t("状态"), t(query.data.status?.description ?? "未知")],
                 [
-                  "更新于",
-                  new Date(query.data.fetchedAt).toLocaleString("zh-CN"),
+                  t("更新于"),
+                  new Date(query.data.fetchedAt).toLocaleString(locale),
                 ],
               ]}
             />
           </ToolCard>
           <section className="reading">
-            <h2>服务组件</h2>
+            <h2>{t("服务组件")}</h2>
             <Facts
               rows={(query.data.components ?? []).map((c) => [
                 c.name,
@@ -54,27 +55,26 @@ export function ServiceStatusPage({
             />
           </section>
           <section className="reading">
-            <h2>当前事件</h2>
+            <h2>{t("当前事件")}</h2>
             {query.data.incidents?.length ? (
               query.data.incidents.map((i) => (
                 <ToolCard title={i.name} key={i.id}>
                   <p>
-                    {i.status} ·{" "}
-                    {new Date(i.updated_at).toLocaleString("zh-CN")}
+                    {i.status} · {new Date(i.updated_at).toLocaleString(locale)}
                   </p>
                 </ToolCard>
               ))
             ) : (
-              <p className="muted">官方接口当前没有未解决事件。</p>
+              <p className="muted">{t("官方接口当前没有未解决事件。")}</p>
             )}
           </section>
         </>
       ) : null}
       <p className="principle">
-        历史可用率需要持续采样和存储，本页不使用抓取快照模拟历史监控。
+        {t("历史可用率需要持续采样和存储，本页不使用抓取快照模拟历史监控。")}
         <UnderlineHover asChild>
           <a href={service.page} target="_blank" rel="noreferrer">
-            查看完整官方状态页 ↗
+            {t("查看完整官方状态页 ↗")}
           </a>
         </UnderlineHover>
       </p>

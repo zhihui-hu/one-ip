@@ -2472,3 +2472,9 @@ body {
     color: var(--service-color);
   }
 }
+
+@media (max-width: 48rem) {
+  .coffee-nav .desktop-preferences {
+    display: none;
+  }
+}

@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { t, locale } from "@/i18n";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -29,7 +30,7 @@ import {
 import { selectPingPresets } from "./presets";
 
 const regionBatchSize = 40;
-const regionNames = new Intl.DisplayNames(["zh-CN"], { type: "region" });
+const regionNames = new Intl.DisplayNames([locale], { type: "region" });
 const formatLatency = (value: number) => value.toFixed(1);
 
 interface Row {
@@ -45,7 +46,7 @@ interface Row {
 const columns: ColumnDef<Row>[] = [
   {
     accessorKey: "name",
-    header: "节点",
+    header: t("节点"),
     cell: ({ row }) => (
       <span className="site-cell">
         <CountryFlag code={row.original.country} />
@@ -55,14 +56,14 @@ const columns: ColumnDef<Row>[] = [
   },
   {
     accessorKey: "status",
-    header: "状态",
+    header: t("状态"),
     cell: ({ row }) =>
-      row.original.status === "测试中..." ? (
-        <Pending>测试中...</Pending>
+      row.original.status === t("测试中...") ? (
+        <Pending>{t("测试中...")}</Pending>
       ) : (
         <Badge
           variant={
-            row.original.status === "失败" ||
+            row.original.status === t("失败") ||
             row.original.avg == null ||
             row.original.avg < 0
               ? "destructive"
@@ -75,7 +76,7 @@ const columns: ColumnDef<Row>[] = [
   },
   ...(["min", "avg", "max"] as const).map((key, i) => ({
     accessorKey: key,
-    header: ["最小", "平均", "最大"][i],
+    header: [t("最小"), t("平均"), t("最大")][i],
     cell: ({ row }: { row: { original: Row } }) =>
       row.original[key] == null ? (
         "—"
@@ -91,7 +92,7 @@ const columns: ColumnDef<Row>[] = [
   })),
   {
     accessorKey: "loss",
-    header: "丢包",
+    header: t("丢包"),
     cell: ({ row }) =>
       row.original.loss == null ? (
         "—"
@@ -104,12 +105,12 @@ const columns: ColumnDef<Row>[] = [
 ];
 
 const regions = [
-  { id: "AS", name: "亚洲" },
-  { id: "EU", name: "欧洲" },
-  { id: "NA", name: "北美" },
-  { id: "SA", name: "南美" },
-  { id: "AF", name: "非洲" },
-  { id: "OC", name: "大洋洲" },
+  { id: "AS", name: t("亚洲") },
+  { id: "EU", name: t("欧洲") },
+  { id: "NA", name: t("北美") },
+  { id: "SA", name: t("南美") },
+  { id: "AF", name: t("非洲") },
+  { id: "OC", name: t("大洋洲") },
 ];
 export default function PingPage() {
   const [params, setParams] = useSearchParams();
@@ -124,7 +125,7 @@ export default function PingPage() {
   const [stopped, setStopped] = useState(false);
   const controller = useRef<AbortController | null>(null);
   useEffect(() => {
-    document.title = "全球 Ping - IP 网络工具";
+    document.title = t("全球 Ping - IP 网络工具");
     return () => controller.current?.abort();
   }, []);
   const catalog = useQuery({
@@ -171,13 +172,13 @@ export default function PingPage() {
     status:
       item.result.status === "finished"
         ? item.result.stats?.avg == null || item.result.stats.avg < 0
-          ? "无响应"
-          : "完成"
+          ? t("无响应")
+          : t("完成")
         : item.result.status === "failed"
-          ? "失败"
+          ? t("失败")
           : query.isPending
-            ? "测试中..."
-            : "未完成",
+            ? t("测试中...")
+            : t("未完成"),
     ...item.result.stats,
   }));
   rows.sort((a, b) => {
@@ -193,8 +194,8 @@ export default function PingPage() {
         <LookupForm
           grouped
           value={params.get("host") ?? ""}
-          placeholder="输入 IP 地址或域名"
-          label="开始"
+          placeholder={t("输入 IP 地址或域名")}
+          label={t("开始")}
           busy={query.isPending || catalog.isPending}
           onSubmit={(host) => {
             setParams({ host });
@@ -215,19 +216,21 @@ export default function PingPage() {
       <Card className="mt-3">
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-1">
-            {[{ id: "world", name: "全球检测" }, ...regions].map((region) => (
-              <Button
-                key={region.id}
-                size="sm"
-                variant={scope === region.id ? "secondary" : "ghost"}
-                disabled={query.isPending}
-                onClick={() => {
-                  setScope(region.id);
-                }}
-              >
-                {region.name}
-              </Button>
-            ))}
+            {[{ id: "world", name: t("全球检测") }, ...regions].map(
+              (region) => (
+                <Button
+                  key={region.id}
+                  size="sm"
+                  variant={scope === region.id ? "secondary" : "ghost"}
+                  disabled={query.isPending}
+                  onClick={() => {
+                    setScope(region.id);
+                  }}
+                >
+                  {region.name}
+                </Button>
+              ),
+            )}
             <Dialog
               open={open}
               onOpenChange={(value) => {
@@ -241,19 +244,21 @@ export default function PingPage() {
                   variant={scope === "custom" ? "secondary" : "ghost"}
                   disabled={query.isPending}
                 >
-                  自定义地区{selected.length ? ` (${selected.length})` : ""}
+                  {t("自定义地区")}
+                  {selected.length ? ` (${selected.length})` : ""}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>自定义探测地区</DialogTitle>
+                  <DialogTitle>{t("自定义探测地区")}</DialogTitle>
                   <DialogDescription>
-                    按国家或城市搜索，每个城市选择一个在线探针；自定义最多选择
-                    50 个城市。
+                    {t(
+                      "按国家或城市搜索，每个城市选择一个在线探针；自定义最多选择 50 个城市。",
+                    )}
                   </DialogDescription>
                 </DialogHeader>
                 <Input
-                  placeholder="搜索国家 / 城市"
+                  placeholder={t("搜索国家 / 城市")}
                   value={search}
                   onChange={(event) => {
                     setSearch(event.target.value);
@@ -262,7 +267,11 @@ export default function PingPage() {
                   }}
                 />
                 <div className="flex items-center justify-between text-xs">
-                  <span>已选 {selected.length} 个地区</span>
+                  <span>
+                    {t("已选")}
+                    {selected.length}
+                    {t("个地区")}
+                  </span>
                   <div>
                     <Button
                       variant="ghost"
@@ -278,20 +287,20 @@ export default function PingPage() {
                         )
                       }
                     >
-                      添加搜索结果（最多 50 个）
+                      {t("添加搜索结果（最多 50 个）")}
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelected([])}
                     >
-                      清空
+                      {t("清空")}
                     </Button>
                   </div>
                 </div>
                 <ErrorNotice error={catalog.error} />
                 {catalog.isPending ? (
-                  <Pending>加载在线地区...</Pending>
+                  <Pending>{t("加载在线地区...")}</Pending>
                 ) : (
                   <div
                     ref={regionList}
@@ -336,7 +345,7 @@ export default function PingPage() {
                     ))}
                     {!shown.length && (
                       <p className="col-span-full py-4 text-center text-muted-foreground">
-                        没有匹配的地区
+                        {t("没有匹配的地区")}
                       </p>
                     )}
                     {visibleCount < shown.length && (
@@ -350,8 +359,9 @@ export default function PingPage() {
                           )
                         }
                       >
-                        加载更多（已显示 {Math.min(visibleCount, shown.length)}{" "}
-                        / {shown.length}）
+                        {t("加载更多（已显示")}
+                        {Math.min(visibleCount, shown.length)} / {shown.length}
+                        ）
                       </Button>
                     )}
                   </div>
@@ -363,7 +373,7 @@ export default function PingPage() {
                     setOpen(false);
                   }}
                 >
-                  使用所选地区
+                  {t("使用所选地区")}
                 </Button>
               </DialogContent>
             </Dialog>
@@ -371,10 +381,20 @@ export default function PingPage() {
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>
               {scope === "custom"
-                ? `已选 ${selected.length}/50 个城市`
-                : `${fullCoverage ? "完整覆盖" : "优选模式"} · ${planned} 个探测地区，预计消耗 ${planned} 次探针额度`}
+                ? t("已选 {0}/50 个城市", [selected.length])
+                : t("{0} · {1} 个探测地区，预计消耗 {2} 次探针额度", [
+                    fullCoverage ? t("完整覆盖") : t("优选模式"),
+                    planned,
+                    planned,
+                  ])}
             </span>
-            {planned > 50 && <span>分 {Math.ceil(planned / 50)} 批测试</span>}
+            {planned > 50 && (
+              <span>
+                {t("分")}
+                {Math.ceil(planned / 50)}
+                {t("批测试")}
+              </span>
+            )}
           </div>
           {scope !== "custom" && (
             <>
@@ -385,7 +405,7 @@ export default function PingPage() {
                   disabled={query.isPending}
                   onClick={() => setFullCoverage(false)}
                 >
-                  优选模式
+                  {t("优选模式")}
                 </Button>
                 <Button
                   size="sm"
@@ -393,12 +413,14 @@ export default function PingPage() {
                   disabled={query.isPending}
                   onClick={() => setFullCoverage(true)}
                 >
-                  完整覆盖（{availableNodes.length} 个地区）
+                  {t("完整覆盖（")}
+                  {availableNodes.length}
+                  {t("个地区）")}
                 </Button>
               </div>
               <ErrorNotice error={catalog.error} />
               {catalog.isPending ? (
-                <Pending>加载常用方案...</Pending>
+                <Pending>{t("加载常用方案...")}</Pending>
               ) : (
                 <div className="space-y-2">
                   {regions
@@ -415,7 +437,8 @@ export default function PingPage() {
                       return items.length ? (
                         <details key={region.id} className="text-xs">
                           <summary className="cursor-pointer py-1 text-muted-foreground">
-                            {region.name} · {items.length} 个探测地区
+                            {region.name} · {items.length}
+                            {t("个探测地区")}
                           </summary>
                           <div className="flex max-h-40 flex-wrap gap-1 overflow-auto pt-2">
                             {items.map((node) => (
@@ -433,12 +456,11 @@ export default function PingPage() {
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                优选模式优先加入 2
-                个中国大陆城市用于对照；其他地区优先大型云厂商，缺少时使用在线节点。全球每洲另选最多
-                2 个、单洲最多 5 个。相同组合 60 秒内复用结果。Ping
-                失败不能单独判定被墙。
+                {t(
+                  "优选模式优先加入 2 个中国大陆城市用于对照；其他地区优先大型云厂商，缺少时使用在线节点。全球每洲另选最多 2 个、单洲最多 5 个。相同组合 60 秒内复用结果。Ping 失败不能单独判定被墙。",
+                )}
                 {chinaNodes.length < 2 &&
-                  ` 当前只有 ${chinaNodes.length} 个中国大陆城市在线。`}
+                  t(" 当前只有 {0} 个中国大陆城市在线。", [chinaNodes.length])}
               </p>
             </>
           )}
@@ -458,16 +480,18 @@ export default function PingPage() {
           <div className="my-3 flex items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>
               {data?.reusedAt
-                ? `复用 ${new Date(data.reusedAt).toLocaleTimeString("zh-CN")} 的测量结果`
+                ? t("复用 {0} 的测量结果", [
+                    new Date(data.reusedAt).toLocaleTimeString(locale),
+                  ])
                 : stopped
-                  ? "已停止"
+                  ? t("已停止")
                   : query.isPending
-                    ? "测试中..."
+                    ? t("测试中...")
                     : query.isError
-                      ? "部分测量未完成"
-                      : "测量完成"}{" "}
-              · <NumberTicker value={done} /> 个节点已返回 ·
-              平均延迟从高到低，未返回数值置底
+                      ? t("部分测量未完成")
+                      : t("测量完成")}{" "}
+              · <NumberTicker value={done} />
+              {t("个节点已返回 · 平均延迟从高到低，未返回数值置底")}
             </span>
             {query.isPending && (
               <Button
@@ -478,7 +502,7 @@ export default function PingPage() {
                   controller.current?.abort();
                 }}
               >
-                停止检测
+                {t("停止检测")}
               </Button>
             )}
           </div>
@@ -491,7 +515,7 @@ export default function PingPage() {
                   row.avg == null ||
                   !Number.isFinite(row.avg) ||
                   row.avg < 0 ||
-                  row.status === "失败"
+                  row.status === t("失败")
                     ? "ping-row-danger"
                     : row.avg < 100
                       ? "ping-row-fast"
@@ -507,9 +531,9 @@ export default function PingPage() {
                 animateEntries
                 empty={
                   query.isPending ? (
-                    <Pending>等待远端探针...</Pending>
+                    <Pending>{t("等待远端探针...")}</Pending>
                   ) : (
-                    "暂无结果"
+                    t("暂无结果")
                   )
                 }
               />

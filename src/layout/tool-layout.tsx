@@ -1,15 +1,16 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { PageHelpAlert } from "@/components/page-help-alert";
 import { SiteLogo } from "@/components/site-logo";
+import { t } from "@/i18n";
 import { aiPlatforms } from "@/views/ai/platforms";
 import { toolGroups } from "./routes";
 
 export function ToolLayout({ group }: { group: keyof typeof toolGroups }) {
   return (
     <>
-      <nav className="tool-subnav" aria-label="工具导航">
+      <nav className="tool-subnav" aria-label={t("工具导航")}>
         <NavLink to={`/${group}`} end>
-          概述
+          {t("概述")}
         </NavLink>
         {toolGroups[group].map((tool) => (
           <NavLink key={tool.path} to={tool.path}>

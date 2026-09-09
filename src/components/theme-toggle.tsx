@@ -15,27 +15,28 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/hooks/use-theme";
+import { t } from "@/i18n";
 import { cn } from "@/lib/utils";
 import { Monitor, Moon, Settings2, Sun } from "lucide-react";
 
 const THEME_ITEMS = [
-  { value: "light", label: "浅色模式", icon: Sun },
-  { value: "dark", label: "深色模式", icon: Moon },
-  { value: "system", label: "跟随系统", icon: Monitor },
+  { value: "light", label: t("浅色模式"), icon: Sun },
+  { value: "dark", label: t("深色模式"), icon: Moon },
+  { value: "system", label: t("跟随系统"), icon: Monitor },
 ] as const;
 
 type ThemeValue = (typeof THEME_ITEMS)[number]["value"];
 
 // 颜色选项：只负责设置 data-color，真正改 --primary 在 CSS 里做
 const COLOR_ITEMS = [
-  { value: "zinc", label: "雾灰", dotClass: "bg-zinc-500" },
-  { value: "red", label: "红色", dotClass: "bg-red-500" },
-  { value: "rose", label: "玫红", dotClass: "bg-rose-500" },
-  { value: "orange", label: "橙色", dotClass: "bg-orange-500" },
-  { value: "green", label: "绿色", dotClass: "bg-green-500" },
-  { value: "blue", label: "蓝色", dotClass: "bg-blue-500" },
-  { value: "yellow", label: "琥珀", dotClass: "bg-yellow-500" },
-  { value: "violet", label: "紫罗兰", dotClass: "bg-violet-500" },
+  { value: "zinc", label: t("雾灰"), dotClass: "bg-zinc-500" },
+  { value: "red", label: t("红色"), dotClass: "bg-red-500" },
+  { value: "rose", label: t("玫红"), dotClass: "bg-rose-500" },
+  { value: "orange", label: t("橙色"), dotClass: "bg-orange-500" },
+  { value: "green", label: t("绿色"), dotClass: "bg-green-500" },
+  { value: "blue", label: t("蓝色"), dotClass: "bg-blue-500" },
+  { value: "yellow", label: t("琥珀"), dotClass: "bg-yellow-500" },
+  { value: "violet", label: t("紫罗兰"), dotClass: "bg-violet-500" },
 ] as const;
 
 type ColorValue = (typeof COLOR_ITEMS)[number]["value"] | "default";
@@ -51,17 +52,17 @@ const RADIUS_ITEMS = [
 type RadiusValue = (typeof RADIUS_ITEMS)[number]["value"];
 
 const LAYOUT_ITEMS = [
-  { value: "full", label: "全宽" },
-  { value: "centered", label: "居中" },
+  { value: "full", label: t("全宽") },
+  { value: "centered", label: t("居中") },
 ] as const;
 
 type LayoutValue = (typeof LAYOUT_ITEMS)[number]["value"];
 
 const FONT_SIZE_ITEMS = [
-  { value: "default", label: "默认" },
-  { value: "sm", label: "小号" },
-  { value: "md", label: "标准" },
-  { value: "lg", label: "大号" },
+  { value: "default", label: t("默认") },
+  { value: "sm", label: t("小号") },
+  { value: "md", label: t("标准") },
+  { value: "lg", label: t("大号") },
 ] as const;
 
 type FontSizeValue = (typeof FONT_SIZE_ITEMS)[number]["value"];
@@ -211,22 +212,22 @@ export function ThemeToggle({ className }: { className?: string }) {
       variant="outline"
       size="icon"
       className={cn("relative size-10 rounded-full", className)}
-      aria-label="外观设置"
+      aria-label={t("外观设置")}
     >
       <Settings2 className="h-[1.1rem] w-[1.1rem]" />
-      <span className="sr-only">外观设置</span>
+      <span className="sr-only">{t("外观设置")}</span>
     </Button>
   );
 
   const content = (
     <>
       <p className=" block sm:hidden px-2 pb-2 text-xs text-muted-foreground">
-        选择主题、主色、圆角、字体与布局。
+        {t("选择主题、主色、圆角、字体与布局。")}
       </p>
 
       {/* Color */}
       <div className="space-y-2 px-2 pb-3 sm:pt-2">
-        <p className="text-xs font-medium text-muted-foreground">主色</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("主色")}</p>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -239,7 +240,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           >
             <span className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-              <span>跟随站点默认</span>
+              <span>{t("跟随站点默认")}</span>
             </span>
           </button>
           {COLOR_ITEMS.map((item) => (
@@ -267,7 +268,7 @@ export function ThemeToggle({ className }: { className?: string }) {
 
       {/* Radius */}
       <div className="space-y-2 px-2 pb-3">
-        <p className="text-xs font-medium text-muted-foreground">圆角</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("圆角")}</p>
         <div className="grid grid-cols-5 gap-2">
           {RADIUS_ITEMS.map((item) => (
             <button
@@ -288,7 +289,9 @@ export function ThemeToggle({ className }: { className?: string }) {
 
       {/* Font size */}
       <div className="space-y-2 px-2 pb-3">
-        <p className="text-xs font-medium text-muted-foreground">字体大小</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("字体大小")}
+        </p>
         <div className="grid grid-cols-4 gap-2">
           {FONT_SIZE_ITEMS.map((item) => (
             <button
@@ -309,7 +312,9 @@ export function ThemeToggle({ className }: { className?: string }) {
 
       {/* Color mode */}
       <div className="space-y-2 px-2 pb-3">
-        <p className="text-xs font-medium text-muted-foreground">主题模式</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("主题模式")}
+        </p>
         <div className="grid grid-cols-3 gap-2">
           {THEME_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -336,7 +341,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       {/* Layout */}
       <Separator />
       <div className="space-y-2 px-2 py-3">
-        <p className="text-xs font-medium text-muted-foreground">内容布局</p>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("内容布局")}
+        </p>
         <div className="grid grid-cols-2 gap-2">
           {LAYOUT_ITEMS.map((item) => (
             <button
@@ -363,7 +370,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           className="w-full justify-center text-xs"
           onClick={handleReset}
         >
-          恢复默认
+          {t("恢复默认")}
         </Button>
       </div>
     </>
@@ -376,7 +383,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         <DrawerContent className="px-0 pb-6">
           <DrawerHeader className="text-left">
             <DrawerTitle className="text-base text-left pl-5 font-semibold">
-              外观与主题
+              {t("外观与主题")}
             </DrawerTitle>
           </DrawerHeader>
           <div className="max-h-[70vh] space-y-3 overflow-y-auto px-3 ">

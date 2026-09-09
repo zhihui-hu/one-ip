@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { t } from "@/i18n";
 import { ResponsiveDialog } from "./ui/responsive-dialog";
 import {
   Tooltip,
@@ -10,7 +11,7 @@ import { UnderlineHover } from "./underline-hover";
 
 export function DetailText({
   text,
-  title = "完整内容",
+  title = t("完整内容"),
 }: {
   text: string;
   title?: string;
@@ -41,7 +42,7 @@ export function DetailText({
         open={open}
         onOpenChange={setOpen}
         title={title}
-        description="完整内容"
+        description={t("完整内容")}
       >
         <p className="whitespace-pre-wrap break-all">{text}</p>
       </ResponsiveDialog>

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { endpoint, request, trace } from "@/lib/network";
 import type { Geo } from "@/lib/types";
 
@@ -15,7 +16,7 @@ export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
       options(),
     );
     if (!data.ip || (!data.country && !data.isp))
-      throw new Error("归属信息不完整");
+      throw new Error(t("归属信息不完整"));
     return { ...data, ip, source: "ip.sb" };
   } catch {
     signal?.throwIfAborted();
@@ -30,7 +31,7 @@ export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
       longitude?: number;
       timezone?: { id?: string };
     }>(`https://ipwho.is/${encodeURIComponent(ip)}`, options());
-    if (!data.success) throw new Error("归属信息暂不可用，请稍后重试");
+    if (!data.success) throw new Error(t("归属信息暂不可用，请稍后重试"));
     return {
       ip,
       country: data.country,
@@ -64,7 +65,7 @@ export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
       if (signal?.aborted) throw error;
     }
   }
-  throw new Error("国内出口未知：目标站点可能限制跨域读取");
+  throw new Error(t("国内出口未知：目标站点可能限制跨域读取"));
 }
 export interface Site {
   name: string;
@@ -104,7 +105,7 @@ export async function detectSite(
       )?.[1];
     }
     if (!ip || !/^[\da-fA-F:.]+$/.test(ip))
-      throw new Error("未获取到可读取的出口 IP");
+      throw new Error(t("未获取到可读取的出口 IP"));
     geo = { ip, source: site.name };
   } else {
     const url =
@@ -120,7 +121,7 @@ export async function detectSite(
       headers.get("x-request-ip") ??
       headers.get("x-response-cinfo");
     if (!ip || !/^[\da-fA-F:.]+$/.test(ip))
-      throw new Error("未获取到可读取的出口 IP");
+      throw new Error(t("未获取到可读取的出口 IP"));
     geo = { ip, source: site.name };
   }
   return geo;
@@ -145,6 +146,6 @@ export async function getBrowserIp(
       ? !data.ip.includes(":")
       : !/^\d{1,3}(\.\d{1,3}){3}$/.test(data.ip))
   )
-    throw new Error("未获取到有效 IP");
+    throw new Error(t("未获取到有效 IP"));
   return { ip: data.ip, source: "ipify" };
 }

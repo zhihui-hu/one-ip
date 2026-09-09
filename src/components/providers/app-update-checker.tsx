@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { UpdateAvailableNotice } from "@/components/update-available-notice";
+import { t } from "@/i18n";
 import { updateAvailableAtom } from "@/store/app-update";
 import { useAtom } from "jotai";
 
@@ -19,7 +20,7 @@ export function AppUpdateChecker() {
     )
       return;
 
-    // A stable document URL avoids separate baselines for each History route.
+    // Compare the running build with the deployed manifest, independent of HTTP validators.
     const baseUrl = new URL(import.meta.env.BASE_URL, window.location.origin);
     const workerUrl = new URL("app-update-checker.worker.js", baseUrl);
     workerUrl.searchParams.set("build", import.meta.env.VITE_BUILD_TIME);
@@ -36,7 +37,8 @@ export function AppUpdateChecker() {
       worker.postMessage({
         type: "check",
         source,
-        url: new URL("index.html", baseUrl).href,
+        url: new URL("app-version.json", baseUrl).href,
+        build: import.meta.env.VITE_BUILD_TIME,
       });
     };
     const onMessage = ({ data }: MessageEvent<WorkerMessage>) => {
@@ -55,10 +57,12 @@ export function AppUpdateChecker() {
     worker.addEventListener("error", onError);
     document.addEventListener("visibilitychange", onVisibilityChange);
     requestCheck("mount");
+    const interval = window.setInterval(() => requestCheck("interval"), 60_000);
     return () => {
       worker.removeEventListener("message", onMessage);
       worker.removeEventListener("error", onError);
       document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.clearInterval(interval);
       worker.terminate();
     };
   }, [setAvailable]);
@@ -72,10 +76,10 @@ export function AppUpdateChecker() {
         url.searchParams.set("t", Date.now().toString());
         window.location.replace(url.toString());
       }}
-      title="网页有更新"
-      description="刷新即可加载新版界面，请先保存未提交的内容。"
-      updateLabel="刷新页面"
-      updatingLabel="正在刷新…"
+      title={t("网页有更新")}
+      description={t("刷新即可加载新版界面，请先保存未提交的内容。")}
+      updateLabel={t("刷新页面")}
+      updatingLabel={t("正在刷新…")}
     />
   );
 }

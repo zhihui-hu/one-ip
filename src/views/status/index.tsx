@@ -15,25 +15,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { t, locale } from "@/i18n";
 import { useQueries } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getStatus } from "./api";
 import { statusOrder } from "./order";
-import services from "./services.json";
+import rawservices from "./services.json";
 
 const componentLabels: Record<string, string> = {
-  operational: "正常运行",
-  degraded_performance: "性能下降",
-  partial_outage: "部分故障",
-  major_outage: "严重故障",
-  under_maintenance: "维护中",
+  operational: t("正常运行"),
+  degraded_performance: t("性能下降"),
+  partial_outage: t("部分故障"),
+  major_outage: t("严重故障"),
+  under_maintenance: t("维护中"),
 };
 const labels: Record<string, string> = {
-  none: "正常运行",
-  minor: "轻微故障",
-  major: "严重故障",
-  critical: "重大故障",
-  maintenance: "维护中",
+  none: t("正常运行"),
+  minor: t("轻微故障"),
+  major: t("严重故障"),
+  critical: t("重大故障"),
+  maintenance: t("维护中"),
 };
 export default function StatusPage() {
   const mobile = useIsMobile();
@@ -59,12 +60,15 @@ export default function StatusPage() {
     .filter((s) => filter === "全部" || s.group === filter);
   const sections = [
     [
-      "故障 / 维护",
+      t("故障 / 维护"),
       rows.filter((s) => statusOrder(s.query.data?.status?.indicator) === 0),
     ],
-    ["运行中", rows.filter((s) => s.query.data?.status?.indicator === "none")],
     [
-      "待确认",
+      t("运行中"),
+      rows.filter((s) => s.query.data?.status?.indicator === "none"),
+    ],
+    [
+      t("待确认"),
       rows.filter((s) => statusOrder(s.query.data?.status?.indicator) === 2),
     ],
   ] as const;
@@ -87,13 +91,13 @@ export default function StatusPage() {
   const columns: ColumnDef<(typeof tableRows)[number]>[] = [
     {
       accessorKey: "name",
-      header: "服务",
+      header: t("服务"),
       cell: ({ row }) => (
         <button
           type="button"
           className="service-name text-left text-primary focus-visible:outline-ring"
           onClick={() => setDetailId(row.original.id)}
-          aria-label={`查看 ${row.original.name} 详情`}
+          aria-label={t("查看 {0} 详情", [row.original.name])}
         >
           <SiteLogo src={row.original.icon} website={row.original.page} />
           <UnderlineHover className="truncate">
@@ -101,7 +105,8 @@ export default function StatusPage() {
           </UnderlineHover>
           {!!row.original.data?.incidents?.length && (
             <Badge variant="secondary" className="shrink-0">
-              {row.original.data.incidents.length} 个事件
+              {row.original.data.incidents.length}
+              {t("个事件")}
             </Badge>
           )}
         </button>
@@ -109,14 +114,14 @@ export default function StatusPage() {
     },
     {
       accessorKey: "group",
-      header: "分类",
+      header: t("分类"),
       cell: ({ row }) => (
-        <Badge variant="secondary">{row.original.group}</Badge>
+        <Badge variant="secondary">{t(row.original.group)}</Badge>
       ),
     },
     {
       id: "status",
-      header: "状态",
+      header: t("状态"),
       cell: ({ row }) => {
         const service = row.original;
         const indicator = service.data?.status?.indicator;
@@ -124,7 +129,7 @@ export default function StatusPage() {
           <button
             type="button"
             onClick={() => setDetailId(service.id)}
-            aria-label={`查看 ${service.name} 状态详情`}
+            aria-label={t("查看 {0} 状态详情", [service.name])}
             className={`service-table-state service-card service-${indicator ?? "unknown"}`}
           >
             <i
@@ -132,11 +137,11 @@ export default function StatusPage() {
             />
             <AnimatedValue value={`${service.loading}-${indicator}`}>
               {service.loading ? (
-                <Pending>查询中...</Pending>
+                <Pending>{t("查询中...")}</Pending>
               ) : !service.integrated ? (
-                "未接入"
+                t("未接入")
               ) : (
-                (labels[indicator ?? ""] ?? "未知")
+                (labels[indicator ?? ""] ?? t("未知"))
               )}
             </AnimatedValue>
           </button>
@@ -145,11 +150,11 @@ export default function StatusPage() {
     },
     {
       id: "updated",
-      header: "更新时间",
+      header: t("更新时间"),
       cell: ({ row }) => (
         <span className="small muted">
           {row.original.data?.fetchedAt
-            ? new Date(row.original.data.fetchedAt).toLocaleTimeString("zh-CN")
+            ? new Date(row.original.data.fetchedAt).toLocaleTimeString(locale)
             : "—"}
         </span>
       ),
@@ -165,7 +170,7 @@ export default function StatusPage() {
             rel="noreferrer"
             className="small"
           >
-            {row.original.officialStatus ? "官方状态 ↗" : "平台官网 ↗"}
+            {row.original.officialStatus ? t("官方状态 ↗") : t("平台官网 ↗")}
           </a>
         </UnderlineHover>
       ),
@@ -175,8 +180,8 @@ export default function StatusPage() {
   return (
     <div className="service-status-page">
       <PageHeading
-        title="服务状态"
-        description="各服务官方运行状态与故障事件"
+        title={t("服务状态")}
+        description={t("各服务官方运行状态与故障事件")}
       />
       <div className="toolbar">
         <div className="filter-tabs">
@@ -184,10 +189,10 @@ export default function StatusPage() {
             <Button
               size="sm"
               variant={group === filter ? "secondary" : "ghost"}
-              key={group}
+              key={t(group)}
               onClick={() => setParams(group === "全部" ? {} : { group })}
             >
-              {group}
+              {t(group)}
             </Button>
           ))}
         </div>
@@ -204,7 +209,7 @@ export default function StatusPage() {
             );
           }}
         >
-          {pending ? <Pending>刷新中…</Pending> : "刷新状态"}
+          {pending ? <Pending>{t("刷新中…")}</Pending> : t("刷新状态")}
         </Button>
       </div>
       <div className="service-summary">
@@ -216,7 +221,7 @@ export default function StatusPage() {
           >
             <div className="service-summary-number">
               <NumberTicker value={items.length} />
-              <span>个服务</span>
+              <span>{t("个服务")}</span>
             </div>
           </ToolCard>
         ))}
@@ -241,7 +246,7 @@ export default function StatusPage() {
                             type="button"
                             onClick={() => setDetailId(service.id)}
                             className="block w-full py-3 text-left"
-                            aria-label={`查看 ${service.name} 详情`}
+                            aria-label={t("查看 {0} 详情", [service.name])}
                           >
                             <span className="flex items-center justify-between gap-2">
                               <span className="flex min-w-0 items-center gap-2 text-sm font-medium">
@@ -257,10 +262,10 @@ export default function StatusPage() {
                                 className={`service-card service-${indicator ?? "unknown"} shrink-0 text-xs`}
                               >
                                 {service.query.isFetching && !service.query.data
-                                  ? "查询中"
+                                  ? t("查询中")
                                   : !service.url
-                                    ? "未接入"
-                                    : (labels[indicator ?? ""] ?? "待确认")}
+                                    ? t("未接入")
+                                    : (labels[indicator ?? ""] ?? t("待确认"))}
                               </span>
                             </span>
                             {incident && (
@@ -286,24 +291,26 @@ export default function StatusPage() {
                 columns={columns}
                 getRowId={(row) => row.id}
                 animateChanges={false}
-                empty="暂无服务"
+                empty={t("暂无服务")}
               />
             </CardContent>
           </Card>
         </div>
       )}
       <p className="small muted">
-        每 2 分钟自动检查。未知或查询失败不等于服务故障。
+        {t("每 2 分钟自动检查。未知或查询失败不等于服务故障。")}
       </p>
       <ResponsiveDialog
-        title={`${detail?.name ?? "服务"} · 服务详情`}
+        title={t("{0} · 服务详情", [detail?.name ?? t("服务")])}
         description={
           detail?.loading
-            ? "正在查询服务状态…"
-            : (detail?.note ??
-              detail?.error ??
-              detail?.data?.status?.description ??
-              "暂无说明")
+            ? t("正在查询服务状态…")
+            : t(
+                detail?.note ??
+                  detail?.error ??
+                  detail?.data?.status?.description ??
+                  t("暂无说明"),
+              )
         }
         open={detailId !== null}
         onOpenChange={(open) => {
@@ -314,20 +321,21 @@ export default function StatusPage() {
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="secondary">
               {!detail.integrated
-                ? "未接入"
-                : (labels[detail.data?.status?.indicator ?? ""] ?? "未知")}
+                ? t("未接入")
+                : (labels[detail.data?.status?.indicator ?? ""] ?? t("未知"))}
             </Badge>
-            <span>{detail.group}</span>
+            <span>{t(detail.group)}</span>
             {detail.data?.fetchedAt && (
               <time>
-                更新于 {new Date(detail.data.fetchedAt).toLocaleString("zh-CN")}
+                {t("更新于")}
+                {new Date(detail.data.fetchedAt).toLocaleString(locale)}
               </time>
             )}
           </div>
         )}
         {!!detail?.data?.components?.length && (
           <section className="space-y-2">
-            <h3 className="text-sm font-medium">服务组件</h3>
+            <h3 className="text-sm font-medium">{t("服务组件")}</h3>
             <dl className="divide-y divide-border text-sm">
               {detail.data.components.map((component) => (
                 <div
@@ -343,13 +351,13 @@ export default function StatusPage() {
             </dl>
           </section>
         )}
-        <h3 className="text-sm font-medium">当前事件</h3>
+        <h3 className="text-sm font-medium">{t("当前事件")}</h3>
         {!detail?.loading &&
           !detail?.error &&
           detail?.data &&
           !detail.data.incidents?.length && (
             <p className="text-sm text-muted-foreground">
-              数据源未报告当前事件。
+              {t("数据源未报告当前事件。")}
             </p>
           )}
         {detail?.data?.incidents?.map((incident) => (
@@ -361,7 +369,7 @@ export default function StatusPage() {
             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
               <Badge variant="secondary">{incident.status}</Badge>
               <time>
-                {new Date(incident.updated_at).toLocaleString("zh-CN")}
+                {new Date(incident.updated_at).toLocaleString(locale)}
               </time>
             </div>
           </section>
@@ -373,10 +381,18 @@ export default function StatusPage() {
             target="_blank"
             rel="noreferrer"
           >
-            {detail.officialStatus ? "查看官方状态页 ↗" : "前往平台官网 ↗"}
+            {detail.officialStatus
+              ? t("查看官方状态页 ↗")
+              : t("前往平台官网 ↗")}
           </a>
         )}
       </ResponsiveDialog>
     </div>
   );
 }
+
+const services = rawservices.map((item) => ({
+  ...item,
+  name: t(item.name),
+  note: item.note ? t(item.note) : item.note,
+}));

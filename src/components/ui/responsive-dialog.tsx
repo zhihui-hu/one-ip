@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { t } from "@/i18n";
 import { Button } from "./button";
 import {
   Dialog,
@@ -47,7 +48,7 @@ export function ResponsiveDialog({
           </div>
           <DrawerFooter className="shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <DrawerClose asChild>
-              <Button variant="outline">关闭</Button>
+              <Button variant="outline">{t("关闭")}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>

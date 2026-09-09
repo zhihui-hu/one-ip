@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { t } from "@/i18n";
 
 export function Explanation({
   items,
@@ -12,7 +13,7 @@ export function Explanation({
 }) {
   return (
     <section className="reading">
-      <h2>📖 拓展阅读</h2>
+      <h2>{t("📖 拓展阅读")}</h2>
       <Accordion type="multiple">
         {items.map((item, i) => (
           <AccordionItem value={String(i)} key={item.title}>

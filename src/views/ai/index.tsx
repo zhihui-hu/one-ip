@@ -6,6 +6,7 @@ import {
   IpText,
   Pending,
 } from "@/components/toolkit";
+import { t } from "@/i18n";
 import { trace } from "@/lib/network";
 import { getGeo, getDomesticIp } from "@/views/home/api";
 import { useQuery } from "@tanstack/react-query";
@@ -44,12 +45,15 @@ export default function PlatformDiagnostics({
   });
   return (
     <div className="ai-diagnostics">
-      <PageHeading title={`${platform.name} 网络检测`} description="" />
+      <PageHeading title={t("{0} 网络检测", [platform.name])} description="" />
       <div className="ai-overview">
         <ToolCard
           title={
             <div className="flex items-center justify-between gap-3">
-              <span>{platform.name} 出口</span>
+              <span>
+                {platform.name}
+                {t("出口")}
+              </span>
               <PrivacyToggle />
             </div>
           }
@@ -58,16 +62,16 @@ export default function PlatformDiagnostics({
             <>
               <div className="ip-value text-primary">
                 {exit.isPending ? (
-                  <Pending>正在检测出口…</Pending>
+                  <Pending>{t("正在检测出口…")}</Pending>
                 ) : (
                   <IpText ip={exit.data?.ip} />
                 )}
               </div>
               <p className="text-xs leading-5 text-muted-foreground">
                 {exit.isError ? (
-                  "出口查询失败，可能受网络或跨域限制。"
+                  t("出口查询失败，可能受网络或跨域限制。")
                 ) : geo.isFetching ? (
-                  <Pending>查询归属信息…</Pending>
+                  <Pending>{t("查询归属信息…")}</Pending>
                 ) : (
                   <>
                     <CountryFlag
@@ -79,29 +83,29 @@ export default function PlatformDiagnostics({
                       geo.data?.isp,
                     ]
                       .filter(Boolean)
-                      .join(" · ") || "归属信息暂不可用"}
+                      .join(" · ") || t("归属信息暂不可用")}
                   </>
                 )}
               </p>
             </>
           ) : (
             <p className="text-xs leading-5 text-muted-foreground">
-              暂未找到可读取此平台出口的公开接口；以下地址仅供对照。
+              {t("暂未找到可读取此平台出口的公开接口；以下地址仅供对照。")}
             </p>
           )}
           <div className="ai-exit-comparison">
-            <span className="small muted">其他出口对照</span>
+            <span className="small muted">{t("其他出口对照")}</span>
             {[
-              { query: domestic, title: "国内 IPv4" },
+              { query: domestic, title: t("国内 IPv4") },
               { query: cf, title: "Cloudflare" },
             ].map(({ query, title }) => (
               <div className="ai-exit-row" key={title}>
                 <span className="muted">{title}</span>
                 <span>
                   {query.isPending ? (
-                    <Pending>检测中…</Pending>
+                    <Pending>{t("检测中…")}</Pending>
                   ) : query.isError ? (
-                    <span className="muted">暂不可用</span>
+                    <span className="muted">{t("暂不可用")}</span>
                   ) : (
                     <IpText ip={query.data?.ip} />
                   )}
@@ -109,13 +113,15 @@ export default function PlatformDiagnostics({
               </div>
             ))}
             {(domestic.isError || cf.isError) && (
-              <p className="small muted">对照出口可能受连接或跨域限制。</p>
+              <p className="small muted">
+                {t("对照出口可能受连接或跨域限制。")}
+              </p>
             )}
           </div>
         </ToolCard>
         <AiNetworkCheck domains={[platform.domain]}>
           <p className="small muted mt-3">
-            浏览器 HTTP 探测，不代表账号可用或模型权限。
+            {t("浏览器 HTTP 探测，不代表账号可用或模型权限。")}
           </p>
           <AiPlatformLinks platform={platform} />
         </AiNetworkCheck>

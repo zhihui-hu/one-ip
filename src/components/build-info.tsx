@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { t } from "@/i18n";
 import { format, isValid, parseISO } from "date-fns";
 import { name, version } from "../../package.json";
 
@@ -12,7 +13,7 @@ export function BuildInfo() {
     const date = parseISO(import.meta.env.VITE_BUILD_TIME ?? "");
     const buildTime = isValid(date)
       ? format(date, "yyyy-MM-dd HH:mm:ss xxx")
-      : "未知";
+      : t("未知");
     const print = (key: string, value: string) =>
       console.log(
         `%c ${key} %c ${value} %c `,

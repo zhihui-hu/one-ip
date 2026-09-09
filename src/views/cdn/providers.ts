@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export const providers = [
   {
     name: "Cloudflare",
@@ -5,7 +7,7 @@ export const providers = [
     trace: true,
   },
   {
-    name: "Cloudflare 中国网络",
+    name: t("Cloudflare 中国网络"),
     url: "https://perfops.cloudflareperf.com/cdn-cgi/trace",
     trace: true,
   },
@@ -80,27 +82,27 @@ export const providers = [
     headers: ["x-swifty-node"],
   },
   {
-    name: "网易",
+    name: t("网易"),
     url: "https://necaptcha.nosdn.127.net/ab7f4275c1744aa28e0a8f3a1c58c532.png",
     headers: ["cdn-source", "cdn-ip"],
   },
   {
-    name: "字节跳动",
+    name: t("字节跳动"),
     url: "https://perfops.byte-test.com/500b-bench.jpg",
     headers: ["via"],
   },
   {
-    name: "字节跳动 海外",
+    name: t("字节跳动 海外"),
     url: "https://perfops2.byte-test.com/500b-bench.jpg",
     headers: ["via"],
   },
   {
-    name: "网宿 QUANTIL",
+    name: t("网宿 QUANTIL"),
     url: "https://cdnperf-rum.quantil.com/500b-bench.jpg",
     headers: ["via", "x-via"],
   },
   {
-    name: "网宿 CDNetworks",
+    name: t("网宿 CDNetworks"),
     url: "https://cdnperf-rum.cdnetworks.net/500b-bench.jpg",
     headers: ["via", "x-via"],
   },
@@ -110,7 +112,7 @@ export function providerWebsite(name: string) {
   if (name.startsWith("Cloudflare")) return "https://cloudflare.com";
   if (name.startsWith("Akamai")) return "https://akamai.com";
   if (name.startsWith("Bunny")) return "https://bunny.net";
-  if (name.startsWith("字节")) return "https://bytedance.com";
+  if (name.startsWith(t("字节"))) return "https://bytedance.com";
   const domains: Record<string, string> = {
     Fastly: "fastly.com",
     jsDelivr: "jsdelivr.com",
@@ -122,9 +124,9 @@ export function providerWebsite(name: string) {
     Medianova: "medianova.com",
     Zenlayer: "zenlayer.com",
     Melbicom: "melbicom.net",
-    网易: "163.com",
-    "网宿 QUANTIL": "quantil.com",
-    "网宿 CDNetworks": "cdnetworks.com",
+    [t("网易")]: "163.com",
+    [t("网宿 QUANTIL")]: "quantil.com",
+    [t("网宿 CDNetworks")]: "cdnetworks.com",
   };
   return `https://${domains[name]}`;
 }

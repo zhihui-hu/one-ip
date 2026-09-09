@@ -28,3 +28,6 @@ worker-configuration.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Deployment secrets (never commit)
+.secrets.*.env

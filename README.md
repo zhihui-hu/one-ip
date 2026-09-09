@@ -194,7 +194,7 @@ pnpm lint
 | `RECAPTCHA_HOSTNAMES`                     | reCAPTCHA 允许的 hostname，逗号分隔                          |
 | `VITE_API_BASE_URL`                       | 前端 API 地址，默认 `/api`；如需覆盖，配置在对应 `.env` 文件 |
 
-hostname 只填写主机名，不含协议或端口，并与验证码服务商后台配置一致。`TURNSTILE_SITE_KEY`、`RECAPTCHA_SITE_KEY` 可留空；未填写时隐藏对应验证组件。填写 Site Key 后，如服务端 Secret 缺失或 hostname 不匹配，组件显示不可用。
+hostname 只填写主机名，不含协议或端口，并与验证码服务商后台配置一致。`TURNSTILE_SITE_KEY`、`RECAPTCHA_SITE_KEY` 可留空；未填写时显示未配置提示。填写 Site Key 后，如服务端 Secret 缺失或 hostname 不匹配，组件显示不可用。
 
 ### 生产配置
 
@@ -278,3 +278,20 @@ wrangler.toml          Worker 与静态资源配置
 - [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs)、[CreepJS](https://github.com/abrahamjuliot/creepjs)：浏览器检测能力参考与依赖。
 
 浏览器深度检测的来源版本、校验值和许可证见 [`vendor/browser-diagnostics/README.md`](vendor/browser-diagnostics/README.md) 与对应目录中的 `LICENSE`。各第三方依赖遵循各自许可证。
+
+### 项目内管理正式环境密钥
+
+- 公开配置：`wrangler.toml` 的 `[vars]`（正式）或 `[env.stage.vars]`（测试）填写 `*_SITE_KEY` 与 `*_HOSTNAMES`。
+- 密钥：将 `.secrets.example` 复制为 `.secrets.production.env` 或 `.secrets.stage.env`，填写对应环境的 Secret；这些文件已被 Git 忽略。
+- `make deploy` / `make deploy-stage` 会先检查本地配置，构建部署后通过标准输入上传非空密钥，不在日志中显示密钥值，也不删除已有的其他 Secret。
+- 首次自动生成的正式配置来自现有本地配置，请确认密钥本身支持正式域名；验证码平台后台也必须允许这些域名。
+- `.dev.vars` 仍仅供本地开发使用。更改它不会同步修改正式密钥文件。
+- 这里只接入本地 Make 部署。GitHub Actions 不会读取未提交的文件；CI 部署需要单独使用 GitHub Secrets，或者保留已上传的 Worker Secrets。
+
+仅检查、不上传：
+
+```bash
+node scripts/sync-worker-secrets.mjs production --check
+```
+
+部署与 Secrets 同步是两个步骤；如果同步失败，命令会报错，已部署的代码不会自动回滚。修正后可单独执行 `node scripts/sync-worker-secrets.mjs production` 重试密钥同步。

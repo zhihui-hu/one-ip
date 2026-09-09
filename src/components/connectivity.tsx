@@ -2,6 +2,7 @@ import { CompactText } from "@/components/compact-text";
 import { LatencyBadge } from "@/components/latency-badge";
 import { SiteLogo } from "@/components/site-logo";
 import { TableRow, TableCell } from "@/components/ui/table";
+import { t } from "@/i18n";
 import { testConnectivity, type ProbeResult } from "@/views/link/api";
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -76,17 +77,17 @@ export function ConnectivityTile({
 
 export const homeTargets: Target[] = [
   {
-    name: "字节跳动",
+    name: t("字节跳动"),
     icon: "https://icons.duckduckgo.com/ip3/bytedance.com.ico",
     url: "https://perfops.byte-test.com/500b-bench.jpg",
   },
   {
-    name: "淘宝",
+    name: t("淘宝"),
     icon: "https://icons.duckduckgo.com/ip3/taobao.com.ico",
     url: "https://www.taobao.com/favicon.ico",
   },
   {
-    name: "微信",
+    name: t("微信"),
     icon: "https://icons.duckduckgo.com/ip3/weixin.qq.com.ico",
     url: "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico",
   },

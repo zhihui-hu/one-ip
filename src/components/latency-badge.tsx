@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { useTheme } from "@/hooks/use-theme";
+import { t } from "@/i18n";
 import type { ProbeResult } from "@/views/link/api";
 import { gsap } from "gsap";
 import { AnimatedValue } from "./animated-value";
@@ -58,7 +59,9 @@ export function LatencyBadge({
     <span
       ref={ref}
       className="ping-ms latency-badge"
-      title="浏览器 HTTP 请求耗时中位数；颜色与显示的中位数一致，非 ICMP 延迟"
+      title={t(
+        "浏览器 HTTP 请求耗时中位数；颜色与显示的中位数一致，非 ICMP 延迟",
+      )}
     >
       <AnimatedValue value={pending}>
         {pending ? (

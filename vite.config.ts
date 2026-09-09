@@ -38,7 +38,21 @@ export default defineConfig(() => {
   const buildTime = new Date().toISOString();
 
   return {
-    plugins: [react(), tailwindcss(), excludeBackendSource()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      excludeBackendSource(),
+      {
+        name: "app-build-version",
+        generateBundle() {
+          this.emitFile({
+            type: "asset",
+            fileName: "app-version.json",
+            source: JSON.stringify({ build: buildTime }),
+          });
+        },
+      },
+    ],
     optimizeDeps: {
       include: ["vaul", "@fingerprintjs/fingerprintjs"],
     },

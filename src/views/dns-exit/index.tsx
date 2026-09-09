@@ -10,6 +10,7 @@ import {
   Pending,
 } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
+import { t } from "@/i18n";
 import { request } from "@/lib/network";
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -20,19 +21,19 @@ const samples = 6;
 const columns: ColumnDef<Resolver>[] = [
   {
     id: "ip",
-    header: "DNS 出口 IP",
+    header: t("DNS 出口 IP"),
     cell: ({ row }) => <IpText ip={row.original.ip} />,
   },
   {
     accessorKey: "geo",
-    header: "归属地 / 运营商",
+    header: t("归属地 / 运营商"),
     cell: ({ row }) => (
-      <DetailText text={row.original.geo} title="DNS 归属信息" />
+      <DetailText text={row.original.geo} title={t("DNS 归属信息")} />
     ),
   },
   {
     id: "samples",
-    header: "观察次数",
+    header: t("观察次数"),
     cell: ({ row }) => <NumberTicker value={row.original.samples} />,
   },
 ];
@@ -61,7 +62,7 @@ export default function DnsExitPage() {
             { signal, cache: "no-store" },
           );
           signal.throwIfAborted();
-          if (!data.dns?.ip) throw new Error("未返回 DNS 出口");
+          if (!data.dns?.ip) throw new Error(t("未返回 DNS 出口"));
           const resolver = data.dns;
           const found = state.results.some((item) => item.ip === resolver.ip);
           state = {
@@ -82,7 +83,7 @@ export default function DnsExitPage() {
         client.setQueryData(progressKey, state);
       }
       if (!state.results.length)
-        throw new Error("DNS 出口检测失败，可能受网络、代理或跨域限制");
+        throw new Error(t("DNS 出口检测失败，可能受网络、代理或跨域限制"));
       return state;
     },
   });
@@ -91,17 +92,18 @@ export default function DnsExitPage() {
     : (query.data ?? progress.data);
   return (
     <>
-      <PageHeading title="DNS 出口查询" description="" />
+      <PageHeading title={t("DNS 出口查询")} description="" />
       <div className="toolbar">
         <ActionButton
           busy={query.isFetching}
           onClick={() => setRound((n) => n + 1)}
         >
-          {query.isFetching ? "检测中..." : "重新检测"}
+          {query.isFetching ? t("检测中...") : t("重新检测")}
         </ActionButton>
         <span className="small muted">
-          <NumberTicker value={state?.count ?? 0} />/{samples} 次采样 ·{" "}
-          {state?.failed ?? 0} 次失败
+          <NumberTicker value={state?.count ?? 0} />/{samples}
+          {t("次采样 ·")} {state?.failed ?? 0}
+          {t("次失败")}
         </span>
       </div>
       <ErrorNotice error={query.error} />
@@ -116,17 +118,18 @@ export default function DnsExitPage() {
             animateEntries
             empty={
               query.isFetching ? (
-                <Pending>正在等待解析结果...</Pending>
+                <Pending>{t("正在等待解析结果...")}</Pending>
               ) : (
-                "未检测到 DNS 出口"
+                t("未检测到 DNS 出口")
               )
             }
           />
         </CardContent>
       </Card>
       <p className="small muted mt-3">
-        相同出口合并显示；出口数量取决于实际解析路径，不代表设备配置了相同数量的
-        DNS。
+        {t(
+          "相同出口合并显示；出口数量取决于实际解析路径，不代表设备配置了相同数量的 DNS。",
+        )}
       </p>
     </>
   );

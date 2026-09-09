@@ -7,18 +7,19 @@ import {
   InputGroupInput,
   InputGroupAddon,
 } from "@/components/ui/input-group";
+import { t } from "@/i18n";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const schema = z.object({
-  query: z.string().trim().min(1, "请输入查询内容").max(253, "输入过长"),
+  query: z.string().trim().min(1, t("请输入查询内容")).max(253, t("输入过长")),
 });
 export function LookupForm({
   value = "",
   placeholder,
   busy,
-  label = "查询",
+  label = t("查询"),
   onSubmit,
   grouped = false,
 }: {
@@ -62,7 +63,7 @@ export function LookupForm({
                   type="submit"
                   busy={busy}
                 >
-                  {busy ? "查询中..." : label}
+                  {busy ? t("查询中...") : label}
                 </ActionButton>
               </InputGroupAddon>
             ) : (

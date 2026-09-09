@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
+import { t } from "@/i18n";
 import { BrowserSummary } from "@/views/browser/summary";
 import type { ProbeResult } from "@/views/link/api";
 import { skipToken, useQueries } from "@tanstack/react-query";
@@ -46,7 +47,7 @@ export function HomePage() {
     `${mobile}-${orderedTargets.map(({ target }) => target.name).join("|")}`,
   );
   useEffect(() => {
-    document.title = "概览 - IP 网络工具";
+    document.title = t("概览 - IP 网络工具");
   }, []);
   const primary = useQueries({
     queries: ([4, 6] as const).map((version) => ({
@@ -71,7 +72,7 @@ export function HomePage() {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   return (
     <div className="home-page">
-      <h1 className="sr-only">网络概览</h1>
+      <h1 className="sr-only">{t("网络概览")}</h1>
       <div className="home-overview home-ip-overview">
         {primary.map((query, index) => {
           if (index === 1 && !query.isPending && !query.data) return null;
@@ -85,23 +86,27 @@ export function HomePage() {
             <Card key={index} className="home-primary-card">
               <CardContent className="primary-ip-block">
                 <div className="row-between eyebrow">
-                  <span>当前出口 · IPv{index === 0 ? 4 : 6}</span>
+                  <span>
+                    {t("当前出口 · IPv")}
+                    {index === 0 ? 4 : 6}
+                  </span>
                   <CountryFlag code={geo?.country_code} />
                 </div>
                 <div className="ip-value">
                   {query.isPending ? (
-                    <Pending>加载中...</Pending>
+                    <Pending>{t("加载中...")}</Pending>
                   ) : geo ? (
                     <IpText ip={geo.ip} />
                   ) : (
                     <span className="muted">
-                      未获取到 IPv{index === 0 ? 4 : 6}
+                      {t("未获取到 IPv")}
+                      {index === 0 ? 4 : 6}
                     </span>
                   )}
                 </div>
                 <div className="primary-ip-meta text-sm text-muted-foreground">
                   {loading ? (
-                    <Pending>正在查询归属信息…</Pending>
+                    <Pending>{t("正在查询归属信息…")}</Pending>
                   ) : geo?.country || geo?.city || geo?.isp ? (
                     <>
                       <p>
@@ -118,13 +123,13 @@ export function HomePage() {
                     </>
                   ) : query.data ? (
                     <div className="flex items-center justify-between gap-2 text-xs">
-                      <span>归属信息暂不可用</span>
+                      <span>{t("归属信息暂不可用")}</span>
                       <button
                         type="button"
                         className="shrink-0 text-primary"
                         onClick={() => geoByIp.get(query.data!.ip)?.refetch()}
                       >
-                        重试
+                        {t("重试")}
                       </button>
                     </div>
                   ) : null}
@@ -136,10 +141,10 @@ export function HomePage() {
         <Card className="home-connectivity-card">
           <CardHeader>
             <div className="row-between">
-              <CardTitle>网络连通性</CardTitle>
+              <CardTitle>{t("网络连通性")}</CardTitle>
               <UnderlineHover asChild>
                 <Link className="small muted" to="/network/connectivity/">
-                  查看更多 ›
+                  {t("查看更多 ›")}
                 </Link>
               </UnderlineHover>
             </div>
@@ -160,13 +165,13 @@ export function HomePage() {
       <QuickChecks />
       <BrowserSummary />
       <section className="home-shortcuts">
-        <h2>快捷入口</h2>
+        <h2>{t("快捷入口")}</h2>
         <div>
           {[
-            { path: "/network", label: "网络检测" },
-            { path: "/browser", label: "浏览器检测" },
-            { path: "/ai", label: "AI 检测" },
-            { path: "/status", label: "服务状态" },
+            { path: "/network", label: t("网络检测") },
+            { path: "/browser", label: t("浏览器检测") },
+            { path: "/ai", label: t("AI 检测") },
+            { path: "/status", label: t("服务状态") },
           ].map((tool) => (
             <Link key={tool.path} to={tool.path}>
               {tool.label}

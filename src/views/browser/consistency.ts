@@ -1,3 +1,5 @@
+import { t } from "@/i18n";
+
 export interface Check {
   name: string;
   status: "一致" | "存在差异" | "检测到特征" | "未发现特征" | "无法检测";
@@ -26,9 +28,12 @@ export function comparePlatforms(
     (left === "ChromeOS" && right === "Linux") ||
     (left === "iOS" && right === "macOS" && touchPoints > 1);
   return {
-    name: "UA / 平台",
+    name: t("UA / 平台"),
     status: !left || !right ? "无法检测" : compatible ? "一致" : "存在差异",
-    detail: `${left ?? "未知"} / ${right ?? "未知"}。兼容模式和隐私设置也可能影响这些值。`,
+    detail: t("{0} / {1}。兼容模式和隐私设置也可能影响这些值。", [
+      left ?? t("未知"),
+      right ?? t("未知"),
+    ]),
   };
 }
 export function compareContexts(
@@ -60,9 +65,9 @@ export function compareContexts(
         ? "无法检测"
         : "一致",
     detail: differences.length
-      ? `不同字段：${differences.join("、")}`
+      ? t("不同字段：{0}", [differences.join("、")])
       : missing.length
-        ? `未提供：${missing.join("、")}`
-        : "已读取的语言、平台、UA、处理器与时区一致。",
+        ? t("未提供：{0}", [missing.join("、")])
+        : t("已读取的语言、平台、UA、处理器与时区一致。"),
   };
 }

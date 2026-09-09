@@ -5,22 +5,23 @@ import { Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
+import { t } from "@/i18n";
 import { aiPlatforms } from "@/views/ai/platforms";
 import { probeAiDomain } from "@/views/ai/probe";
 import { getStatus } from "@/views/status/api";
 import { statusOrder } from "@/views/status/order";
-import services from "@/views/status/services.json";
+import rawservices from "@/views/status/services.json";
 import { useQueries } from "@tanstack/react-query";
 
 const featured = ["9", "4", "10", "5", "0", "19", "15", "1"].map((id) =>
   services.find((service) => service.id === id)!,
 );
 const statusLabels: Record<string, string> = {
-  none: "正常运行",
-  minor: "轻微故障",
-  major: "严重故障",
-  critical: "重大故障",
-  maintenance: "维护中",
+  none: t("正常运行"),
+  minor: t("轻微故障"),
+  major: t("严重故障"),
+  critical: t("重大故障"),
+  maintenance: t("维护中"),
 };
 export function PlatformSummary() {
   const ref = useRef<HTMLDivElement>(null);
@@ -82,7 +83,7 @@ export function PlatformSummary() {
     <div ref={ref} className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>AI 访问概览</CardTitle>
+          <CardTitle>{t("AI 访问概览")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div
@@ -123,12 +124,12 @@ export function PlatformSummary() {
                     }}
                   >
                     {query.isPending ? (
-                      <Pending>待检测</Pending>
+                      <Pending>{t("待检测")}</Pending>
                     ) : latency == null || latency < 0 ? (
                       query.data?.status === "restricted" ? (
-                        "检测受限"
+                        t("检测受限")
                       ) : (
-                        "未确认"
+                        t("未确认")
                       )
                     ) : (
                       `${latency} ms`
@@ -139,18 +140,19 @@ export function PlatformSummary() {
             })}
           </div>
           <p className="home-note mt-3">
-            显示探测资源的 HTTP
-            响应耗时；检测受限或未确认不代表网站打不开。点击平台可查看说明并打开官网。
+            {t(
+              "显示探测资源的 HTTP 响应耗时；检测受限或未确认不代表网站打不开。点击平台可查看说明并打开官网。",
+            )}
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
           <div className="row-between">
-            <CardTitle>服务状态</CardTitle>
+            <CardTitle>{t("服务状态")}</CardTitle>
             <UnderlineHover asChild>
               <Link to="/status" className="small text-primary">
-                全部服务 ›
+                {t("全部服务 ›")}
               </Link>
             </UnderlineHover>
           </div>
@@ -194,9 +196,9 @@ export function PlatformSummary() {
                       }}
                     >
                       {query.isPending ? (
-                        <Pending>查询中</Pending>
+                        <Pending>{t("查询中")}</Pending>
                       ) : (
-                        (statusLabels[indicator ?? ""] ?? "待确认")
+                        (statusLabels[indicator ?? ""] ?? t("待确认"))
                       )}
                     </span>
                   </div>
@@ -204,10 +206,16 @@ export function PlatformSummary() {
               })}
           </div>
           <p className="home-note mt-3">
-            来自官方状态源；点击服务查看组件与事件。
+            {t("来自官方状态源；点击服务查看组件与事件。")}
           </p>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+const services = rawservices.map((item) => ({
+  ...item,
+  name: t(item.name),
+  note: item.note ? t(item.note) : item.note,
+}));

@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { PageHelpAlert } from "@/components/page-help-alert";
 import { Button } from "@/components/ui/button";
+import { t } from "@/i18n";
 import { AppLayout } from "@/layout";
 import { legacyRoutes } from "@/layout/routes";
 import { ToolLayout } from "@/layout/tool-layout";
@@ -121,9 +122,9 @@ export function App() {
           path="*"
           element={
             <section className="status-line">
-              <h1>404 · 页面不存在</h1>
+              <h1>{t("404 · 页面不存在")}</h1>
               <Button variant="outline" asChild>
-                <Link to="/">返回概览</Link>
+                <Link to="/">{t("返回概览")}</Link>
               </Button>
             </section>
           }

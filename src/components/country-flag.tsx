@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { t } from "@/i18n";
 import { Globe2 } from "lucide-react";
 
 export function CountryFlag({ code }: { code?: string }) {
@@ -7,7 +8,7 @@ export function CountryFlag({ code }: { code?: string }) {
   return (
     <Avatar
       className="country-flag rounded-sm after:hidden"
-      aria-label={country?.toUpperCase() ?? "未知地区"}
+      aria-label={country?.toUpperCase() ?? t("未知地区")}
     >
       <AvatarImage
         src={country ? `https://flagcdn.com/w40/${country}.png` : undefined}
