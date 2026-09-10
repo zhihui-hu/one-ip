@@ -2624,9 +2624,17 @@ body {
   background: var(--muted);
   color: var(--muted-foreground);
 }
+.ip-chip-neutral {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
 .ip-chip-good {
   color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+}
+.ip-chip-residential {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 25%, transparent);
 }
 .ip-chip-warn {
   color: var(--warning);
@@ -2662,10 +2670,15 @@ body {
 .ip-field-label {
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
+  line-height: 20px;
   gap: 5px;
 }
 .ip-help-trigger {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   flex-shrink: 0;
   padding: 2px;
   color: var(--muted-foreground);
@@ -2829,4 +2842,59 @@ body {
 }
 .ip-dossier .facts > div {
   min-width: 0;
+}
+
+.home-address-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.home-page .home-primary-card .home-address-row .ip-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.home-address-row .ip-value > :first-child {
+  flex-shrink: 0;
+}
+@media (max-width: 48rem) {
+  .home-address-row {
+    gap: 8px;
+  }
+  .home-address-row .ip-reputation-badge {
+    padding: 0 4px;
+  }
+  .home-address-row .ip-reputation-badge strong {
+    font-size: 44px;
+  }
+}
+
+.home-address-row {
+  position: relative;
+}
+.home-address-row:has(.ip-reputation-badge) {
+  padding-right: 96px;
+}
+.home-address-row .ip-reputation-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.home-address-row:has(.ip-reputation-badge) + .primary-ip-meta {
+  padding-right: 96px;
+}
+@media (max-width: 48rem) {
+  .home-address-row:has(.ip-reputation-badge),
+  .home-address-row:has(.ip-reputation-badge) + .primary-ip-meta {
+    padding-right: 80px;
+  }
+}
+
+.ip-help-trigger > svg {
+  display: block;
+  flex-shrink: 0;
 }

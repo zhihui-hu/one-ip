@@ -48,22 +48,21 @@ export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
   }
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
-  for (const url of ["https://2026.ip138.com/", "https://my.ip.cn/"]) {
-    try {
-      const text = await request<string>(
-        url,
-        {
-          signal: signal
-            ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
-            : AbortSignal.timeout(5000),
-        },
-        "text",
-      );
-      const match = text.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
-      if (match) return { ip: match[0], source: new URL(url).hostname };
-    } catch (error) {
-      if (signal?.aborted) throw error;
-    }
+  try {
+    const text = await request<string>(
+      "https://2026.ip138.com/",
+      {
+        cache: "no-store",
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(8000)])
+          : AbortSignal.timeout(8000),
+      },
+      "text",
+    );
+    const match = text.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
+    if (match) return { ip: match[0], source: "2026.ip138.com" };
+  } catch (error) {
+    if (signal?.aborted) throw error;
   }
   throw new Error(t("国内出口未知：目标站点可能限制跨域读取"));
 }

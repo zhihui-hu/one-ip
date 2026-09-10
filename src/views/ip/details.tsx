@@ -3,9 +3,12 @@ import { Link } from "react-router-dom";
 import { CountryFlag } from "@/components/country-flag";
 import { NumberTicker } from "@/components/number-ticker";
 import { IpText, ToolCard, DataTable } from "@/components/toolkit";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { t } from "@/i18n";
+import { companyTypeColors } from "@/lib/ip-badge-colors";
+import { ipScoreColor } from "@/lib/ip-score";
 import type { Geo } from "@/lib/types";
 import type { CoffeeLookup } from "./coffee";
 import { IpFacts } from "./field-help";
@@ -92,7 +95,10 @@ export function IpDetails({
               </span>
             </div>
           </div>
-          <div className="ip-reputation-badge">
+          <div
+            className="ip-reputation-badge"
+            style={{ color: ipScoreColor(score) }}
+          >
             <span>{t("IP 信誉分")}</span>
             <strong>
               {score == null ? "—" : <NumberTicker value={score} />}
@@ -112,15 +118,28 @@ export function IpDetails({
                 d.is_public_service
                   ? chip(t("公共服务"))
                   : d.isResidential === true
-                    ? chip(t("家庭住宅 IP"), "good")
+                    ? chip(t("家庭住宅 IP"), "residential")
                     : d.is_datacenter === true
-                      ? chip(t("数据中心"), "warn")
+                      ? chip(t("数据中心"))
                       : chip(t("未知")),
               ],
               [t("注册国家"), d.registered_country],
               [t("数据中心"), yesNo(d.is_datacenter)],
               [t("移动网络"), yesNo(d.is_mobile)],
-              [t("企业类型"), d.company_type],
+              [
+                t("企业类型"),
+                d.company_type ? (
+                  <Badge
+                    variant="secondary"
+                    className={
+                      companyTypeColors[d.company_type.toLowerCase()] ??
+                      "bg-primary/5 text-primary"
+                    }
+                  >
+                    {d.company_type}
+                  </Badge>
+                ) : undefined,
+              ],
               [t("企业信息"), d.company_name],
               [t("机房名称"), d.datacenter_name || "—"],
             ]}

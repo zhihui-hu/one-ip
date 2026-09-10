@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { CountryFlag } from "@/components/country-flag";
+import { NumberTicker } from "@/components/number-ticker";
 import { ActionButton, IpText, Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -9,6 +10,8 @@ import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
+import { companyTypeColors } from "@/lib/ip-badge-colors";
+import { ipScoreColor } from "@/lib/ip-score";
 import { BrowserSummary } from "@/views/browser/summary";
 import { lookupIp } from "@/views/ip/api";
 import { testConnectivity, type ProbeResult } from "@/views/link/api";
@@ -97,7 +100,8 @@ export function HomePage() {
   const probes = useQueries({
     queries: [
       {
-        queryKey: ["home-domestic-ip"],
+        queryKey: ["home-domestic-ip", 2],
+        retry: 1,
         queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
       },
       {
@@ -110,11 +114,11 @@ export function HomePage() {
         queryFn: ({ signal }: { signal: AbortSignal }) =>
           getBrowserIp(6, signal),
       },
-    ].map((probe) => ({ ...probe, retry: false, staleTime: 60_000 })),
+    ].map((probe) => ({ retry: false, staleTime: 60_000, ...probe })),
   });
   const cards = probes.flatMap((query, index) => {
     // Only dedicated probes belong in the overview; per-site routes stay in SplitResults.
-    if (index > 0 && !query.data) return [];
+    if (index === 2 && !query.data) return [];
     if (index === 1 && query.data?.ip === probes[0].data?.ip) return [];
     return [
       {
@@ -175,39 +179,44 @@ export function HomePage() {
           const company = classification?.isSuccess
             ? classification.data.coffee
             : undefined;
+          const score = company?.trust_score;
+          const hasScore =
+            typeof score === "number" &&
+            Number.isFinite(score) &&
+            score >= 0 &&
+            score <= 100;
           const typeLabels = company
             ? [
                 company.company_type
                   ? {
                       label: company.company_type,
                       color:
-                        "bg-slate-500/10 text-slate-600 dark:text-slate-300",
+                        companyTypeColors[company.company_type.toLowerCase()] ??
+                        "bg-primary/5 text-primary dark:bg-primary/10",
                     }
                   : null,
                 company.is_public_service === true
                   ? {
                       label: t("公共服务"),
-                      color: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                      color: "bg-primary/15 text-primary dark:bg-primary/20",
                     }
                   : null,
                 company.isResidential === true && !company.is_public_service
                   ? {
                       label: t("家庭住宅 IP"),
-                      color:
-                        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                      color: "bg-primary/25 text-primary dark:bg-primary/30",
                     }
                   : null,
                 company.is_datacenter === true && !company.is_public_service
                   ? {
                       label: t("机房 IP"),
-                      color:
-                        "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+                      color: "bg-primary/5 text-primary dark:bg-primary/10",
                     }
                   : null,
                 company.is_mobile === true
                   ? {
                       label: t("移动网络"),
-                      color: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                      color: "bg-primary/15 text-primary dark:bg-primary/20",
                     }
                   : null,
                 company.is_proxy === true ||
@@ -215,8 +224,7 @@ export function HomePage() {
                 company.is_tor === true
                   ? {
                       label: t("代理 / VPN / Tor"),
-                      color:
-                        "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+                      color: "bg-primary/10 text-primary dark:bg-primary/15",
                     }
                   : null,
               ].filter((item) => item !== null)
@@ -224,7 +232,14 @@ export function HomePage() {
           const loading =
             pending || Boolean(data && geoByIp.get(data.ip)?.isPending);
           return (
-            <Card key={index} className="home-primary-card">
+            <Card key={index} className="home-primary-card relative">
+              {data && (
+                <Link
+                  to={`/network/ip/${encodeURIComponent(data.ip)}`}
+                  aria-label={`${label} · ${t("IP 信息查询")}`}
+                  className="absolute inset-0 z-10 rounded-[inherit] transition-colors hover:bg-primary/[0.025] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+                />
+              )}
               <CardContent className="primary-ip-block">
                 <div className="row-between eyebrow">
                   <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
@@ -239,18 +254,33 @@ export function HomePage() {
                       </Badge>
                     ))}
                   </div>
-                  <CountryFlag code={geo?.country_code} />
                 </div>
-                <div className="ip-value">
-                  {pending ? (
-                    <Pending>{t("加载中...")}</Pending>
-                  ) : geo ? (
-                    <IpText ip={geo.ip} />
-                  ) : (
-                    <span className="muted">
-                      {t("未获取到 IPv")}
-                      {version}
-                    </span>
+                <div className="home-address-row">
+                  <div className="ip-value">
+                    {pending ? (
+                      <Pending>{t("加载中...")}</Pending>
+                    ) : geo ? (
+                      <>
+                        <CountryFlag code={geo.country_code} />
+                        <IpText ip={geo.ip} link={false} />
+                      </>
+                    ) : (
+                      <span className="muted">
+                        {t("未获取到 IPv")}
+                        {version}
+                      </span>
+                    )}
+                  </div>
+                  {hasScore && (
+                    <div
+                      className="ip-reputation-badge shrink-0"
+                      style={{ color: ipScoreColor(score) }}
+                    >
+                      <span>{t("IP 信誉分")}</span>
+                      <strong>
+                        <NumberTicker value={score} />
+                      </strong>
+                    </div>
                   )}
                 </div>
                 <div className="primary-ip-meta text-sm text-muted-foreground">
@@ -275,7 +305,7 @@ export function HomePage() {
                       <span>{t("归属信息暂不可用")}</span>
                       <button
                         type="button"
-                        className="shrink-0 text-primary"
+                        className="relative z-20 shrink-0 text-primary"
                         onClick={() => geoByIp.get(data.ip)?.refetch()}
                       >
                         {t("重试")}
