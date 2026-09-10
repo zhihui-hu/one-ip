@@ -66,11 +66,13 @@ export function LatencyBadge({
       <AnimatedValue value={pending}>
         {pending ? (
           <Pending>···</Pending>
-        ) : (
+        ) : latency != null && latency >= 0 ? (
           <>
-            <NumberTicker value={latency ?? -1} />
-            {latency != null && "ms"}
+            <NumberTicker value={latency} />
+            ms
           </>
+        ) : (
+          <span>{result?.samples.length ? t("未连通") : "—"}</span>
         )}
       </AnimatedValue>
     </span>

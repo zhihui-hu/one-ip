@@ -22,9 +22,6 @@ const descriptions: Record<string, string> = {
     "体验当前浏览器完成第三方验证的过程，查看本站本次验证的实际结果。",
   ),
 
-  "/network/ip": t(
-    "查询公网 IP 的归属地、运营商和所属网络，了解地址的详细信息。",
-  ),
   "/network/whois": t(
     "查询域名、IP 或 AS 号的注册信息，了解注册主体、所属机构及相关日期。",
   ),

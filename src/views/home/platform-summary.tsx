@@ -75,11 +75,11 @@ export function PlatformSummary() {
     )
   )
     orderedPlatforms.sort((a, b) => {
-      const left = a.query.data?.median ?? Infinity;
-      const right = b.query.data?.median ?? Infinity;
+      const left = a.query.data?.median;
+      const right = b.query.data?.median;
       return (
-        Number(Boolean(b.platform.traceDomain)) -
-          Number(Boolean(a.platform.traceDomain)) || left - right
+        (left != null && left >= 0 ? left : Infinity) -
+        (right != null && right >= 0 ? right : Infinity)
       );
     });
   const sortRef = useSortAnimation(

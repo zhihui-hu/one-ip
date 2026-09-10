@@ -102,12 +102,18 @@ export function ToolCard({
     </Card>
   );
 }
-export function Facts({ rows }: { rows: [string, ReactNode][] }) {
+export function Facts({
+  rows,
+  renderLabel,
+}: {
+  rows: [string, ReactNode][];
+  renderLabel?: (label: string) => ReactNode;
+}) {
   return (
     <dl className="facts">
       {rows.map(([label, value]) => (
         <div key={label}>
-          <dt>{label}</dt>
+          <dt>{renderLabel ? renderLabel(label) : label}</dt>
           <dd>
             <AnimatedValue
               value={

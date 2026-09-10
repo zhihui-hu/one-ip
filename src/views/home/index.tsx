@@ -9,10 +9,10 @@ import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
-import { endpoint } from "@/lib/network";
 import { BrowserSummary } from "@/views/browser/summary";
-import type { ProbeResult } from "@/views/link/api";
-import { skipToken, useQueries, useQueryClient } from "@tanstack/react-query";
+import { lookupIp } from "@/views/ip/api";
+import { testConnectivity, type ProbeResult } from "@/views/link/api";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   ArrowRight,
@@ -40,7 +40,7 @@ export function HomePage() {
           "browser-ip",
           "split",
           "geoip",
-          "home-ip-type",
+          "lookup-ip-coffee",
           "connectivity",
           "connectivity-progress",
           "ai-preview",
@@ -62,7 +62,12 @@ export function HomePage() {
     queries: homeTargets.map((target) => ({
       queryKey: ["connectivity", target.url, 0],
       enabled: false,
-      queryFn: skipToken,
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        testConnectivity(target.url, signal, (result) =>
+          client.setQueryData(["connectivity-progress", target.url, 0], result),
+        ),
+      retry: false,
+      staleTime: 60_000,
     })),
   });
   const orderedTargets = homeTargets.map((target, index) => ({
@@ -139,14 +144,8 @@ export function HomePage() {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   const typeQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["home-ip-type", ip, 2],
-      queryFn: ({ signal }: { signal: AbortSignal }) =>
-        endpoint<{
-          available: boolean;
-          hosting?: boolean;
-          mobile?: boolean;
-          proxy?: boolean;
-        }>(`/ip-type/${encodeURIComponent(ip)}?v=2`, { signal }),
+      queryKey: ["lookup-ip-coffee", ip],
+      queryFn: ({ signal }: { signal: AbortSignal }) => lookupIp(ip, signal),
       staleTime: 3600_000,
       retry: false,
       refetchOnWindowFocus: false,
@@ -173,32 +172,55 @@ export function HomePage() {
             ? { ...data, ...geoByIp.get(data.ip)?.data }
             : undefined;
           const classification = data ? typeByIp.get(data.ip) : undefined;
-          const typeLabels =
-            classification?.isSuccess && classification.data?.available
-              ? [
-                  classification.data.hosting === true
-                    ? {
-                        label: t("机房 IP"),
-                        color:
-                          "bg-violet-500/10 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
-                      }
-                    : null,
-                  classification.data.mobile === true
-                    ? {
-                        label: t("移动网络"),
-                        color:
-                          "bg-sky-500/10 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
-                      }
-                    : null,
-                  classification.data.proxy === true
-                    ? {
-                        label: t("代理 / VPN / Tor"),
-                        color:
-                          "bg-amber-500/10 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
-                      }
-                    : null,
-                ].filter((item) => item !== null)
-              : [];
+          const company = classification?.isSuccess
+            ? classification.data.coffee
+            : undefined;
+          const typeLabels = company
+            ? [
+                company.company_type
+                  ? {
+                      label: company.company_type,
+                      color:
+                        "bg-slate-500/10 text-slate-600 dark:text-slate-300",
+                    }
+                  : null,
+                company.is_public_service === true
+                  ? {
+                      label: t("公共服务"),
+                      color: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                    }
+                  : null,
+                company.isResidential === true && !company.is_public_service
+                  ? {
+                      label: t("家庭住宅 IP"),
+                      color:
+                        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+                    }
+                  : null,
+                company.is_datacenter === true && !company.is_public_service
+                  ? {
+                      label: t("机房 IP"),
+                      color:
+                        "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+                    }
+                  : null,
+                company.is_mobile === true
+                  ? {
+                      label: t("移动网络"),
+                      color: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                    }
+                  : null,
+                company.is_proxy === true ||
+                company.is_vpn === true ||
+                company.is_tor === true
+                  ? {
+                      label: t("代理 / VPN / Tor"),
+                      color:
+                        "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+                    }
+                  : null,
+              ].filter((item) => item !== null)
+            : [];
           const loading =
             pending || Boolean(data && geoByIp.get(data.ip)?.isPending);
           return (

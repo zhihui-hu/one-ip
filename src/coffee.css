@@ -2519,70 +2519,314 @@ body {
 
 .ip-dossier {
   display: grid;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+}
+.ip-dossier-top {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
 }
 .ip-dossier-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--card);
+}
+.ip-head-search {
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+.ip-detail-page .lookup-input-group {
+  border: 0;
+  box-shadow: none;
+  background: var(--muted);
 }
 .ip-reputation-badge {
   display: flex;
-  flex-shrink: 0;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
-  gap: 2px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--muted);
-  color: var(--foreground);
-  font-size: 12px;
+  gap: 4px;
+  padding: 0 8px;
+  color: var(--primary);
+  font-size: 11px;
+  white-space: nowrap;
 }
 .ip-reputation-badge strong {
-  font-size: 28px;
-  line-height: 1.1;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
-.ip-reputation-badge small {
+.ip-recent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  padding-top: 10px;
+  white-space: nowrap;
+  font-size: 11px;
   color: var(--muted-foreground);
+  scrollbar-width: none;
+}
+.ip-recent button {
+  border: 0;
+  padding: 2px 4px;
+  color: var(--foreground);
+  cursor: pointer;
+}
+.ip-search-only {
+  max-width: 640px;
 }
 .ip-dossier-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 .ip-dossier [data-slot="card"] {
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 0;
+  box-shadow: none;
+  border-radius: 14px;
   --card-spacing: 16px;
+  gap: 10px;
+  min-width: 0;
+}
+.ip-dossier [data-slot="card-title"] {
+  color: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+}
+.ip-dossier .facts > div {
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  min-height: 40px;
+  padding: 8px 0;
+  gap: 16px;
+  font-size: 13px;
+  align-items: center;
+  line-height: 24px;
 }
 .ip-dossier .facts dd {
+  font-weight: 400;
   overflow-wrap: anywhere;
 }
-.ip-map-disclosure summary {
-  cursor: pointer;
-  padding: 12px 0;
-  font-size: 13px;
+.ip-dossier [data-slot="table-row"],
+.ip-dossier [data-slot="table-header"],
+.ip-dossier [data-slot="table-cell"] {
+  border: 0;
+}
+.ip-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.3;
+  background: var(--muted);
   color: var(--muted-foreground);
 }
-.ip-detail-page > [data-slot="card"] {
-  background: transparent;
-  --card-spacing: 6px;
+.ip-chip-good {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
 }
-@media (max-width: 40rem) {
+.ip-chip-warn {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 9%, transparent);
+}
+.ip-chip-bad {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 9%, transparent);
+}
+@media (max-width: 48rem) {
+  .ip-dossier-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .ip-head-search {
+    grid-column: 1 / -1;
+  }
   .ip-dossier-grid {
     grid-template-columns: 1fr;
   }
-  .ip-dossier-head {
+  .ip-dossier-top {
     padding: 12px;
+  }
+  .ip-dossier .facts > div {
+    font-size: 12px;
+    gap: 10px;
+  }
+}
+
+.ip-dossier .facts > div:last-child {
+  border-bottom: 0;
+}
+.ip-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.ip-help-trigger {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 2px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  border-radius: 4px;
+}
+.ip-help-trigger:hover,
+.ip-help-trigger:focus-visible {
+  color: var(--primary);
+  background: var(--muted);
+  outline: 2px solid transparent;
+}
+.ip-help-trigger:focus-visible {
+  outline-color: var(--ring);
+}
+.ip-key-value {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.ip-key-value .ip-chip {
+  font-weight: 600;
+}
+@media (pointer: coarse) {
+  .ip-help-trigger {
+    min-width: 28px;
+    min-height: 28px;
+    justify-content: center;
+  }
+}
+
+/* Keep the score on the right while allowing long IP addresses to wrap. */
+@media (max-width: 48rem) {
+  .ip-dossier-head {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .ip-dossier-head h2 {
+    padding-right: 0;
+    font-size: 22px;
+    line-height: 1.35;
+  }
+  .ip-dossier-head > div:first-child > div {
+    font-size: 12px;
+    line-height: 1.6;
+    align-items: flex-start;
+  }
+  .ip-dossier-head .ip-reputation-badge {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    padding: 0 4px;
+    gap: 4px;
+    font-size: 11px;
+  }
+  .ip-dossier-head .ip-reputation-badge strong {
+    font-size: 44px;
+  }
+  .ip-dossier [data-slot="card"] {
+    --card-spacing: 12px;
+    gap: 6px;
+  }
+  .ip-dossier .facts > div {
+    min-height: 38px;
+    padding: 6px 0;
+    line-height: 1.5;
+  }
+  .ip-dossier .facts dt {
+    max-width: 42%;
+  }
+  .ip-dossier .facts dd {
+    flex: 1;
+  }
+  .ip-recent {
     gap: 8px;
+    padding-top: 8px;
   }
-  .ip-reputation-badge {
-    padding: 6px 10px;
+  .ip-recent > span {
+    flex-shrink: 0;
   }
+  .ip-recent button {
+    min-height: 32px;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 48rem) {
+  .ip-dossier .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+  }
+  .ip-dossier .facts > div {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .ip-dossier .facts > div:has(.ip-compact-field) {
+    grid-column: span 1;
+    gap: 6px;
+  }
+  .ip-dossier .facts > div:has(.ip-compact-field) dt {
+    max-width: none;
+    font-size: 11px;
+  }
+  .ip-dossier .facts > div:has(.ip-compact-field) dd {
+    font-size: 11px;
+  }
+  .ip-dossier .facts > div:has(.ip-compact-field) .ip-chip {
+    padding: 3px 5px;
+    font-size: 10px;
+  }
+}
+
+.ip-recent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 8px;
+}
+.ip-recent-row .ip-recent {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0;
+}
+.ip-recent-row > button {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.ip-dossier .ip-geo-table {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.ip-dossier .ip-geo-table table {
+  min-width: 620px;
+  table-layout: auto;
+}
+.ip-dossier .ip-geo-table :is(th, td) {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  padding: 10px 12px;
+}
+.ip-geo-city {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ip-dossier .facts dd {
+  overflow-x: auto;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+.ip-dossier .facts dd > * {
+  max-width: 100%;
+}
+.ip-dossier .facts > div {
+  min-width: 0;
 }

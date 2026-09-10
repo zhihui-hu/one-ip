@@ -1,47 +1,89 @@
+import { useLayoutEffect, useRef, useState, useId } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { LookupFaq } from "@/components/lookup-faq";
 import { LookupForm } from "@/components/lookup-form";
-import {
-  PageHeading,
-  IpText,
-  ErrorNotice,
-  Pending,
-} from "@/components/toolkit";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { IpText, ErrorNotice } from "@/components/toolkit";
+import { Button } from "@/components/ui/button";
 import { useLookupHistory } from "@/hooks/use-lookup-history";
-import { t, locale } from "@/i18n";
-import type { Lookup } from "@/lib/types";
+import { t } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
+import { gsap } from "gsap";
+import { Search, X } from "lucide-react";
 import { lookupIp } from "./api";
+import type { CoffeeLookup } from "./coffee";
 import { IpDetails } from "./details";
 
 export default function IpPage() {
   const { ip = "" } = useParams();
   const navigate = useNavigate();
-  const history = useLookupHistory<Lookup>("ip-tools:ip-history:v1");
+  const history = useLookupHistory<CoffeeLookup>("ip-tools:coffee-history:v1");
   const cached = history.find(ip);
   const query = useQuery({
-    queryKey: ["lookup-ip", ip],
+    queryKey: ["lookup-ip-coffee", ip],
     enabled: !!ip,
     initialData: cached?.data,
     initialDataUpdatedAt: cached?.savedAt,
     staleTime: 300_000,
+    retry: false,
     queryFn: async ({ signal }) => {
       const result = await lookupIp(ip, signal);
       history.save(ip, result);
       return result;
     },
-    retry: false,
   });
-  const data = query.data;
-  return (
-    <div className="lookup-page ip-detail-page">
-      <div className="lookup-search-card">
-        <PageHeading
-          title={t("IP 信息查询")}
-          description={t("归属地、运营商与注册信息")}
-        />
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchPanel = useRef<HTMLDivElement>(null);
+  const searchButton = useRef<HTMLButtonElement>(null);
+  const searchId = useId();
+  useLayoutEffect(() => {
+    const panel = searchPanel.current;
+    if (!panel) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const tween = gsap.to(panel, {
+      height: searchOpen ? "auto" : 0,
+      opacity: searchOpen ? 1 : 0,
+      duration: reduced ? 0 : 0.25,
+      ease: "power2.out",
+      overwrite: true,
+      onComplete: () => {
+        if (searchOpen) panel.querySelector("input")?.focus();
+      },
+    });
+    return () => {
+      tween.kill();
+    };
+  }, [searchOpen, Boolean(query.data)]);
+  const searchToggle = (
+    <Button
+      ref={searchButton}
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="size-8 shrink-0 text-primary"
+      aria-label={searchOpen ? t("收起搜索") : t("展开搜索")}
+      aria-expanded={searchOpen}
+      aria-controls={searchId}
+      onClick={() => setSearchOpen((open) => !open)}
+    >
+      {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
+    </Button>
+  );
+  const search = (
+    <div
+      ref={searchPanel}
+      id={searchId}
+      aria-hidden={!searchOpen}
+      inert={!searchOpen}
+      style={{ height: 0, opacity: 0, overflow: "hidden" }}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          setSearchOpen(false);
+          searchButton.current?.focus();
+        }
+      }}
+    >
+      <div className="pt-2">
         <LookupForm
           grouped
           value={ip}
@@ -54,85 +96,49 @@ export default function IpPage() {
           }
         />
       </div>
-      <Card className="mt-3">
-        <CardContent>
-          <div className="examples lookup-history">
-            <span>
-              {history.entries.length ? t("最近查询") : t("推荐查询")}
-            </span>
-            {(history.entries.length
-              ? history.entries.map((entry) => entry.query)
-              : ["1.1.1.1", "8.8.8.8", "223.5.5.5"]
-            ).map((value) => (
-              <Badge key={value} variant="secondary" asChild>
-                <button
-                  type="button"
-                  className="cursor-pointer rounded-md px-2 py-1 h-auto hover:bg-accent"
-                  onClick={() =>
-                    navigate(`/network/ip/${encodeURIComponent(value)}`)
-                  }
-                >
-                  <IpText ip={value} link={false} />
-                </button>
-              </Badge>
-            ))}
-          </div>
-          {cached && (
-            <p className="small muted">
-              {t("已保存的查询结果 ·")}{" "}
-              {new Date(cached.savedAt).toLocaleString(locale)}
-              {t("，点击查询可更新")}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+    </div>
+  );
+  const recent = (
+    <div className="ip-recent-row">
+      <div className="ip-recent">
+        <span>{history.entries.length ? t("最近查询") : t("推荐查询")}</span>
+        {(history.entries.length
+          ? history.entries.map((entry) => entry.query)
+          : ["1.1.1.1", "8.8.8.8", "223.5.5.5"]
+        )
+          .slice(0, 6)
+          .map((value) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() =>
+                value === ip
+                  ? void query.refetch()
+                  : navigate(`/network/ip/${encodeURIComponent(value)}`)
+              }
+            >
+              <IpText ip={value} link={false} />
+            </button>
+          ))}
+      </div>
+      {searchToggle}
+    </div>
+  );
+  return (
+    <div className="lookup-page ip-detail-page">
+      <h1 className="sr-only">{t("IP 信息查询")}</h1>
       <ErrorNotice error={query.error} />
-      {query.isFetching && (
-        <p className="status-line">
-          <Pending>{t("正在查询多源 IP 情报…")}</Pending>
-        </p>
+      {query.data ? (
+        <IpDetails data={query.data} search={search} recent={recent} />
+      ) : (
+        <div className="ip-dossier-top">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">{t("IP 信息查询")}</span>
+          </div>
+          {search}
+          {recent}
+        </div>
       )}
-      {data && <IpDetails data={data} />}
-      <LookupFaq
-        items={[
-          {
-            title: t("支持哪些 IP 地址？"),
-            text: t(
-              "支持公网 IPv4 和 IPv6。请只输入地址，不要附加协议、端口或路径；私有、回环及保留地址无法进行公网归属查询。\n\n例如 1.1.1.1、8.8.8.8；IPv6 可直接粘贴完整地址。192.168.x.x、10.x.x.x 和 127.0.0.1 等地址只在本地网络中有意义，不能据此判断公网位置。",
-            ),
-          },
-          {
-            title: t("为什么多个数据源给出的归属地不同？"),
-            text: t(
-              "各数据源的采集方式和更新时间不同。IP 归属地是网络地址的估计位置，不等同于设备的精确位置；运营商名称也可能显示机房或上游网络。\n\n判断时可以对比国家、城市、运营商和 ASN，而不要只看城市名称。代理、移动网络、云服务器及地址重新分配都可能使数据库记录与实际使用位置存在差异。",
-            ),
-          },
-          {
-            title: t("ASN、运营商和地址类型分别是什么？"),
-            text: t(
-              "ASN 标识负责路由该地址的自治系统；运营商表示数据源记录的网络组织；IPv4、IPv6 表示地址协议版本。\n\n同一运营商可能拥有多个 ASN，同一 ASN 也可能覆盖多个城市。注册组织、路由运营方和最终使用者并不总是同一个主体，因此组织名称不等于设备或用户身份。",
-            ),
-          },
-          {
-            title: t("为什么风险评分或部分字段没有显示？"),
-            text: t(
-              "只有数据源实际返回的信息才会展示。缺少风险评分、经纬度或代理标记，不表示该 IP 安全，也不表示它一定存在风险。\n\n评分和 VPN、代理等标记属于特定数据源的判断，不能作为单独的安全结论。字段缺失可能是数据源未提供、查询失败或服务未配置；不要把“未知”解读成“否”或零风险。",
-            ),
-          },
-          {
-            title: t("如何查看当前网络的出口 IP？"),
-            text: t(
-              "首页的 IPv4、IPv6 卡片会通过浏览器检测当前出口。需要查看详细归属信息时，可以点击地址进入 IP 信息页。\n\n使用代理或分流时，不同网站可能走不同出口。可结合首页的网站分流结果，选择需要查询的具体地址。",
-            ),
-          },
-          {
-            title: t("最近查询保存在哪里，如何更新？"),
-            text: t(
-              "本浏览器保留最近 10 条成功查询及结果，点击历史直接读取缓存，再点击“查询”可更新。\n\n历史保存在当前浏览器的 localStorage，不会在设备间同步。清除本站数据可移除本地历史；查询地址也可能出现在地址栏与浏览器历史中。",
-            ),
-          },
-        ]}
-      />
     </div>
   );
 }

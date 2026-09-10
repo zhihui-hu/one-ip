@@ -77,9 +77,7 @@ export function AppUpdateChecker() {
         window.location.replace(url.toString());
       }}
       title={t("新版本，等你来体验")}
-      description={t(
-        "忙完手头的事，再来看看新版吧。更新前记得保存未提交的内容。",
-      )}
+      description={t("准备好了，就来体验新版吧。")}
       updateLabel={t("体验新版")}
       updatingLabel={t("正在为你切换…")}
     />

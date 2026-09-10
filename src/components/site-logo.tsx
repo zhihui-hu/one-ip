@@ -20,6 +20,14 @@ export function SiteLogo({ src, website }: { src?: string; website?: string }) {
   const proxyHost = icon?.match(
     /^https:\/\/icons\.duckduckgo\.com\/ip3\/([^/?#]+)\.ico$/,
   )?.[1];
+  // Match visible logo sizes: OpenAI's favicon has more built-in whitespace.
+  const logoHost = proxyHost ?? iconHost;
+  const logoScale =
+    logoHost === "openai.com" || logoHost === "chatgpt.com"
+      ? 1.2
+      : logoHost === "cloudflare.com" || logoHost === "www.deepseek.com"
+        ? 1
+        : 0.9;
   const imageSrc = proxyHost
     ? `${import.meta.env.VITE_API_BASE_URL ?? "/api"}/icons/${encodeURIComponent(proxyHost)}`
     : icon;
@@ -29,6 +37,7 @@ export function SiteLogo({ src, website }: { src?: string; website?: string }) {
         src={imageSrc}
         alt=""
         referrerPolicy="no-referrer"
+        style={{ transform: `scale(${logoScale})` }}
         className={`rounded-sm object-contain${githubIcon ? " dark:brightness-0 dark:invert" : ""}`}
       />
       <AvatarFallback className="rounded-sm">
