@@ -1,4 +1,5 @@
 {
+  "显示本次探测资源的 HTTP 响应耗时；未连通表示本次探测失败。点击平台可查看详情并打开官网。": "Shows HTTP response time for this probe. Unreachable means this probe failed. Click a platform for details and its website.",
   "评分": "Score",
   "验证评分无效，请重新验证。": "Invalid verification score. Please try again.",
   "本次评分低于通过阈值。": "This score is below the passing threshold.",

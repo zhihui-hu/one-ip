@@ -109,28 +109,18 @@ export function HomePage() {
         queryFn: ({ signal }: { signal: AbortSignal }) =>
           getBrowserIp(4, signal),
       },
-      {
-        queryKey: ["browser-ip", 6],
-        queryFn: ({ signal }: { signal: AbortSignal }) =>
-          getBrowserIp(6, signal),
-      },
     ].map((probe) => ({ retry: false, staleTime: 60_000, ...probe })),
   });
   const cards = probes.flatMap((query, index) => {
     // Only dedicated probes belong in the overview; per-site routes stay in SplitResults.
-    if (index === 2 && !query.data) return [];
+    if (!query.data || query.data.ip.includes(":")) return [];
     if (index === 1 && query.data?.ip === probes[0].data?.ip) return [];
     return [
       {
         query,
         data: query.data,
-        version: index === 2 ? 6 : 4,
-        label:
-          index === 0
-            ? t("IPv4 · 国内探测")
-            : index === 1
-              ? t("IPv4 · 外部探测")
-              : t("IPv6 · 外部探测"),
+        version: 4,
+        label: index === 0 ? t("IPv4 · 国内探测") : t("IPv4 · 外部探测"),
       },
     ];
   });

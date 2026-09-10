@@ -121,7 +121,7 @@ export function PlatformSummary() {
                       color: query.isPending
                         ? "var(--muted-foreground)"
                         : latency == null || latency < 0
-                          ? "var(--muted-foreground)"
+                          ? "var(--danger)"
                           : latency < 100
                             ? "var(--success)"
                             : latency < 400
@@ -135,7 +135,7 @@ export function PlatformSummary() {
                       query.data?.status === "restricted" ? (
                         t("检测受限")
                       ) : (
-                        t("未确认")
+                        t("未连通")
                       )
                     ) : (
                       `${latency} ms`
@@ -147,7 +147,7 @@ export function PlatformSummary() {
           </div>
           <p className="home-note mt-3">
             {t(
-              "显示探测资源的 HTTP 响应耗时；检测受限或未确认不代表网站打不开。点击平台可查看说明并打开官网。",
+              "显示本次探测资源的 HTTP 响应耗时；未连通表示本次探测失败。点击平台可查看详情并打开官网。",
             )}
           </p>
         </CardContent>

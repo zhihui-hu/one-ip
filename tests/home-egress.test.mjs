@@ -49,14 +49,14 @@ test("matching domestic and external IPv4 produces one card", () => {
 });
 test("failed domestic probe never promotes a proxy or routed IPv6 to local egress", () => {
   const result = render([failed, { data: ipv4 }, failed], [{ data: ipv6 }]);
-  assert.ok(result.includes("未获取到 IPv"));
+  assert.ok(!result.includes("未获取到 IPv"));
   assert.ok(result.includes("IPv4 · 外部探测"));
   assert.ok(!result.includes(ipv6.ip));
 });
-test("only a dedicated IPv6 result gets an overview card", () => {
+test("IPv6 and failed probes do not create overview cards", () => {
   const result = render([{ data: ipv4 }, failed, { data: ipv6 }], []);
-  assert.ok(result.includes("IPv6 · 外部探测"));
-  assert.ok(result.includes(ipv6.ip));
+  assert.ok(!result.includes("IPv6 · 外部探测"));
+  assert.ok(!result.includes(ipv6.ip));
 });
 
 test("home retest cancels previous runs before resetting only home query families", async () => {
