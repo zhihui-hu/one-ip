@@ -1694,10 +1694,18 @@ body {
 }
 @media (min-width: 64rem) {
   .home-ip-overview:not(:has(> :nth-child(3))) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    align-items: stretch;
+  }
+  .home-ip-overview:not(:has(> :nth-child(3))) > .home-primary-card {
+    flex: 0 0 24rem;
+    min-width: 24rem;
+    height: auto;
   }
   .home-ip-overview:not(:has(> :nth-child(3))) > .home-connectivity-card {
-    grid-column: auto;
+    flex: 1;
+    min-width: 0;
+    height: auto;
   }
 }
 .connectivity-table table {
