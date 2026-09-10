@@ -156,6 +156,17 @@ export function AppLayout() {
           ·{" "}
           <UnderlineHover asChild>
             <Link to="/network/whois/">{t("WHOIS 查询")}</Link>
+          </UnderlineHover>{" "}
+          ·{" "}
+          <UnderlineHover asChild>
+            <a
+              href="https://github.com/zhihui-hu/one-ip"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 align-middle"
+            >
+              GitHub
+            </a>
           </UnderlineHover>
         </footer>
       </div>
