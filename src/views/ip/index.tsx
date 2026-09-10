@@ -1,34 +1,21 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { LookupFaq } from "@/components/lookup-faq";
 import { LookupForm } from "@/components/lookup-form";
 import {
   PageHeading,
-  ToolCard,
-  Facts,
   IpText,
-  DataTable,
   ErrorNotice,
   Pending,
 } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLookupHistory } from "@/hooks/use-lookup-history";
 import { t, locale } from "@/i18n";
 import type { Lookup } from "@/lib/types";
-import type { Geo } from "@/lib/types";
 import { useQuery } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
 import { lookupIp } from "./api";
-import { LocationMap } from "./location-map";
+import { IpDetails } from "./details";
 
-const columns: ColumnDef<Geo>[] = [
-  { accessorKey: "source", header: t("数据源") },
-  { accessorKey: "country", header: t("国家 / 地区") },
-  { accessorKey: "city", header: t("城市") },
-  { accessorKey: "isp", header: t("运营商") },
-  { accessorKey: "asn", header: "ASN" },
-];
 export default function IpPage() {
   const { ip = "" } = useParams();
   const navigate = useNavigate();
@@ -39,7 +26,7 @@ export default function IpPage() {
     enabled: !!ip,
     initialData: cached?.data,
     initialDataUpdatedAt: cached?.savedAt,
-    staleTime: Infinity,
+    staleTime: 300_000,
     queryFn: async ({ signal }) => {
       const result = await lookupIp(ip, signal);
       history.save(ip, result);
@@ -49,7 +36,7 @@ export default function IpPage() {
   });
   const data = query.data;
   return (
-    <div className="lookup-page">
+    <div className="lookup-page ip-detail-page">
       <div className="lookup-search-card">
         <PageHeading
           title={t("IP 信息查询")}
@@ -105,128 +92,7 @@ export default function IpPage() {
           <Pending>{t("正在查询多源 IP 情报…")}</Pending>
         </p>
       )}
-      {data && (
-        <div className="lookup-results">
-          <div className="result-title">
-            <h2>
-              <IpText ip={data.geo.ip} link={false} />
-            </h2>
-            <Button variant="outline" asChild>
-              <Link
-                to={`/network/ping/?host=${encodeURIComponent(data.geo.ip)}`}
-              >
-                {t("全球延迟测试")}
-              </Link>
-            </Button>
-          </div>
-          <div className="ip-result-grid">
-            {data.risk.available && (
-              <ToolCard title={t("风险评分")}>
-                <div className="gauge-score">
-                  {data.risk.available ? (data.risk.fraud_score ?? "—") : "—"}
-                </div>
-                <p className="small muted">
-                  {data.risk.available
-                    ? t("{0} · 风险越低越好", [data.risk.source])
-                    : data.risk.reason}
-                </p>
-              </ToolCard>
-            )}
-            {data.risk.available && (
-              <ToolCard title={t("使用场景 / 类型")}>
-                <Facts
-                  rows={[
-                    [t("IP 属性"), data.risk.connection_type ?? t("未提供")],
-                    [
-                      "VPN",
-                      data.risk.vpn == null
-                        ? t("未知")
-                        : data.risk.vpn
-                          ? t("是")
-                          : t("否"),
-                    ],
-                    [
-                      t("代理"),
-                      data.risk.proxy == null
-                        ? t("未知")
-                        : data.risk.proxy
-                          ? t("是")
-                          : t("否"),
-                    ],
-                  ]}
-                />
-              </ToolCard>
-            )}
-            <ToolCard title={t("ASN / 运营商")}>
-              <Facts
-                rows={[
-                  ["ASN", data.geo.asn],
-                  [t("运营商"), data.geo.isp],
-                  [t("时区"), data.geo.timezone],
-                ]}
-              />
-            </ToolCard>
-            <ToolCard title={t("技术指标")}>
-              <Facts
-                rows={[
-                  [t("地址类型"), data.geo.ip.includes(":") ? "IPv6" : "IPv4"],
-                  [t("经度"), data.geo.longitude],
-                  [t("纬度"), data.geo.latitude],
-                ]}
-              />
-            </ToolCard>
-            {data.risk.available && (
-              <ToolCard title={t("IP 情报（威胁指标）")}>
-                <Facts
-                  rows={[
-                    [
-                      "Tor",
-                      data.risk.tor == null
-                        ? t("未知")
-                        : data.risk.tor
-                          ? t("是")
-                          : t("否"),
-                    ],
-                    [
-                      t("机器人"),
-                      data.risk.bot_status == null
-                        ? t("未知")
-                        : data.risk.bot_status
-                          ? t("是")
-                          : t("否"),
-                    ],
-                    [
-                      t("近期滥用"),
-                      data.risk.recent_abuse == null
-                        ? t("未知")
-                        : data.risk.recent_abuse
-                          ? t("是")
-                          : t("否"),
-                    ],
-                  ]}
-                />
-              </ToolCard>
-            )}
-            {data.rdap && (
-              <ToolCard title={t("注册信息（RDAP）")}>
-                <Button variant="outline" asChild>
-                  <Link to={`/network/whois/?q=${encodeURIComponent(ip)}`}>
-                    {t("查看完整注册信息")}
-                  </Link>
-                </Button>
-              </ToolCard>
-            )}
-          </div>
-          <LocationMap geo={data.geo} />
-          <ToolCard title={t("地理位置 · 多源对比")}>
-            <DataTable
-              columns={columns}
-              data={data.sources}
-              empty={t("未获取到归属地数据")}
-            />
-          </ToolCard>
-        </div>
-      )}
+      {data && <IpDetails data={data} />}
       <LookupFaq
         items={[
           {

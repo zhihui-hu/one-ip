@@ -74,8 +74,8 @@ export async function probe(url: string, signal?: AbortSignal) {
         mode: "no-cors",
         cache: "no-store",
         signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(2500)])
-          : AbortSignal.timeout(2500),
+          ? AbortSignal.any([signal, AbortSignal.timeout(1000)])
+          : AbortSignal.timeout(1000),
       },
       "opaque",
     );

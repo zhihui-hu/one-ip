@@ -79,6 +79,10 @@ export async function detectSite(
   site: Site,
   signal?: AbortSignal,
 ): Promise<Geo> {
+  signal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(1000)])
+    : AbortSignal.timeout(1000);
+  signal.throwIfAborted();
   let geo: Geo;
   if (site.method === "cftrace" && site.domain)
     geo = await trace(site.domain, signal);

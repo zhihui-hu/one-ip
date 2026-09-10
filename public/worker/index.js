@@ -1,6 +1,10 @@
+import { getAiStatus } from "./ai-status.js";
 import { challengeConfig, verifyChallenge } from "./challenges.js";
 import { cfGeo, geoIp, secondaryGeo, riskIp } from "./geo.js";
-import { HttpError, inputJson, json, publicIp, upstream } from "./http.js";
+import { HttpError, inputJson, json, publicIp } from "./http.js";
+import { siteIcon } from "./icons.js";
+import { ipNetwork } from "./ip-network.js";
+import { ipType } from "./ip-type.js";
 import { startPing, pingResult, pingNodes } from "./ping.js";
 import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
@@ -13,7 +17,7 @@ export default {
     if (url.pathname === "/worker" || url.pathname.startsWith("/worker/"))
       return new Response("Not found", { status: 404 });
     if (!url.pathname.startsWith("/api/")) {
-      if (env.APP_ENV === "dev") {
+      if (env.LOCAL_DEV === "true") {
         url.hostname = "127.0.0.1";
         url.port = "5137";
         url.protocol = "http:";
@@ -44,24 +48,32 @@ export default {
         throw new HttpError(405, "不支持此请求方法");
       if (path === "/browser/challenges")
         return json(challengeConfig(env, url.hostname));
+      if (path.startsWith("/icons/"))
+        return await siteIcon(decodeURIComponent(path.slice(7)));
       if (path === "/browser/challenges/verify")
         return json(
           await verifyChallenge(await inputJson(request), env, url.hostname),
         );
       if (path === "/me") {
         const data = cfGeo(request);
-        if (!data.ip || key === "local" || env.APP_ENV === "dev")
+        if (!data.ip || key === "local" || env.LOCAL_DEV === "true")
           throw new HttpError(
             503,
             "本地环境没有真实访客 IP，请部署 Worker 后检测；不会使用示例 IP。",
           );
         return json(data);
       }
+      if (path.startsWith("/ip-type/"))
+        return await ipType(decodeURIComponent(path.slice(9)), url.origin);
       if (path.startsWith("/geoip/"))
         return json(await geoIp(publicIp(decodeURIComponent(path.slice(7)))));
       if (path.startsWith("/iprisk/"))
         return json(
           await riskIp(publicIp(decodeURIComponent(path.slice(8))), env),
+        );
+      if (path.startsWith("/ip/network/"))
+        return json(
+          await ipNetwork(publicIp(decodeURIComponent(path.slice(12)))),
         );
       if (path.startsWith("/ip/lookup/")) {
         const ip = publicIp(decodeURIComponent(path.slice(11)));
@@ -105,7 +117,7 @@ export default {
             503,
             "该服务未提供已接入的公开状态接口，请查看官方状态页",
           );
-        const data = await upstream(service.url);
+        const data = await getAiStatus(service);
         return json({
           ...normalizeStatus(data),
           fetchedAt: new Date().toISOString(),

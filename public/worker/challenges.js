@@ -23,7 +23,7 @@ function settings(env, id) {
     .filter(Boolean);
   // Development hostnames must never authorize a production deployment.
   const safeHosts =
-    env.APP_ENV === "dev"
+    env.LOCAL_DEV === "true"
       ? hostnames
       : hostnames.filter(
           (host) => !["localhost", "127.0.0.1", "[::1]", "::1"].includes(host),

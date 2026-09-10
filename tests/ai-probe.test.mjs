@@ -25,14 +25,14 @@ test("Gemini probes its cross-origin robots resource instead of the missing icon
   try { assert.equal((await probeAiDomain("gemini.google.com")).status,"response"); }
   finally { globalThis.fetch = original; }
 });
-test("a transient failure is retried and persistent failures remain unconfirmed", async () => {
+test("failed probes are skipped without retries and cancellation is preserved", async () => {
   const original = globalThis.fetch;
   let calls=0;
   globalThis.fetch = async () => { if (++calls === 1) throw new TypeError("network"); return new Response("ip=1.1.1.1\ncolo=SIN"); };
   try {
-    assert.equal((await probeAiDomain("www.perplexity.ai")).status,"response"); assert.equal(calls,2);
+    assert.equal((await probeAiDomain("www.perplexity.ai")).status,"unknown"); assert.equal(calls,1);
     globalThis.fetch = async () => { throw new TypeError("blocked"); };
-    const result = await probeAiDomain("www.perplexity.ai"); assert.equal(result.status,"unknown"); assert.equal(result.samples.length,2);
+    const result = await probeAiDomain("www.perplexity.ai"); assert.equal(result.status,"unknown"); assert.equal(result.samples.length,1);
     const controller=new AbortController(); controller.abort(); await assert.rejects(probeAiDomain("gemini.google.com",controller.signal), {name:"AbortError"});
   } finally { globalThis.fetch = original; }
 });

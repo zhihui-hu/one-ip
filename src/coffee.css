@@ -1376,30 +1376,6 @@ body {
   background: color-mix(in oklch, var(--primary) 12%, var(--card));
   color: var(--primary);
 }
-.home-shortcuts {
-  margin-top: 16px;
-}
-.home-shortcuts h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-.home-shortcuts > div {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 10px;
-}
-.home-shortcuts a {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px;
-  background: var(--card);
-  border-radius: 10px;
-  font-size: 0.85rem;
-}
-.home-shortcuts a:hover {
-  background: var(--accent);
-}
 
 .tool-subnav a {
   display: inline-flex;
@@ -2002,18 +1978,29 @@ body {
   animation-duration: 1s;
 }
 
-/* Consistent interactive text on the home dashboard. */
-.home-page a,
-.home-page button,
-.home-page summary {
+/* Reserve dashboard accent color for the primary egress address. */
+.home-page .ip-text {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.home-page .home-primary-card .ip-text {
+  color: var(--primary);
+  font-weight: inherit;
+}
+.home-page a.small {
+  color: var(--muted-foreground);
+}
+.home-page
+  :is(a, button, summary):not([data-slot="button"]):is(:hover, :focus-visible) {
   color: var(--primary);
 }
-.home-page :is(a, button, summary):is(:hover, :focus-visible) {
+.home-page
+  :is(a, button, summary):not([data-slot="button"]):not(.underline-hover):is(
+    :hover,
+    :focus-visible
+  ) {
   text-decoration: underline;
   text-underline-offset: 4px;
-}
-.home-page .underline-hover:is(:hover, :focus-visible) {
-  text-decoration: none;
 }
 .home-page button:disabled {
   text-decoration: none;
@@ -2250,61 +2237,110 @@ body {
   margin-top: 10px;
   color: var(--subtle);
 }
-.home-page .home-shortcuts h2 {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--subtle);
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 4px;
 }
 .home-page .home-shortcuts a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px 8px;
+  border-radius: 6px;
+  color: var(--foreground);
   font-size: 12px;
-  padding: 9px 12px;
-  background: transparent;
+  text-decoration: none;
+  transition: background-color 150ms;
+}
+.shortcut-icon {
+  display: flex;
+  flex: none;
+  color: var(--muted-foreground);
+}
+.shortcut-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.75;
+}
+.shortcut-label {
+  flex: 1;
+}
+.shortcut-arrow {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  color: var(--subtle);
+}
+.home-page .home-shortcuts a:is(:hover, :focus-visible) {
+  background: var(--muted);
+  color: var(--foreground);
+  text-decoration: none;
+}
+@media (min-width: 48rem) {
+  .shortcut-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 .desktop-brand {
   display: none;
 }
 @media (min-width: 48.001rem) {
   .coffee-nav {
-    padding: 7px 10px;
-    gap: 16px;
-    margin-bottom: 20px;
-    border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
-    border-radius: 14px;
+    padding: 0;
+    gap: 32px;
+    margin-bottom: 24px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
   }
   .coffee-nav .site-home-link {
     display: flex;
-    width: auto;
-    gap: 8px;
-    padding: 0 8px 0 0;
-    border-radius: 0;
+    width: 32px;
+    height: 40px;
+    padding: 0;
   }
   .coffee-nav .site-home-link img {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
-  .desktop-brand {
-    display: inline;
-    white-space: nowrap;
-    font-size: 13px;
-    font-weight: 650;
-    color: var(--foreground);
+  .coffee-nav .nav-tabs-scroll {
+    border-radius: 0;
   }
   .coffee-nav [role="tablist"] {
-    gap: 4px;
+    height: 40px;
+    gap: 24px;
+    border-radius: 0;
   }
   .coffee-nav [role="tab"] {
-    height: 36px;
-    padding: 0 13px;
+    height: 40px;
+    padding: 0 2px;
+    border-radius: 0;
     font-size: 13px;
-    gap: 6px;
+    font-weight: 500;
+    background: transparent;
+  }
+  .coffee-nav [role="tab"] svg {
+    display: none;
+  }
+  .coffee-nav [role="tab"]:hover {
+    color: var(--foreground);
   }
   .coffee-nav [role="tab"][data-state="active"] {
     color: var(--primary);
-    font-weight: 650;
+    font-weight: 600;
   }
   .coffee-nav [role="tablist"] > span {
-    background: color-mix(in srgb, var(--primary) 9%, var(--card));
-    border-radius: 9px;
+    display: none;
+  }
+  .coffee-nav .desktop-preferences {
+    gap: 4px;
+  }
+  .coffee-nav .desktop-preferences button {
+    width: 32px;
+    height: 32px;
   }
 }
 @media (max-width: 48rem) {
@@ -2421,7 +2457,9 @@ body {
 }
 .page-help-alert [data-slot="alert-description"] {
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.6;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 @media (max-width: 48rem) {
   .service-status-page .toolbar {
@@ -2476,5 +2514,75 @@ body {
 @media (max-width: 48rem) {
   .coffee-nav .desktop-preferences {
     display: none;
+  }
+}
+
+.ip-dossier {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+.ip-dossier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.ip-reputation-badge {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 12px;
+}
+.ip-reputation-badge strong {
+  font-size: 28px;
+  line-height: 1.1;
+}
+.ip-reputation-badge small {
+  color: var(--muted-foreground);
+}
+.ip-dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ip-dossier [data-slot="card"] {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  --card-spacing: 16px;
+}
+.ip-dossier .facts dd {
+  overflow-wrap: anywhere;
+}
+.ip-map-disclosure summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.ip-detail-page > [data-slot="card"] {
+  background: transparent;
+  --card-spacing: 6px;
+}
+@media (max-width: 40rem) {
+  .ip-dossier-grid {
+    grid-template-columns: 1fr;
+  }
+  .ip-dossier-head {
+    padding: 12px;
+    gap: 8px;
+  }
+  .ip-reputation-badge {
+    padding: 6px 10px;
   }
 }

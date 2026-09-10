@@ -119,19 +119,12 @@ pnpm exec wrangler login
 make deploy
 ```
 
-部署测试环境：
+| 环境     | Worker 名称      | 命令              |
+| -------- | ---------------- | ----------------- |
+| 生产     | `one-ip`         | `make deploy`     |
+| 本地调试 | `one-ip`（本地） | `make worker-dev` |
 
-```bash
-make deploy-stage
-```
-
-| 环境     | Worker 名称    | 命令                |
-| -------- | -------------- | ------------------- |
-| 生产     | `one-ip`       | `make deploy`       |
-| 测试     | `one-ip-stage` | `make deploy-stage` |
-| 本地开发 | `one-ip-dev`   | `make worker-dev`   |
-
-配置文件为 [`wrangler.toml`](wrangler.toml)。`make deploy` 和 `make deploy-stage` 会先按上海时间更新版本，再构建与部署；GitHub Actions 使用仓库中的版本。
+配置文件为 [`wrangler.toml`](wrangler.toml)。`make deploy` 会先按上海时间更新版本，再构建与部署；GitHub Actions 使用仓库中的版本。
 
 自定义域名及生产密钥需在对应 Worker 上配置。从旧 Worker 更名到 `one-ip` 不会迁移其密钥和域名，也不会删除旧项目。
 
@@ -198,7 +191,7 @@ hostname 只填写主机名，不含协议或端口，并与验证码服务商�
 
 ### 生产配置
 
-`.dev.vars` 仅供本地使用，不随部署上传。公开 site key 和 hostname 列表放在 [`wrangler.toml`](wrangler.toml) 对应环境的 `vars` 中；敏感值使用 Worker Secrets，例如：
+`.dev.vars` 仅供本地使用，不随部署上传。公开 site key 和 hostname 列表放在 [`wrangler.toml`](wrangler.toml) `[vars]` 中；敏感值使用 Worker Secrets，例如：
 
 ```bash
 pnpm exec wrangler secret put GLOBALPING_TOKEN --env=""
@@ -207,7 +200,7 @@ pnpm exec wrangler secret put TURNSTILE_SECRET --env=""
 pnpm exec wrangler secret put RECAPTCHA_SECRET --env=""
 ```
 
-仅设置实际使用的密钥。测试环境将 `--env=""` 改为 `--env stage`。生产 hostname 不应包含 `localhost` 或 `127.0.0.1`；不要将密钥放入 `VITE_*`，这些值会进入前端产物。
+仅设置实际使用的密钥。生产 hostname 不应包含 `localhost` 或 `127.0.0.1`；不要将密钥放入 `VITE_*`，这些值会进入前端产物。
 
 ## 🎯 使用说明
 
@@ -281,9 +274,9 @@ wrangler.toml          Worker 与静态资源配置
 
 ### 项目内管理正式环境密钥
 
-- 公开配置：`wrangler.toml` 的 `[vars]`（正式）或 `[env.stage.vars]`（测试）填写 `*_SITE_KEY` 与 `*_HOSTNAMES`。
-- 密钥：将 `.secrets.example` 复制为 `.secrets.production.env` 或 `.secrets.stage.env`，填写对应环境的 Secret；这些文件已被 Git 忽略。
-- `make deploy` / `make deploy-stage` 会先检查本地配置，构建部署后通过标准输入上传非空密钥，不在日志中显示密钥值，也不删除已有的其他 Secret。
+- 公开配置：`wrangler.toml` 的 `[vars]`（生产）填写 `*_SITE_KEY` 与 `*_HOSTNAMES`。
+- 密钥：将 `.secrets.example` 复制为 `.secrets.production.env`，填写对应环境的 Secret；这些文件已被 Git 忽略。
+- `make deploy` 会先检查本地配置，构建部署后通过标准输入上传非空密钥，不在日志中显示密钥值，也不删除已有的其他 Secret。
 - 首次自动生成的正式配置来自现有本地配置，请确认密钥本身支持正式域名；验证码平台后台也必须允许这些域名。
 - `.dev.vars` 仍仅供本地开发使用。更改它不会同步修改正式密钥文件。
 - 这里只接入本地 Make 部署。GitHub Actions 不会读取未提交的文件；CI 部署需要单独使用 GitHub Secrets，或者保留已上传的 Worker Secrets。
@@ -295,3 +288,5 @@ node scripts/sync-worker-secrets.mjs production --check
 ```
 
 部署与 Secrets 同步是两个步骤；如果同步失败，命令会报错，已部署的代码不会自动回滚。修正后可单独执行 `node scripts/sync-worker-secrets.mjs production` 重试密钥同步。
+
+Wrangler 仅保留默认生产配置（`APP_ENV=prod`，Worker 名称 `one-ip`），不设置 dev/stage 命名环境。本地 `pnpm worker:dev` 使用同一配置，通过命令行临时设置 `LOCAL_DEV=true` 对接 Vite；本地密钥统一放在 `.dev.vars`，该标记不会写入生产配置。

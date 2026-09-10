@@ -19,10 +19,8 @@ import { useQuery } from "@tanstack/react-query";
 export function QuickChecks() {
   const navigate = useNavigate();
   const [target, setTarget] = useState("");
-  const [started, setStarted] = useState(false);
   const dns = useQuery({
     queryKey: ["home-dns"],
-    enabled: started,
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -38,7 +36,6 @@ export function QuickChecks() {
   });
   const rtc = useQuery({
     queryKey: ["home-webrtc"],
-    enabled: started,
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
@@ -56,33 +53,26 @@ export function QuickChecks() {
               variant="secondary"
               disabled={busy}
               onClick={() => {
-                if (started) {
-                  void dns.refetch();
-                  void rtc.refetch();
-                } else setStarted(true);
+                void dns.refetch();
+                void rtc.refetch();
               }}
             >
-              {busy ? (
-                <Pending>{t("检测中…")}</Pending>
-              ) : started ? (
-                t("重新检测")
-              ) : (
-                t("一键检测")
-              )}
+              {busy ? <Pending>{t("检测中…")}</Pending> : t("重新检测")}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           <div className="flex justify-between gap-3 py-2 text-sm">
             <UnderlineHover asChild>
-              <Link className="shrink-0 text-primary" to="/network/dns">
+              <Link
+                className="shrink-0 text-muted-foreground"
+                to="/network/dns"
+              >
                 {t("DNS 出口")}
               </Link>
             </UnderlineHover>
-            <span className="min-w-0">
-              {!started ? (
-                t("未检测")
-              ) : dns.isFetching ? (
+            <span className="min-w-0 text-muted-foreground">
+              {dns.isFetching ? (
                 <Pending>{t("采样中…")}</Pending>
               ) : dns.data ? (
                 <IpText ip={dns.data.ip} />
@@ -93,14 +83,15 @@ export function QuickChecks() {
           </div>
           <div className="flex justify-between gap-3 py-2 text-sm">
             <UnderlineHover asChild>
-              <Link className="shrink-0 text-primary" to="/browser/privacy">
+              <Link
+                className="shrink-0 text-muted-foreground"
+                to="/browser/privacy"
+              >
                 WebRTC
               </Link>
             </UnderlineHover>
-            <span className="min-w-0">
-              {!started ? (
-                t("未检测")
-              ) : rtc.isFetching ? (
+            <span className="min-w-0 text-muted-foreground">
+              {rtc.isFetching ? (
                 <Pending>{t("采样中…")}</Pending>
               ) : rtc.data ? (
                 <CompactText text={rtc.data.verdict} />

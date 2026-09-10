@@ -76,10 +76,12 @@ export function AppUpdateChecker() {
         url.searchParams.set("t", Date.now().toString());
         window.location.replace(url.toString());
       }}
-      title={t("网页有更新")}
-      description={t("刷新即可加载新版界面，请先保存未提交的内容。")}
-      updateLabel={t("刷新页面")}
-      updatingLabel={t("正在刷新…")}
+      title={t("新版本，等你来体验")}
+      description={t(
+        "忙完手头的事，再来看看新版吧。更新前记得保存未提交的内容。",
+      )}
+      updateLabel={t("体验新版")}
+      updatingLabel={t("正在为你切换…")}
     />
   );
 }

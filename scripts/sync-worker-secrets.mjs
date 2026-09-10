@@ -3,8 +3,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { parseEnv } from "node:util";
 
 const environment = process.argv[2];
-if (!["production", "stage"].includes(environment))
-  throw new Error("Specify production or stage");
+if (environment !== "production")
+  throw new Error("Only production is supported");
 const filename = `.secrets.${environment}.env`;
 if (!existsSync(filename))
   throw new Error(
@@ -29,8 +29,7 @@ if (!Object.keys(secrets).length)
     "No secrets configured; refusing to deploy an empty configuration",
   );
 const config = readFileSync("wrangler.toml", "utf8");
-const sectionName = environment === "production" ? "vars" : "env.stage.vars";
-const marker = `[${sectionName}]`;
+const marker = "[vars]";
 const section = config.split(marker)[1]?.split(/\n\s*\[/)[0] ?? "";
 for (const prefix of ["TURNSTILE", "RECAPTCHA"]) {
   const getValue = (key) =>
@@ -67,7 +66,7 @@ if (process.argv.includes("--check")) {
       "secret",
       "bulk",
       "--env",
-      environment === "production" ? "" : "stage",
+      "",
     ],
     {
       input: JSON.stringify(secrets),

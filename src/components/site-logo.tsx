@@ -17,10 +17,16 @@ export function SiteLogo({ src, website }: { src?: string; website?: string }) {
   const githubIcon =
     iconHost === "github.com" ||
     /\/github\.com\.ico(?:[?#]|$)/.test(icon ?? "");
+  const proxyHost = icon?.match(
+    /^https:\/\/icons\.duckduckgo\.com\/ip3\/([^/?#]+)\.ico$/,
+  )?.[1];
+  const imageSrc = proxyHost
+    ? `${import.meta.env.VITE_API_BASE_URL ?? "/api"}/icons/${encodeURIComponent(proxyHost)}`
+    : icon;
   return (
     <Avatar className="site-icon rounded-sm after:hidden" aria-hidden="true">
       <AvatarImage
-        src={icon}
+        src={imageSrc}
         alt=""
         referrerPolicy="no-referrer"
         className={`rounded-sm object-contain${githubIcon ? " dark:brightness-0 dark:invert" : ""}`}

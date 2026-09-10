@@ -51,7 +51,7 @@ test("config never exposes secrets and disables missing or mismatched host confi
   );
   assert.equal(
     challengeConfig(
-      { ...env, APP_ENV: "dev", TURNSTILE_HOSTNAMES: "localhost" },
+      { ...env, LOCAL_DEV: "true", TURNSTILE_HOSTNAMES: "localhost" },
       "localhost",
     )[0].configured,
     true,

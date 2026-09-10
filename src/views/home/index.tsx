@@ -1,23 +1,63 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { CountryFlag } from "@/components/country-flag";
-import { IpText, Pending } from "@/components/toolkit";
+import { ActionButton, IpText, Pending } from "@/components/toolkit";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
+import { endpoint } from "@/lib/network";
 import { BrowserSummary } from "@/views/browser/summary";
 import type { ProbeResult } from "@/views/link/api";
-import { skipToken, useQueries } from "@tanstack/react-query";
-import { getGeo, getBrowserIp } from "./api";
+import { skipToken, useQueries, useQueryClient } from "@tanstack/react-query";
+import {
+  Activity,
+  ArrowRight,
+  Fingerprint,
+  Globe2,
+  Network,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
+import { getGeo, getBrowserIp, getDomesticIp } from "./api";
 import { PlatformSummary } from "./platform-summary";
 import { QuickChecks } from "./quick-checks";
 import { SplitResults } from "./split-results";
 
 export function HomePage() {
   const mobile = useIsMobile();
+  const client = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = async () => {
+    setRefreshing(true);
+    const filters = {
+      predicate: (query: { queryKey: readonly unknown[] }) =>
+        [
+          "home-domestic-ip",
+          "browser-ip",
+          "split",
+          "geoip",
+          "home-ip-type",
+          "connectivity",
+          "connectivity-progress",
+          "ai-preview",
+          "service-status",
+          "home-dns",
+          "home-webrtc",
+          "webrtc-diagnostic",
+          "home-browser-fingerprint",
+        ].includes(String(query.queryKey[0])),
+    };
+    try {
+      await client.cancelQueries(filters);
+      await client.resetQueries(filters);
+    } finally {
+      setRefreshing(false);
+    }
+  };
   const connectivity = useQueries({
     queries: homeTargets.map((target) => ({
       queryKey: ["connectivity", target.url, 0],
@@ -49,17 +89,44 @@ export function HomePage() {
   useEffect(() => {
     document.title = t("概览 - IP 网络工具");
   }, []);
-  const primary = useQueries({
-    queries: ([4, 6] as const).map((version) => ({
-      queryKey: ["browser-ip", version],
-      queryFn: ({ signal }: { signal: AbortSignal }) =>
-        getBrowserIp(version, signal),
-      retry: false,
-      staleTime: 60_000,
-    })),
+  const probes = useQueries({
+    queries: [
+      {
+        queryKey: ["home-domestic-ip"],
+        queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
+      },
+      {
+        queryKey: ["browser-ip", 4],
+        queryFn: ({ signal }: { signal: AbortSignal }) =>
+          getBrowserIp(4, signal),
+      },
+      {
+        queryKey: ["browser-ip", 6],
+        queryFn: ({ signal }: { signal: AbortSignal }) =>
+          getBrowserIp(6, signal),
+      },
+    ].map((probe) => ({ ...probe, retry: false, staleTime: 60_000 })),
+  });
+  const cards = probes.flatMap((query, index) => {
+    // Only dedicated probes belong in the overview; per-site routes stay in SplitResults.
+    if (index > 0 && !query.data) return [];
+    if (index === 1 && query.data?.ip === probes[0].data?.ip) return [];
+    return [
+      {
+        query,
+        data: query.data,
+        version: index === 2 ? 6 : 4,
+        label:
+          index === 0
+            ? t("IPv4 · 国内探测")
+            : index === 1
+              ? t("IPv4 · 外部探测")
+              : t("IPv6 · 外部探测"),
+      },
+    ];
   });
   const ips = [
-    ...new Set(primary.flatMap((query) => (query.data ? [query.data.ip] : []))),
+    ...new Set(cards.flatMap(({ data }) => (data ? [data.ip] : []))),
   ];
   const geoQueries = useQueries({
     queries: ips.map((ip) => ({
@@ -70,37 +137,97 @@ export function HomePage() {
     })),
   });
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
+  const typeQueries = useQueries({
+    queries: ips.map((ip) => ({
+      queryKey: ["home-ip-type", ip, 2],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        endpoint<{
+          available: boolean;
+          hosting?: boolean;
+          mobile?: boolean;
+          proxy?: boolean;
+        }>(`/ip-type/${encodeURIComponent(ip)}?v=2`, { signal }),
+      staleTime: 3600_000,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })),
+  });
+  const typeByIp = new Map(ips.map((ip, index) => [ip, typeQueries[index]]));
   return (
     <div className="home-page">
-      <h1 className="sr-only">{t("网络概览")}</h1>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h1 className="text-sm font-semibold">{t("网络概览")}</h1>
+        <ActionButton
+          size="sm"
+          variant="outline"
+          busy={refreshing}
+          onClick={refresh}
+        >
+          {refreshing ? t("检测中...") : t("重新检测")}
+        </ActionButton>
+      </div>
       <div className="home-overview home-ip-overview">
-        {primary.map((query, index) => {
-          if (index === 1 && !query.isPending && !query.data) return null;
-          const geo = query.data
-            ? { ...query.data, ...geoByIp.get(query.data.ip)?.data }
+        {cards.map(({ query, data, version, label }, index) => {
+          const pending = !data && query.isPending;
+          const geo = data
+            ? { ...data, ...geoByIp.get(data.ip)?.data }
             : undefined;
+          const classification = data ? typeByIp.get(data.ip) : undefined;
+          const typeLabels =
+            classification?.isSuccess && classification.data?.available
+              ? [
+                  classification.data.hosting === true
+                    ? {
+                        label: t("机房 IP"),
+                        color:
+                          "bg-violet-500/10 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300",
+                      }
+                    : null,
+                  classification.data.mobile === true
+                    ? {
+                        label: t("移动网络"),
+                        color:
+                          "bg-sky-500/10 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300",
+                      }
+                    : null,
+                  classification.data.proxy === true
+                    ? {
+                        label: t("代理 / VPN / Tor"),
+                        color:
+                          "bg-amber-500/10 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300",
+                      }
+                    : null,
+                ].filter((item) => item !== null)
+              : [];
           const loading =
-            query.isPending ||
-            Boolean(query.data && geoByIp.get(query.data.ip)?.isPending);
+            pending || Boolean(data && geoByIp.get(data.ip)?.isPending);
           return (
             <Card key={index} className="home-primary-card">
               <CardContent className="primary-ip-block">
                 <div className="row-between eyebrow">
-                  <span>
-                    {t("当前出口 · IPv")}
-                    {index === 0 ? 4 : 6}
-                  </span>
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span>{label}</span>
+                    {typeLabels.map((type) => (
+                      <Badge
+                        key={type.label}
+                        variant="secondary"
+                        className={`h-4 px-1.5 text-[10px] font-medium tracking-normal ${type.color}`}
+                      >
+                        {type.label}
+                      </Badge>
+                    ))}
+                  </div>
                   <CountryFlag code={geo?.country_code} />
                 </div>
                 <div className="ip-value">
-                  {query.isPending ? (
+                  {pending ? (
                     <Pending>{t("加载中...")}</Pending>
                   ) : geo ? (
                     <IpText ip={geo.ip} />
                   ) : (
                     <span className="muted">
                       {t("未获取到 IPv")}
-                      {index === 0 ? 4 : 6}
+                      {version}
                     </span>
                   )}
                 </div>
@@ -121,13 +248,13 @@ export function HomePage() {
                           .join(" · ")}
                       </p>
                     </>
-                  ) : query.data ? (
+                  ) : data ? (
                     <div className="flex items-center justify-between gap-2 text-xs">
                       <span>{t("归属信息暂不可用")}</span>
                       <button
                         type="button"
                         className="shrink-0 text-primary"
-                        onClick={() => geoByIp.get(query.data!.ip)?.refetch()}
+                        onClick={() => geoByIp.get(data.ip)?.refetch()}
                       >
                         {t("重试")}
                       </button>
@@ -164,22 +291,39 @@ export function HomePage() {
       <PlatformSummary />
       <QuickChecks />
       <BrowserSummary />
-      <section className="home-shortcuts">
-        <h2>{t("快捷入口")}</h2>
-        <div>
-          {[
-            { path: "/network", label: t("网络检测") },
-            { path: "/browser", label: t("浏览器检测") },
-            { path: "/ai", label: t("AI 检测") },
-            { path: "/status", label: t("服务状态") },
-          ].map((tool) => (
-            <Link key={tool.path} to={tool.path}>
-              {tool.label}
-              <span aria-hidden="true">↗</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <Card className="home-shortcuts">
+        <CardHeader>
+          <CardTitle>{t("热门功能")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="shortcut-grid">
+            {[
+              { path: "/network/ip", label: t("IP 信息查询"), icon: Search },
+              { path: "/network/ping", label: t("全球 Ping"), icon: Activity },
+              { path: "/network/dns", label: t("DNS 出口"), icon: Network },
+              {
+                path: "/browser/privacy",
+                label: t("WebRTC 检测"),
+                icon: ShieldCheck,
+              },
+              {
+                path: "/browser/fingerprint",
+                label: t("浏览器指纹"),
+                icon: Fingerprint,
+              },
+              { path: "/network/whois", label: t("WHOIS 查询"), icon: Globe2 },
+            ].map((tool) => (
+              <Link key={tool.path} to={tool.path}>
+                <span className="shortcut-icon">
+                  <tool.icon aria-hidden="true" />
+                </span>
+                <span className="shortcut-label">{tool.label}</span>
+                <ArrowRight className="shortcut-arrow" aria-hidden="true" />
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

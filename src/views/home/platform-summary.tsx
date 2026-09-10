@@ -107,7 +107,7 @@ export function PlatformSummary() {
                   <UnderlineHover asChild>
                     <Link
                       to={`/ai/${platform.id}`}
-                      className="flex min-w-0 items-center gap-2 text-primary"
+                      className="flex min-w-0 items-center gap-2 text-foreground"
                       style={{ display: "flex" }}
                     >
                       <SiteLogo website={`https://${platform.domain}`} />
@@ -157,7 +157,7 @@ export function PlatformSummary() {
           <div className="row-between">
             <CardTitle>{t("服务状态")}</CardTitle>
             <UnderlineHover asChild>
-              <Link to="/status" className="small text-primary">
+              <Link to="/status" className="small muted">
                 {t("全部服务 ›")}
               </Link>
             </UnderlineHover>
@@ -182,7 +182,7 @@ export function PlatformSummary() {
                     <UnderlineHover asChild>
                       <Link
                         to={`/status?service=${service.id}`}
-                        className="flex min-w-0 items-center gap-2 text-primary"
+                        className="flex min-w-0 items-center gap-2 text-foreground"
                         style={{ display: "flex" }}
                       >
                         <SiteLogo src={service.icon} website={service.page} />

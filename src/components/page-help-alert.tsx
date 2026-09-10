@@ -67,13 +67,18 @@ function DismissibleHelp({ page, text }: { page: string; text: string }) {
   });
   if (dismissed) return null;
   return (
-    <Alert className="page-help-alert mb-3 border-0 py-2 pr-10" role="note">
-      <AlertDescription className="text-xs leading-5">{text}</AlertDescription>
+    <Alert
+      className="page-help-alert mb-3 flex items-start gap-2 border-0 py-2"
+      role="note"
+    >
+      <AlertDescription className="min-w-0 flex-1 text-xs leading-5">
+        {text}
+      </AlertDescription>
       <Button
         type="button"
         variant="ghost"
         size="icon-sm"
-        className="absolute right-1 top-1"
+        className="-mt-1 shrink-0"
         aria-label={t("关闭功能说明")}
         onClick={() => {
           setDismissed(true);

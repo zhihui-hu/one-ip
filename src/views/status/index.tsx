@@ -222,7 +222,13 @@ export default function StatusPage() {
         {sections.map(([label, items], index) => (
           <ToolCard
             key={label}
-            title={label}
+            title={
+              <span className="block truncate" title={label}>
+                {locale === "en"
+                  ? ["Issues", "Healthy", "Unknown"][index]
+                  : label}
+              </span>
+            }
             className={`service-summary-card summary-${index}`}
           >
             <div className="service-summary-number">

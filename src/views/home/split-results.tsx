@@ -215,7 +215,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 <UnderlineHover asChild>
                   <button
                     type="button"
-                    className="shrink-0 text-primary"
+                    className="shrink-0 text-muted-foreground"
                     onClick={() => {
                       setDetailName(null);
                       setDetailIp(geo.ip);
@@ -278,24 +278,28 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <IpText ip={detailIp ?? undefined} />
-            {rows
-              .filter((row) => row.geo?.ip === detailIp)
-              .map((row) => (
-                <div key={row.name} className="flex items-center gap-2 text-sm">
-                  <SiteLogo src={row.icon} />
-                  <UnderlineHover asChild>
+            <div className="flex flex-wrap gap-2">
+              {rows
+                .filter((row) => row.geo?.ip === detailIp)
+                .map((row) => (
+                  <Badge
+                    key={row.name}
+                    variant="secondary"
+                    className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground [&_.site-icon]:size-3.5"
+                    asChild
+                  >
                     <button
                       type="button"
-                      className="text-primary"
                       onClick={() => setDetailName(row.name)}
                     >
-                      {row.name}
+                      <SiteLogo src={row.icon} />
+                      <span className="min-w-0 truncate">{row.name}</span>
                     </button>
-                  </UnderlineHover>
-                </div>
-              ))}
+                  </Badge>
+                ))}
+            </div>
           </div>
         )}
       </ResponsiveDialog>

@@ -1,7 +1,5 @@
 import type { ReactNode } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { t } from "@/i18n";
-import { Button } from "./button";
 import {
   Dialog,
   DialogContent,
@@ -15,8 +13,6 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerDescription,
-  DrawerClose,
-  DrawerFooter,
 } from "./drawer";
 
 export function ResponsiveDialog({
@@ -43,14 +39,9 @@ export function ResponsiveDialog({
               {description}
             </DrawerDescription>
           </DrawerHeader>
-          <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4">
+          <div className="min-h-0 space-y-4 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
             {children}
           </div>
-          <DrawerFooter className="shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <DrawerClose asChild>
-              <Button variant="outline">{t("关闭")}</Button>
-            </DrawerClose>
-          </DrawerFooter>
         </DrawerContent>
       </Drawer>
     );

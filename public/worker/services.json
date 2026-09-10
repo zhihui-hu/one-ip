@@ -216,20 +216,20 @@
     "id": "31",
     "name": "Gemini",
     "group": "AI",
-    "url": "",
+    "url": "https://alkalimakersuite-pa.clients6.google.com/$rpc/google.internal.alkali.applications.makersuite.v1.MakerSuiteService/ListIncidentsHistory",
     "page": "https://aistudio.google.com/status",
     "icon": "https://icons.duckduckgo.com/ip3/gemini.google.com.ico",
-    "note": "仅涵盖 AI Studio / Gemini API，未接入可读取的状态接口。",
+    "note": "仅涵盖 AI Studio / Gemini API，不代表 Gemini 聊天网站状态。",
     "officialStatus": true
   },
   {
     "id": "32",
     "name": "DeepSeek",
     "group": "AI",
-    "url": "",
+    "url": "https://status.deepseek.com",
     "page": "https://status.deepseek.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.deepseek.com.ico",
-    "note": "官方状态页使用 Flashduty，暂未接入结构化状态接口。",
+    "note": "读取 DeepSeek 官方状态页的当前事件数据。",
     "officialStatus": true
   },
   {
@@ -239,7 +239,7 @@
     "url": "",
     "page": "https://status.x.ai",
     "icon": "https://icons.duckduckgo.com/ip3/grok.com.ico",
-    "note": "官方状态页暂未接入结构化状态接口。",
+    "note": "官方状态页与 RSS 当前拒绝自动读取（HTTP 403），可前往官方页面查看。",
     "officialStatus": true
   },
   {
@@ -256,10 +256,10 @@
     "id": "35",
     "name": "Kimi",
     "group": "AI",
-    "url": "",
-    "page": "https://www.kimi.com",
+    "url": "https://status.moonshot.cn/api/v2/summary.json",
+    "page": "https://status.moonshot.cn",
     "icon": "https://icons.duckduckgo.com/ip3/www.kimi.com.ico",
-    "note": "暂未确认独立的公开状态页，可前往平台官网查看。",
-    "officialStatus": false
+    "note": "Moonshot AI 官方状态，涵盖 Kimi 与开放平台 API。",
+    "officialStatus": true
   }
 ]

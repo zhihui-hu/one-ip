@@ -135,7 +135,7 @@ test("local requests never manufacture a visitor IP", async () => {
   assert.equal((await worker.fetch(request("/api/me"), env)).status, 503);
   const response = await worker.fetch(
     request("/api/me", { headers: { "CF-Connecting-IP": "1.1.1.1" } }),
-    { ...env, APP_ENV: "dev" },
+    { ...env, LOCAL_DEV: "true" },
   );
   assert.equal(response.status, 503);
 });
@@ -336,5 +336,56 @@ test("preferred Ping pins the online major provider ASN while custom mode keeps 
   }, async () => {
     const response = await worker.fetch(request("/api/ping/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ host: "1.1.1.1", nodes: ["US:Seattle"], preferred: true }) }), env);
     assert.equal(response.status, 200);
+  });
+});
+
+test("icon proxy uses a fixed provider, caches images and strips upstream cookies", async () => {
+  await withFetch(async (url, options) => {
+    assert.equal(url, "https://icons.duckduckgo.com/ip3/github.com.ico");
+    assert.equal(options.redirect, "manual");
+    assert.equal(options.cf.cacheTtlByStatus["200-299"], 604800);
+    return new Response(new Uint8Array([0, 0, 1, 0]), {
+      headers: { "Content-Type": "image/x-icon", "Set-Cookie": "upstream=1" },
+    });
+  }, async () => {
+    const response = await worker.fetch(request("/api/icons/github.com"), env);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Cache-Control"), "public, max-age=86400");
+    assert.equal(response.headers.get("Set-Cookie"), null);
+    assert.equal((await response.arrayBuffer()).byteLength, 4);
+  });
+});
+
+test("icon proxy rejects arbitrary URLs and non-image responses", async () => {
+  await withFetch(async () => { throw new Error("must not fetch"); }, async () => {
+    assert.equal((await worker.fetch(request("/api/icons/https%3A%2F%2Fevil.com"), env)).status, 400);
+  });
+  await withFetch(async () => new Response("<html>error</html>", {
+    headers: { "Content-Type": "text/html" },
+  }), async () => {
+    const response = await worker.fetch(request("/api/icons/github.com"), env);
+    assert.equal(response.status, 502);
+    assert.equal(response.headers.get("Cache-Control"), "no-store");
+  });
+});
+
+test("icon proxy rejects upstream redirects without forwarding Location", async () => {
+  await withFetch(async () => new Response(null, {
+    status: 302,
+    headers: { Location: "https://example.com/icon.ico" },
+  }), async () => {
+    const response = await worker.fetch(request("/api/icons/github.com"), env);
+    assert.equal(response.status, 502);
+    assert.equal(response.headers.get("Location"), null);
+    assert.deepEqual(await response.json(), { error: "图标暂不可用" });
+  });
+});
+
+test("WeChat icon uses its official resource because the icon provider returns 404", async () => {
+  await withFetch(async (url) => {
+    assert.equal(url, "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico");
+    return new Response("icon", { headers: { "Content-Type": "image/x-icon" } });
+  }, async () => {
+    assert.equal((await worker.fetch(request("/api/icons/weixin.qq.com"), env)).status, 200);
   });
 });
