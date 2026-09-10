@@ -1,4 +1,13 @@
 {
+  "已复制": "Copied",
+  "复制": "Copy",
+  "分享网站": "Share this site",
+  "把实用的网络工具，分享给需要的人。": "Share useful network tools with someone who needs them.",
+  "扫码打开网站": "Scan to open the site",
+  "网站链接": "Website link",
+  "链接已复制": "Link copied",
+  "复制链接": "Copy link",
+  "自动复制失败，请长按或选中链接复制。": "Could not copy automatically. Select or press and hold the link to copy it.",
   "显示本次探测资源的 HTTP 响应耗时；未连通表示本次探测失败。点击平台可查看详情并打开官网。": "Shows HTTP response time for this probe. Unreachable means this probe failed. Click a platform for details and its website.",
   "评分": "Score",
   "验证评分无效，请重新验证。": "Invalid verification score. Please try again.",

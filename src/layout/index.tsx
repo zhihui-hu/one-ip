@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BuildInfo } from "@/components/build-info";
 import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
+import { ShareSite } from "@/components/share-site";
 import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
 import { Pending } from "@/components/toolkit";
 import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs";
@@ -86,6 +87,7 @@ export function AppLayout() {
             <img src="/icon.svg" width="24" height="24" alt="" />
           </Link>
           <div className="flex items-center gap-1">
+            <ShareSite />
             <LanguageSelect />
             <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
           </div>
@@ -121,6 +123,7 @@ export function AppLayout() {
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
               <div className="desktop-preferences flex items-center gap-1">
+                <ShareSite />
                 <LanguageSelect />
                 <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
               </div>

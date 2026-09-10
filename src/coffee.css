@@ -2898,3 +2898,22 @@ body {
   display: block;
   flex-shrink: 0;
 }
+
+.share-qr-panel {
+  background-color: color-mix(in srgb, var(--primary) 4%, var(--card));
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--primary) 12%, transparent) 0.7px,
+    transparent 0.7px
+  );
+  background-size: 12px 12px;
+}
+.share-qr-frame {
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.share-qr-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--primary);
+  pointer-events: none;
+}
