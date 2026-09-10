@@ -1000,7 +1000,7 @@ body {
 }
 .home-overview {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -1694,7 +1694,7 @@ body {
 }
 @media (min-width: 64rem) {
   .home-ip-overview:not(:has(> :nth-child(3))) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .home-ip-overview:not(:has(> :nth-child(3))) > .home-connectivity-card {
     grid-column: auto;
@@ -2916,4 +2916,14 @@ body {
   height: 24px;
   border-color: var(--primary);
   pointer-events: none;
+}
+
+/* Primary addresses must remain readable instead of being ellipsized. */
+.home-address-row .ip-text,
+.home-address-row .compact-text,
+.home-address-row .compact-text-head {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
 }
