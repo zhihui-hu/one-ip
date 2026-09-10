@@ -66,28 +66,22 @@ IP 详情地址为 `/network/ip/:ip`；完整网站分流表格位于 `/network/
 
 ## 🖼️ 界面预览
 
-以下为此前本地运行保留的界面截图，**尚未更新为最新 UI**：移动端底部玻璃菜单、双列首页及格式化检测详情请以当前代码和上方说明为准。桌面截图尺寸为 **1440 × 820**，移动端为 **390 × 844**。截图中的 IP、延迟和服务状态不是实时结果。
+以下截图已遮盖 IP 地址、具体位置信息及运营商 / ASN。延迟、评分与服务状态仅为截图时的展示结果。
 
 ### 桌面端
 
-**首页概览**
-
-![One IP 桌面首页：IP 地址、网络连通性、AI 访问与服务状态](docs/screenshots/desktop-home.jpg)
-
-**CDN 节点诊断**
-
-![One IP 桌面 CDN 诊断：厂商、命中节点与缓存状态](docs/screenshots/desktop-cdn.jpg)
+![One IP 桌面首页：网络连通性、AI 访问与服务状态（已打码）](docs/screenshots/desktop-home-redacted.png)
 
 ### 移动端
 
 <table>
   <tr>
-    <th>首页概览</th>
-    <th>CDN 节点诊断</th>
+    <th>浅色模式</th>
+    <th>深色模式</th>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/mobile-home.jpg" alt="One IP 移动端首页" width="390" /></td>
-    <td><img src="docs/screenshots/mobile-cdn.jpg" alt="One IP 移动端 CDN 节点诊断" width="390" /></td>
+    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="One IP 移动端浅色首页（已打码）" width="390" /></td>
+    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="One IP 移动端深色首页（已打码）" width="390" /></td>
   </tr>
 </table>
 
