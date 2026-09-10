@@ -100,7 +100,7 @@ export function HomePage() {
   const probes = useQueries({
     queries: [
       {
-        queryKey: ["home-domestic-ip", 2],
+        queryKey: ["home-domestic-ip", 3],
         retry: 1,
         queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
       },

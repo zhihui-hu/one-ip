@@ -48,21 +48,43 @@ export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
   }
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
-  try {
-    const text = await request<string>(
-      "https://2026.ip138.com/",
-      {
-        cache: "no-store",
-        signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(8000)])
-          : AbortSignal.timeout(8000),
-      },
-      "text",
-    );
-    const match = text.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/);
-    if (match) return { ip: match[0], source: "2026.ip138.com" };
-  } catch (error) {
-    if (signal?.aborted) throw error;
+  const sources = [
+    {
+      url: "https://necaptcha.nosdn.127.net/ab7f4275c1744aa28e0a8f3a1c58c532.png",
+      header: "cdn-user-ip",
+    },
+    {
+      url: "https://perfops.byte-test.com/500b-bench.jpg",
+      header: "x-request-ip",
+    },
+  ];
+  for (const source of sources) {
+    signal?.throwIfAborted();
+    try {
+      const headers = await request<Headers>(
+        source.url,
+        {
+          method: "HEAD",
+          mode: "cors",
+          credentials: "omit",
+          redirect: "error",
+          cache: "no-store",
+          signal: signal
+            ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
+            : AbortSignal.timeout(5000),
+        },
+        "headers",
+      );
+      const ip = headers.get(source.header)?.trim();
+      if (
+        ip &&
+        /^(?:\d{1,3}\.){3}\d{1,3}$/.test(ip) &&
+        ip.split(".").every((part) => Number(part) <= 255)
+      )
+        return { ip, source: new URL(source.url).hostname };
+    } catch (error) {
+      if (signal?.aborted) throw error;
+    }
   }
   throw new Error(t("国内出口未知：目标站点可能限制跨域读取"));
 }
