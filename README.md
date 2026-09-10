@@ -179,11 +179,9 @@ pnpm lint
 
 | 配置项                                    | 用途                                                         |
 | ----------------------------------------- | ------------------------------------------------------------ |
-| `GLOBALPING_TOKEN`                        | 可选的 Globalping 访问凭证                                   |
-| `IPQS_KEY`                                | 可选的 IPQualityScore 风险查询密钥                           |
 | `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET` | Cloudflare Turnstile 站点密钥与服务端密钥                    |
 | `TURNSTILE_HOSTNAMES`                     | Turnstile 允许的 hostname，逗号分隔                          |
-| `RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET` | Google reCAPTCHA v2 checkbox 密钥                            |
+| `RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET` | Google reCAPTCHA v3 评分型密钥                               |
 | `RECAPTCHA_HOSTNAMES`                     | reCAPTCHA 允许的 hostname，逗号分隔                          |
 | `VITE_API_BASE_URL`                       | 前端 API 地址，默认 `/api`；如需覆盖，配置在对应 `.env` 文件 |
 
@@ -194,8 +192,6 @@ hostname 只填写主机名，不含协议或端口，并与验证码服务商�
 `.dev.vars` 仅供本地使用，不随部署上传。公开 site key 和 hostname 列表放在 [`wrangler.toml`](wrangler.toml) `[vars]` 中；敏感值使用 Worker Secrets，例如：
 
 ```bash
-pnpm exec wrangler secret put GLOBALPING_TOKEN --env=""
-pnpm exec wrangler secret put IPQS_KEY --env=""
 pnpm exec wrangler secret put TURNSTILE_SECRET --env=""
 pnpm exec wrangler secret put RECAPTCHA_SECRET --env=""
 ```
@@ -290,3 +286,5 @@ node scripts/sync-worker-secrets.mjs production --check
 部署与 Secrets 同步是两个步骤；如果同步失败，命令会报错，已部署的代码不会自动回滚。修正后可单独执行 `node scripts/sync-worker-secrets.mjs production` 重试密钥同步。
 
 Wrangler 仅保留默认生产配置（`APP_ENV=prod`，Worker 名称 `one-ip`），不设置 dev/stage 命名环境。本地 `pnpm worker:dev` 使用同一配置，通过命令行临时设置 `LOCAL_DEV=true` 对接 Vite；本地密钥统一放在 `.dev.vars`，该标记不会写入生产配置。
+
+Google 验证体验使用 reCAPTCHA v3：前端执行 `browser_check`，服务端校验 hostname、action 和 0–1 范围的 score；当前体验通过阈值为 0.5。必须使用配套的 v3 Site Key 与 Secret。

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { CountryFlag } from "@/components/country-flag";
-import { NumberTicker } from "@/components/number-ticker";
 import {
   PrivacyToggle,
   PageHeading,
@@ -15,10 +14,8 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { t, locale } from "@/i18n";
-import type { Risk } from "@/lib/types";
 import { AiNetworkCheck } from "@/views/ai/network-check";
 import { AiPlatformLinks } from "@/views/ai/platform-links";
 import { aiPlatforms } from "@/views/ai/platforms";
@@ -29,28 +26,6 @@ import { gptHistoryAtom } from "@/views/gpt/store";
 import { useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
-function riskLabel(value: boolean | undefined) {
-  return value === undefined ? (
-    t("未知")
-  ) : value ? (
-    <Badge variant="destructive">{t("是")}</Badge>
-  ) : (
-    <Badge variant="secondary">{t("否")}</Badge>
-  );
-}
-export function RiskFacts({ risk }: { risk?: Risk }) {
-  return (
-    <Facts
-      rows={[
-        ["VPN", riskLabel(risk?.vpn)],
-        [t("代理 (Proxy)"), riskLabel(risk?.proxy)],
-        ["Tor", riskLabel(risk?.tor)],
-        [t("机器人 (Crawler)"), riskLabel(risk?.bot_status)],
-        [t("滥用记录"), riskLabel(risk?.recent_abuse)],
-      ]}
-    />
-  );
-}
 export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
   const api = kind === "claude" ? claudeApi : gptApi;
   const label = kind === "claude" ? "Claude AI" : "ChatGPT";
@@ -79,12 +54,6 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
     queryFn: ({ signal }) => api.geo(ip!, signal),
     retry: false,
   });
-  const risk = useQuery({
-    queryKey: ["risk", ip],
-    enabled: !!ip,
-    queryFn: ({ signal }) => api.risk(ip!, signal),
-    retry: false,
-  });
   useEffect(() => {
     if (ip)
       setHistory((previous) =>
@@ -93,10 +62,6 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
           : [{ ip, time: new Date().toISOString() }, ...previous].slice(0, 20),
       );
   }, [ip, setHistory]);
-  const score =
-    risk.data?.available && typeof risk.data.fraud_score === "number"
-      ? 100 - risk.data.fraud_score
-      : null;
   return (
     <div className="ai-diagnostics">
       <PageHeading
@@ -150,14 +115,6 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
             rows={[
               [t("运营商"), geo.data?.isp],
               ["ASN", geo.data?.asn],
-              ...(risk.data?.connection_type
-                ? [
-                    [t("IP 属性"), risk.data.connection_type] as [
-                      string,
-                      string,
-                    ],
-                  ]
-                : []),
             ]}
           />
           <div className="ai-exit-comparison">
@@ -202,44 +159,6 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
         </AiNetworkCheck>
       </div>
       <Accordion type="multiple" className="ai-details">
-        <AccordionItem value="risk">
-          <AccordionTrigger>
-            <span>
-              {t("IP 风险参考")}{" "}
-              <span className="ai-detail-summary">
-                {risk.isFetching
-                  ? t("检测中")
-                  : risk.data?.available
-                    ? "IPQualityScore"
-                    : t("暂无数据")}
-              </span>
-            </span>
-          </AccordionTrigger>
-          <AccordionContent>
-            {risk.isFetching ? (
-              <Pending>{t("正在读取风险数据…")}</Pending>
-            ) : risk.data?.available ? (
-              <>
-                <p className="small muted mb-3">
-                  {t("第三方参考分：")}
-                  <strong className="text-foreground">
-                    {score !== null ? <NumberTicker value={score} /> : "—"}
-                  </strong>{" "}
-                  {t("/ 100 · 100 − IPQS 风险分，非平台官方评分。")}
-                </p>
-                <RiskFacts risk={risk.data} />
-              </>
-            ) : (
-              <p className="small muted">
-                {risk.data?.reason ??
-                  (ip
-                    ? t("风险数据源暂不可用。")
-                    : t("获取平台出口后才能查询风险信息。"))}
-              </p>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-
         <AccordionItem value="history">
           <AccordionTrigger>
             <span>

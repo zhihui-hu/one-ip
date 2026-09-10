@@ -1,15 +1,7 @@
 import { HttpError, target, upstream } from "./http.js";
 import nodes from "./nodes.json";
 
-function headers(env) {
-  return {
-    "Content-Type": "application/json",
-    ...(env.GLOBALPING_TOKEN
-      ? { Authorization: `Bearer ${env.GLOBALPING_TOKEN}` }
-      : {}),
-  };
-}
-export async function startPing(input, env) {
+export async function startPing(input) {
   const host = target(input.host);
   let locations;
   if (input.regions) {
@@ -56,7 +48,7 @@ export async function startPing(input, env) {
   // Actual probe availability is decided by Globalping, never fabricate fixed nodes.
   return upstream("https://api.globalping.io/v1/measurements", {
     method: "POST",
-    headers: headers(env),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       type: "ping",
       target: host,
@@ -66,11 +58,11 @@ export async function startPing(input, env) {
     }),
   });
 }
-export async function pingResult(id, env) {
+export async function pingResult(id) {
   if (!/^[a-zA-Z0-9_-]{8,80}$/.test(id))
     throw new HttpError(400, "无效的测量 ID");
   return upstream(`https://api.globalping.io/v1/measurements/${id}`, {
-    headers: headers(env),
+    headers: { "Content-Type": "application/json" },
   });
 }
 

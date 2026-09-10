@@ -108,7 +108,7 @@ test("verification requires provider success, exact hostname and Turnstile actio
         true,
       ),
   );
-  await withFetch({ success: true, hostname }, async () =>
+  await withFetch({ success: true, hostname, action: "browser_check", score: 0.9 }, async () =>
     assert.equal(
       (
         await verifyChallenge(
@@ -184,4 +184,25 @@ test("missing configuration keeps providers visible with actionable reasons", ()
   assert.equal(invalid.length, 2);
   assert.equal(invalid[0].configured, false);
   assert.equal(invalid[0].sitekey, undefined);
+});
+
+test("reCAPTCHA v3 requires the expected action and a valid score meeting the threshold", async () => {
+  for (const fields of [
+    { action: "signup", score: 0.9 },
+    { action: "browser_check" },
+    { action: "browser_check", score: "0.9" },
+    { action: "browser_check", score: -1 },
+    { action: "browser_check", score: 1.1 },
+    { action: "browser_check", score: 0.49 },
+  ]) {
+    await withFetch({ success: true, hostname, ...fields }, async () => {
+      const result = await verifyChallenge({ provider: "recaptcha", token: "token" }, env, hostname);
+      assert.equal(result.success, false);
+    });
+  }
+  await withFetch({ success: true, hostname, action: "browser_check", score: 0.5 }, async () => {
+    const result = await verifyChallenge({ provider: "recaptcha", token: "token" }, env, hostname);
+    assert.equal(result.success, true);
+    assert.equal(result.score, 0.5);
+  });
 });

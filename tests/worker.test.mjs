@@ -150,13 +150,8 @@ test("visitor information uses this request only and is not cacheable", async ()
     assert.equal((await response.json()).ip, ip);
   }
 });
-test("unconfigured risk data remains unavailable, not safe or zero risk", async () => {
-  const data = await (
-    await worker.fetch(request("/api/iprisk/1.1.1.1"), env)
-  ).json();
-  assert.equal(data.available, false);
-  assert.equal(data.fraud_score, undefined);
-  assert.equal(data.vpn, undefined);
+test("removed legacy risk endpoint returns 404", async () => {
+  assert.equal((await worker.fetch(request("/api/iprisk/1.1.1.1"), env)).status, 404);
 });
 test("removed DNS endpoints return 404 without querying upstream services", async () => {
   await withFetch(

@@ -1,6 +1,6 @@
 import { getAiStatus } from "./ai-status.js";
 import { challengeConfig, verifyChallenge } from "./challenges.js";
-import { cfGeo, geoIp, secondaryGeo, riskIp } from "./geo.js";
+import { cfGeo, geoIp, secondaryGeo } from "./geo.js";
 import { HttpError, inputJson, json, publicIp } from "./http.js";
 import { siteIcon } from "./icons.js";
 import { ipNetwork } from "./ip-network.js";
@@ -10,7 +10,7 @@ import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
 import { lookupRegistration } from "./whois.js";
 
-/** @type {ExportedHandler<Env & {IPQS_KEY?: string, GLOBALPING_TOKEN?: string}>} */
+/** @type {ExportedHandler<Env>} */
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -67,33 +67,23 @@ export default {
         return await ipType(decodeURIComponent(path.slice(9)), url.origin);
       if (path.startsWith("/geoip/"))
         return json(await geoIp(publicIp(decodeURIComponent(path.slice(7)))));
-      if (path.startsWith("/iprisk/"))
-        return json(
-          await riskIp(publicIp(decodeURIComponent(path.slice(8))), env),
-        );
       if (path.startsWith("/ip/network/"))
         return json(
           await ipNetwork(publicIp(decodeURIComponent(path.slice(12)))),
         );
       if (path.startsWith("/ip/lookup/")) {
         const ip = publicIp(decodeURIComponent(path.slice(11)));
-        const [primary, secondary, risk, registration] =
-          await Promise.allSettled([
-            geoIp(ip),
-            secondaryGeo(ip),
-            riskIp(ip, env),
-            lookupRegistration(ip),
-          ]);
+        const [primary, secondary, registration] = await Promise.allSettled([
+          geoIp(ip),
+          secondaryGeo(ip),
+          lookupRegistration(ip),
+        ]);
         const sources = [primary, secondary].flatMap((r) =>
           r.status === "fulfilled" ? [r.value] : [],
         );
         return json({
           geo: sources[0] ?? { ip },
           sources,
-          risk:
-            risk.status === "fulfilled"
-              ? risk.value
-              : { available: false, reason: "风险数据源暂不可用" },
           rdap:
             registration.status === "fulfilled"
               ? registration.value.data
@@ -106,9 +96,9 @@ export default {
         );
       if (path === "/ping/nodes") return json(await pingNodes());
       if (path === "/ping/start")
-        return json(await startPing(await inputJson(request), env));
+        return json(await startPing(await inputJson(request)));
       if (path.startsWith("/ping/result/"))
-        return json(await pingResult(path.slice(13), env));
+        return json(await pingResult(path.slice(13)));
       if (path.startsWith("/status/")) {
         const service = services.find((s) => s.id === path.slice(8));
         if (!service) throw new HttpError(404, "未知服务");

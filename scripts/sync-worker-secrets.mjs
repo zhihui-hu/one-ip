@@ -16,8 +16,6 @@ const values = parseEnv(readFileSync(filename, "utf8"));
 const allowed = [
   "TURNSTILE_SECRET",
   "RECAPTCHA_SECRET",
-  "GLOBALPING_TOKEN",
-  "IPQS_KEY",
 ];
 if (Object.keys(values).some((key) => !allowed.includes(key)))
   throw new Error("Secret file contains unsupported configuration keys");

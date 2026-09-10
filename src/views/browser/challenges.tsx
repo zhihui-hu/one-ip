@@ -25,6 +25,7 @@ type WidgetApi = {
     options: Record<string, unknown>,
   ): string | number;
   reset(id: string | number): void;
+  execute?(sitekey: string, options: { action: string }): Promise<string>;
   remove?(id: string | number): void;
 };
 declare global {
@@ -34,28 +35,29 @@ declare global {
   }
 }
 const scripts = new Map<string, Promise<WidgetApi>>();
-function loadWidget(id: Provider["id"]): Promise<WidgetApi> {
-  const existing = scripts.get(id);
+function loadWidget(id: Provider["id"], sitekey: string): Promise<WidgetApi> {
+  const key = `${id}:${sitekey}`;
+  const existing = scripts.get(key);
   if (existing) return existing;
   const promise = new Promise<WidgetApi>((resolve, reject) => {
     const script = document.createElement("script");
     script.src =
       id === "turnstile"
         ? "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        : "https://www.google.com/recaptcha/api.js?render=explicit";
+        : `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(sitekey)}`;
     script.async = true;
     const timer = setTimeout(() => fail(), 15000);
     function fail() {
       clearTimeout(timer);
       script.remove();
-      scripts.delete(id);
+      scripts.delete(key);
       reject(new Error(t("验证组件加载失败，请检查网络或内容拦截设置。")));
     }
     script.onerror = fail;
     script.onload = () => {
       const ready = () => {
         const api = id === "turnstile" ? window.turnstile : window.grecaptcha;
-        if (!api?.render) {
+        if (!api || (id === "recaptcha" ? !api.execute : !api.render)) {
           fail();
           return;
         }
@@ -68,7 +70,7 @@ function loadWidget(id: Provider["id"]): Promise<WidgetApi> {
     };
     document.head.append(script);
   });
-  scripts.set(id, promise);
+  scripts.set(key, promise);
   return promise;
 }
 function Challenge({ provider }: { provider: Provider }) {
@@ -84,23 +86,22 @@ function Challenge({ provider }: { provider: Provider }) {
     let widget: string | number | undefined;
     const host = container.current;
     const mount = document.createElement("div");
-    mount.style.minWidth = "304px";
+    if (provider.id === "turnstile") mount.style.minWidth = "304px";
     host.append(mount);
     const abort = new AbortController();
     const started = performance.now();
     setStatus(t("加载中"));
     setMessage("");
     setElapsed(undefined);
-    void loadWidget(provider.id)
-      .then((loaded) => {
+    void loadWidget(provider.id, provider.sitekey)
+      .then(async (loaded) => {
         if (!active) return;
         api = loaded;
         setStatus(t("等待验证"));
-        widget = api.render(mount, {
+        const options = {
           sitekey: provider.sitekey,
-          ...(provider.id === "turnstile"
-            ? { action: "browser_check", size: "flexible" }
-            : { size: "normal" }),
+          action: "browser_check",
+          size: "flexible",
           callback: async (token: string) => {
             if (!active) return;
             setStatus(t("确认结果中"));
@@ -108,6 +109,7 @@ function Challenge({ provider }: { provider: Provider }) {
               const result = await endpoint<{
                 success: boolean;
                 message: string;
+                score?: number;
               }>("/browser/challenges/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -116,7 +118,12 @@ function Challenge({ provider }: { provider: Provider }) {
               });
               if (!active) return;
               setStatus(result.success ? t("验证通过") : t("未通过"));
-              setMessage(t(result.message));
+              setMessage(
+                t(result.message) +
+                  (typeof result.score === "number"
+                    ? ` · ${t("评分")} ${result.score.toFixed(2)}`
+                    : ""),
+              );
               setElapsed(Math.round((performance.now() - started) / 1000));
             } catch (error) {
               if (active) {
@@ -137,17 +144,19 @@ function Challenge({ provider }: { provider: Provider }) {
             if (active) {
               setStatus(t("未完成"));
               setMessage(
-                provider.id === "recaptcha"
-                  ? t(
-                      "验证组件未完成加载。若上方提示密钥类型无效，请使用 reCAPTCHA v2「我不是机器人」复选框类型的站点 Key 和配套 Secret；v3 或其他类型不能用于此组件。",
-                    )
-                  : t(
-                      "Turnstile 无法完成验证，请检查网络连接及站点允许的域名。",
-                    ),
+                t("Turnstile 无法完成验证，请检查网络连接及站点允许的域名。"),
               );
             }
           },
-        });
+        };
+        if (provider.id === "recaptcha") {
+          const token = await api.execute!(provider.sitekey!, {
+            action: "browser_check",
+          });
+          if (active) await options.callback(token);
+        } else {
+          widget = api.render(mount, options);
+        }
       })
       .catch((error) => {
         if (active) {
@@ -185,7 +194,9 @@ function Challenge({ provider }: { provider: Provider }) {
       <div
         ref={container}
         className={
-          round ? "mt-4 min-h-20 w-full min-w-0 overflow-x-auto pb-1" : ""
+          round && provider.id === "turnstile"
+            ? "mt-4 min-h-20 w-full min-w-0 overflow-x-auto pb-1"
+            : ""
         }
       />
       <p className="small muted mt-3" role="status">

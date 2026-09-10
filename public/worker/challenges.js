@@ -8,7 +8,7 @@ const providers = {
   },
   recaptcha: {
     prefix: "RECAPTCHA",
-    name: "Google reCAPTCHA v2",
+    name: "Google reCAPTCHA v3",
     url: "https://www.google.com/recaptcha/api/siteverify",
   },
 };
@@ -86,9 +86,25 @@ export async function verifyChallenge(body, env, hostname) {
     !config.hostnames.includes(result.hostname)
   )
     return { success: false, message: "验证站点不匹配，请重新验证。" };
-  if (body.provider === "turnstile" && result.action !== "browser_check")
+  if (result.action !== "browser_check")
     return { success: false, message: "验证场景不匹配，请重新验证。" };
+  if (body.provider === "recaptcha") {
+    if (
+      typeof result.score !== "number" ||
+      !Number.isFinite(result.score) ||
+      result.score < 0 ||
+      result.score > 1
+    )
+      return { success: false, message: "验证评分无效，请重新验证。" };
+    if (result.score < 0.5)
+      return {
+        success: false,
+        score: result.score,
+        message: "本次评分低于通过阈值。",
+      };
+  }
   return {
+    ...(body.provider === "recaptcha" ? { score: result.score } : {}),
     success: true,
     message: "本站本次验证通过",
     verifiedAt: new Date().toISOString(),

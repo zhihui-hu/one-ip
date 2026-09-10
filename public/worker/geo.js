@@ -52,30 +52,3 @@ export async function secondaryGeo(ip) {
     source: "ip.sb",
   };
 }
-export async function riskIp(ip, env) {
-  publicIp(ip);
-  if (!env.IPQS_KEY)
-    return {
-      available: false,
-      reason: "尚未配置 IPQS 风险数据源；无法推断住宅、VPN、滥用或信任评分。",
-    };
-  const data = await upstream(
-    `https://www.ipqualityscore.com/api/json/ip/${encodeURIComponent(env.IPQS_KEY)}/${encodeURIComponent(ip)}?strictness=1&allow_public_access_points=true`,
-  );
-  if (!data.success)
-    return {
-      available: false,
-      reason: "风险数据源未返回有效结果，请检查服务额度与配置。",
-    };
-  return {
-    available: true,
-    source: "IPQualityScore（非 AI 平台官方评分）",
-    fraud_score: data.fraud_score,
-    vpn: data.vpn,
-    proxy: data.proxy,
-    tor: data.tor,
-    bot_status: data.bot_status,
-    recent_abuse: data.recent_abuse,
-    connection_type: data.connection_type,
-  };
-}
