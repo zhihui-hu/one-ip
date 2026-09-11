@@ -21,7 +21,6 @@ import {
   Activity,
   ArrowRight,
   Fingerprint,
-  Globe2,
   Network,
   Search,
   ShieldCheck,
@@ -356,7 +355,7 @@ export function HomePage() {
                 path: "/ai/gpt",
                 label: t("ChatGPT 检测"),
                 description: t("检查 AI 服务响应与访问出口"),
-                icon: Globe2,
+                icon: () => <SiteLogo website="https://chatgpt.com" />,
               },
               {
                 path: "/network/exits",

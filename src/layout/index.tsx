@@ -148,7 +148,7 @@ export function AppLayout() {
           </Tabs.Content>
         </AnimatedSegmentedTabs>
         <footer className="app-footer">
-          © {new Date().getFullYear()} {t("IP 网络工具 ·")}{" "}
+          © {new Date().getFullYear()} IP ·{" "}
           <UnderlineHover asChild>
             <a
               href="https://huzhihui.com/blog/one-ip-guide"
