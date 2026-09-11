@@ -10,13 +10,13 @@ export const navigationRoutes = [
 ] as const;
 export const toolGroups = {
   network: [
-    { path: "/network/ip", label: t("IP 检测") },
-    { path: "/network/whois", label: "WHOIS" },
     { path: "/network/connectivity", label: t("网站连通") },
     { path: "/network/exits", label: t("分流出口") },
-    { path: "/network/ping", label: t("全球 Ping") },
     { path: "/network/dns", label: t("DNS 出口") },
     { path: "/network/cdn", label: t("CDN 节点") },
+    { path: "/network/ip", label: t("IP 检测") },
+    { path: "/network/whois", label: "WHOIS" },
+    { path: "/network/ping", label: t("全球 Ping") },
   ],
   browser: [
     { path: "/browser/environment", label: t("环境信息") },

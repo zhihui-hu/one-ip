@@ -1,5 +1,11 @@
 [
   {
+    "cc": "gl",
+    "name": "Telegram",
+    "url": "https://web.telegram.org/",
+    "icon": "https://icons.duckduckgo.com/ip3/telegram.org.ico"
+  },
+  {
     "cc": "cn",
     "name": "DeepSeek",
     "slug": "deepseek",

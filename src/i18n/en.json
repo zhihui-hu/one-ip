@@ -1362,5 +1362,7 @@
   "添加 ?ip=1.1.1.1 可查询指定公网 IPv4 / IPv6；添加 ?format=text 返回终端文本。": "Add ?ip=1.1.1.1 to query a public IPv4 / IPv6 address, or ?format=text for terminal text output.",
   "示例输出": "Example response",
   "以下为示意数据，并非实时查询结果。": "Illustrative data, not a live query result.",
-  "信誉分越高越好；未知字段为 null。接口有频率限制，收到 429 后请稍后重试。": "Higher reputation scores are better. Unknown fields are null. The API is rate-limited; retry later after a 429 response."
+  "信誉分越高越好；未知字段为 null。接口有频率限制，收到 429 后请稍后重试。": "Higher reputation scores are better. Unknown fields are null. The API is rate-limited; retry later after a 429 response.",
+  "暂未接入可读取 Telegram 出口 IP 的接口；网页连通性请使用网站连通检测。": "No readable Telegram egress IP endpoint is integrated. Use website connectivity to check web access.",
+  "暂未接入 Telegram 官方实时状态接口，请查看官方公告；待确认不代表服务故障。": "No official live Telegram status feed is integrated. Check official announcements; unconfirmed does not mean an outage."
 }

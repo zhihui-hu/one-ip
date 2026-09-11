@@ -207,7 +207,10 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 ? t("检测中…")
                 : detail.geo
                   ? t("已读取出口")
-                  : t("出口检测受阻（接口不支持、跨域限制或连接失败）")}
+                  : t(
+                      detail.note ??
+                        "出口检测受阻（接口不支持、跨域限制或连接失败）",
+                    )}
             </p>
           </div>
         ) : (

@@ -91,6 +91,7 @@ export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   throw new Error(t("国内出口未知：目标站点可能限制跨域读取"));
 }
 export interface Site {
+  note?: string;
   extra?: string[];
   name: string;
   type: string;
@@ -103,6 +104,8 @@ export async function detectSite(
   site: Site,
   signal?: AbortSignal,
 ): Promise<Geo> {
+  if (site.method === "unsupported")
+    throw new Error(t(site.note ?? "未获取到可读取的出口 IP"));
   signal = signal
     ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
     : AbortSignal.timeout(3000);

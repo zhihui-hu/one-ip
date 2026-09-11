@@ -1,5 +1,14 @@
 [
   {
+    "name": "Telegram",
+    "type": "international",
+    "method": "unsupported",
+    "domain": "web.telegram.org",
+    "icon": "https://icons.duckduckgo.com/ip3/telegram.org.ico",
+    "extra": ["social"],
+    "note": "暂未接入可读取 Telegram 出口 IP 的接口；网页连通性请使用网站连通检测。"
+  },
+  {
     "name": "IP.cn",
     "type": "domestic",
     "method": "ip-text",
