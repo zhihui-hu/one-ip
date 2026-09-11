@@ -156,8 +156,8 @@
     "name": "binance.com",
     "type": "international",
     "method": "cftrace",
-    "domain": "www.binance.info",
-    "icon": "https://icons.duckduckgo.com/ip3/www.binance.info.ico",
+    "domain": "www.binance.com",
+    "icon": "https://icons.duckduckgo.com/ip3/binance.com.ico",
     "extra": ["crypto"]
   },
   {
@@ -206,7 +206,7 @@
     "method": "cftrace",
     "domain": "shopify.com",
     "icon": "https://icons.duckduckgo.com/ip3/shopify.com.ico",
-    "extra": ["tools"]
+    "extra": ["tools", "ecommerce"]
   },
   {
     "name": "godaddy.com",
@@ -287,5 +287,101 @@
     "domain": "crunchyroll.com",
     "icon": "https://icons.duckduckgo.com/ip3/crunchyroll.com.ico",
     "extra": ["media"]
+  },
+  {
+    "name": "kraken.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.kraken.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.kraken.com.ico",
+    "extra": ["crypto"]
+  },
+  {
+    "name": "bybit.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.bybit.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.bybit.com.ico",
+    "extra": ["crypto"]
+  },
+  {
+    "name": "bitget.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.bitget.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.bitget.com.ico",
+    "extra": ["crypto"]
+  },
+  {
+    "name": "kucoin.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.kucoin.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.kucoin.com.ico",
+    "extra": ["crypto"]
+  },
+  {
+    "name": "amazon.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.amazon.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.amazon.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "ebay.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.ebay.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.ebay.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "aliexpress.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.aliexpress.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.aliexpress.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "temu.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.temu.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.temu.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "shein.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.shein.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.shein.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "etsy.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.etsy.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.etsy.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "shopee.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "shopee.com",
+    "icon": "https://icons.duckduckgo.com/ip3/shopee.com.ico",
+    "extra": ["ecommerce"]
+  },
+  {
+    "name": "lazada.com",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.lazada.com",
+    "icon": "https://icons.duckduckgo.com/ip3/www.lazada.com.ico",
+    "extra": ["ecommerce"]
   }
 ]

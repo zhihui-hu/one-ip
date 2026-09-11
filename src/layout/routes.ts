@@ -3,16 +3,17 @@ import { aiPlatforms } from "@/views/ai/platforms";
 
 export const navigationRoutes = [
   { value: "/", label: t("概览"), short: t("概览") },
-  { value: "/network/", label: t("网络检测"), short: t("网络") },
-  { value: "/browser/", label: t("浏览器检测"), short: t("浏览器") },
   { value: "/ai/", label: t("AI 检测"), short: "AI" },
   { value: "/status/", label: t("服务状态"), short: t("状态") },
+  { value: "/network/", label: t("网络检测"), short: t("网络") },
+  { value: "/browser/", label: t("浏览器检测"), short: t("浏览器") },
 ] as const;
 export const toolGroups = {
   network: [
     { path: "/network/ip", label: t("IP 检测") },
     { path: "/network/whois", label: "WHOIS" },
     { path: "/network/connectivity", label: t("网站连通") },
+    { path: "/network/exits", label: t("分流出口") },
     { path: "/network/ping", label: t("全球 Ping") },
     { path: "/network/dns", label: t("DNS 出口") },
     { path: "/network/cdn", label: t("CDN 节点") },
@@ -23,7 +24,7 @@ export const toolGroups = {
     { path: "/browser/consistency", label: t("环境一致性") },
     { path: "/browser/automation", label: t("自动化特征") },
     { path: "/browser/privacy", label: t("权限与隐私") },
-    { path: "/browser/challenges", label: t("验证体验") },
+    { path: "/browser/challenges", label: t("人机校验") },
   ],
   ai: aiPlatforms.map((platform) => ({
     path: `/ai/${platform.id}`,

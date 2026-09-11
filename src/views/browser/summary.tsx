@@ -10,7 +10,7 @@ import { fingerprint } from "./collect";
 export function BrowserSummary() {
   const query = useQuery({
     queryKey: ["home-browser-fingerprint"],
-    queryFn: fingerprint,
+    queryFn: () => fingerprint(),
     staleTime: Infinity,
     retry: false,
     refetchOnWindowFocus: false,

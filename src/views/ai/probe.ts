@@ -28,8 +28,8 @@ export async function probeAiDomain(
         credentials: "omit",
         cache: "no-store",
         signal: signal
-          ? AbortSignal.any([signal, AbortSignal.timeout(1000)])
-          : AbortSignal.timeout(1000),
+          ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
+          : AbortSignal.timeout(3000),
       },
       readable ? "text" : "opaque",
     );
@@ -59,7 +59,7 @@ export async function probeAiDomain(
     median: null,
     status: "unknown",
     description: t(
-      "探测未取得有效响应（单次限时 1 秒），已跳过；可能超时、被内容拦截或受站点防护限制。",
+      "探测未取得有效响应（单次限时 3 秒），已跳过；可能超时、被内容拦截或受站点防护限制。",
     ),
   };
 }

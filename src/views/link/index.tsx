@@ -1,14 +1,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { CountryFlag } from "@/components/country-flag";
 import { LatencyBadge } from "@/components/latency-badge";
 import { NumberTicker } from "@/components/number-ticker";
 import { SiteLogo } from "@/components/site-logo";
 import { ActionButton, DataTable } from "@/components/toolkit";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
-import { SplitResults } from "@/views/home/split-results";
 import { skipToken, useQueries, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useAtom } from "jotai";
@@ -23,6 +21,8 @@ const groups = [
   ["jp", t("日本")],
   ["us", t("美国")],
   ["gl", t("全球")],
+  ["crypto", t("加密货币")],
+  ["ecommerce", t("跨境电商")],
 ];
 type ConnectivityRow = (typeof targets)[number] & {
   result?: ProbeResult;
@@ -81,7 +81,7 @@ const columns: ColumnDef<ConnectivityRow>[] = [
                 sample == null
                   ? t("等待测试")
                   : sample < 0
-                    ? t("未知")
+                    ? t("连接失败")
                     : `${sample}ms`
               }
               className={`ping-dot ${sample == null ? "" : sample < 0 ? "dot-fail" : sample < 100 ? "dot-good" : sample < 400 ? "dot-warn" : "dot-slow"}`}
@@ -163,7 +163,9 @@ function ConnectivityGroup({ cc, label }: { cc: string; label: string }) {
     <section className="country-block connectivity-section">
       <div className="connectivity-heading">
         <h2>
-          <CountryFlag code={cc === "gl" ? undefined : cc} />
+          {["cn", "jp", "us", "gl"].includes(cc) && (
+            <CountryFlag code={cc === "gl" ? undefined : cc} />
+          )}
           {label}
         </h2>
         <div className="connectivity-actions">
@@ -214,52 +216,33 @@ function ConnectivityGroup({ cc, label }: { cc: string; label: string }) {
 }
 
 export default function LinkPage() {
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const exits = params.get("view") === "exits";
   useEffect(() => {
     document.title = t("网络连通 - IP 网络工具");
   }, []);
+  if (exits) return <Navigate replace to="/network/exits" />;
   return (
     <>
       <h1 className="sr-only">{t("网络连通性测试")}</h1>
-      <div className="mb-3 flex gap-2" role="group" aria-label={t("检测类型")}>
-        <Button
-          variant={exits ? "ghost" : "secondary"}
-          onClick={() => setParams({})}
-        >
-          {t("连通测试")}
-        </Button>
-        <Button
-          variant={exits ? "secondary" : "ghost"}
-          onClick={() => setParams({ view: "exits" })}
-        >
-          {t("分流出口")}
-        </Button>
+      <div className="legend mb-2 text-xs">
+        <i className="dot-good" />
+        {t("优")}
+        <i className="dot-warn" />
+        {t("良")}
+        <i className="dot-slow" />
+        {t("慢")}
+        <i className="dot-fail" />
+        {t("连接失败")}
       </div>
-      {exits ? (
-        <SplitResults />
-      ) : (
-        <>
-          <div className="legend mb-2 text-xs">
-            <i className="dot-good" />
-            {t("优")}
-            <i className="dot-warn" />
-            {t("良")}
-            <i className="dot-slow" />
-            {t("慢")}
-            <i className="dot-fail" />
-            {t("未知")}
-          </div>
-          {groups.map(([cc, label]) => (
-            <ConnectivityGroup key={cc} cc={cc} label={label} />
-          ))}
-          <p className="principle">
-            {t(
-              "浏览器 HTTP 请求耗时，取 8 轮成功请求的中位数，非 ICMP Ping。跨域限制或超时可能导致未知结果。",
-            )}
-          </p>
-        </>
-      )}
+      {groups.map(([cc, label]) => (
+        <ConnectivityGroup key={cc} cc={cc} label={label} />
+      ))}
+      <p className="principle">
+        {t(
+          "浏览器 HTTP 请求耗时，取 8 轮成功请求的中位数，非 ICMP Ping。请求被拦截或超时会显示连接失败。",
+        )}
+      </p>
     </>
   );
 }

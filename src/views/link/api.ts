@@ -11,12 +11,16 @@ export async function testConnectivity(
   onProgress?: (result: ProbeResult) => void,
 ): Promise<ProbeResult> {
   const samples: number[] = [];
+  let consecutiveFailures = 0;
   onProgress?.(summarize(samples));
   for (let i = 0; i < 8; i++) {
     signal?.throwIfAborted();
-    samples.push(await probe(url, signal));
+    const latency = await probe(url, signal);
+    samples.push(latency);
+    consecutiveFailures = latency < 0 ? consecutiveFailures + 1 : 0;
     signal?.throwIfAborted();
     onProgress?.(summarize(samples));
+    if (consecutiveFailures >= 2) break;
   }
   return summarize(samples);
 }

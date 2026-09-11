@@ -9,12 +9,21 @@ import {
   Pending,
 } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
+import { ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import type { FingerprintAlgorithm } from "./collect";
 import { consistencyChecks, automationChecks, fingerprint } from "./collect";
 import type { Check } from "./consistency";
 import { DeepPanel } from "./deep-panel";
@@ -27,6 +36,7 @@ import {
   parseDetail,
   hasResultValue,
 } from "./result-format";
+import { TlsFingerprint } from "./tls-fingerprint";
 import { withDetectionAnimation } from "./with-feedback";
 
 const columns: ColumnDef<Check>[] = [
@@ -50,6 +60,58 @@ const titles: Record<string, string> = {
   privacy: t("权限与隐私"),
 };
 function FingerprintPanel() {
+  const [algorithm, setAlgorithm] = useState<FingerprintAlgorithm | "tls">(
+    "modern",
+  );
+  return (
+    <>
+      <div className="mb-3 flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              {t("算法")}：
+              {algorithm === "modern"
+                ? "FingerprintJS (5.2.0)"
+                : algorithm === "tls"
+                  ? "JA3/JA4"
+                  : t("FingerprintJS2（旧版）")}
+              <ChevronDown aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuRadioGroup
+              value={algorithm}
+              onValueChange={(value) => {
+                if (value === "modern" || value === "legacy" || value === "tls")
+                  setAlgorithm(value);
+              }}
+            >
+              <DropdownMenuRadioItem value="modern">
+                FingerprintJS (5.2.0)
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="legacy">
+                {t("FingerprintJS2（旧版）")}
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="tls">
+                JA3/JA4 Fingerprint
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {algorithm === "tls" ? (
+        <TlsFingerprint />
+      ) : (
+        <FingerprintResults key={algorithm} algorithm={algorithm} />
+      )}
+    </>
+  );
+}
+function FingerprintResults({
+  algorithm,
+}: {
+  algorithm: FingerprintAlgorithm;
+}) {
   const [result, setResult] =
     useState<Awaited<ReturnType<typeof fingerprint>>>();
   const [previous, setPrevious] = useState<typeof result>();
@@ -61,7 +123,7 @@ function FingerprintPanel() {
   const initialRun = useRef<ReturnType<typeof fingerprint> | null>(null);
   useEffect(() => {
     let active = true;
-    initialRun.current ??= fingerprint();
+    initialRun.current ??= fingerprint(algorithm);
     void initialRun.current.then(
       (next) => {
         if (active) {
@@ -79,12 +141,12 @@ function FingerprintPanel() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [algorithm]);
   async function run() {
     setBusy(true);
     setError(undefined);
     try {
-      const next = await withDetectionAnimation(fingerprint);
+      const next = await withDetectionAnimation(() => fingerprint(algorithm));
       setPrevious(result);
       setResult(next);
       toast.success(t("指纹检测完成"));

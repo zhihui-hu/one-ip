@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { CountryFlag } from "@/components/country-flag";
 import { NumberTicker } from "@/components/number-ticker";
+import { SiteLogo } from "@/components/site-logo";
 import { ActionButton, IpText, Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -27,7 +28,6 @@ import {
 } from "lucide-react";
 import { getGeo, getBrowserIp, getDomesticIp } from "./api";
 import { PlatformSummary } from "./platform-summary";
-import { QuickChecks } from "./quick-checks";
 import { SplitResults } from "./split-results";
 
 export function HomePage() {
@@ -332,35 +332,73 @@ export function HomePage() {
       </div>
       <SplitResults summary />
       <PlatformSummary />
-      <QuickChecks />
       <BrowserSummary />
       <Card className="home-shortcuts">
         <CardHeader>
           <CardTitle>{t("热门功能")}</CardTitle>
         </CardHeader>
         <CardContent>
+          <Link to="/ai/claude" className="shortcut-feature">
+            <span className="shortcut-icon">
+              <SiteLogo website="https://claude.ai" />
+            </span>
+            <span className="shortcut-label">
+              <strong>{t("Claude 中国用户检测")}</strong>
+              <span className="shortcut-description">
+                {t("检查语言、时区与设备信号，了解浏览器暴露的环境特征。")}
+              </span>
+            </span>
+            <ArrowRight className="shortcut-arrow" aria-hidden="true" />
+          </Link>
           <div className="shortcut-grid">
             {[
-              { path: "/network/ip", label: t("IP 信息查询"), icon: Search },
-              { path: "/network/ping", label: t("全球 Ping"), icon: Activity },
-              { path: "/network/dns", label: t("DNS 出口"), icon: Network },
               {
-                path: "/browser/privacy",
-                label: t("WebRTC 检测"),
+                path: "/ai/gpt",
+                label: t("ChatGPT 检测"),
+                description: t("检查 AI 服务响应与访问出口"),
+                icon: Globe2,
+              },
+              {
+                path: "/network/exits",
+                label: t("分流出口"),
+                description: t("核对不同网站的实际出口"),
+                icon: Network,
+              },
+              {
+                path: "/browser/challenges",
+                label: t("人机检测"),
+                description: t("体验验证码，查看验证结果"),
                 icon: ShieldCheck,
+              },
+              {
+                path: "/browser/consistency",
+                label: t("环境一致性"),
+                description: t("核对浏览器环境与设备信号"),
+                icon: Search,
               },
               {
                 path: "/browser/fingerprint",
                 label: t("浏览器指纹"),
+                description: t("查看指纹组成与变化"),
                 icon: Fingerprint,
               },
-              { path: "/network/whois", label: t("WHOIS 查询"), icon: Globe2 },
+              {
+                path: "/status/",
+                label: t("服务状态"),
+                description: t("查看平台故障与服务动态"),
+                icon: Activity,
+              },
             ].map((tool) => (
               <Link key={tool.path} to={tool.path}>
                 <span className="shortcut-icon">
                   <tool.icon aria-hidden="true" />
                 </span>
-                <span className="shortcut-label">{tool.label}</span>
+                <span className="shortcut-label">
+                  <strong>{tool.label}</strong>
+                  <span className="shortcut-description">
+                    {tool.description}
+                  </span>
+                </span>
                 <ArrowRight className="shortcut-arrow" aria-hidden="true" />
               </Link>
             ))}

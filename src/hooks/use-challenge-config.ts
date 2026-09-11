@@ -2,7 +2,7 @@ import { endpoint } from "@/lib/network";
 import { useQuery } from "@tanstack/react-query";
 
 export type ChallengeProvider = {
-  id: "turnstile" | "recaptcha";
+  id: "turnstile" | "turnstile-noninteractive" | "recaptcha";
   name: string;
   configured: boolean;
   reason?: string;

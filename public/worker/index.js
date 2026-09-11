@@ -8,6 +8,7 @@ import { ipType } from "./ip-type.js";
 import { startPing, pingResult, pingNodes } from "./ping.js";
 import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
+import { tlsFingerprint } from "./tls-fingerprint.js";
 import { lookupRegistration } from "./whois.js";
 
 /** @type {ExportedHandler<Env>} */
@@ -46,6 +47,8 @@ export default {
         (!isAction && request.method !== "GET")
       )
         throw new HttpError(405, "不支持此请求方法");
+      if (path === "/browser/tls-fingerprint")
+        return json(tlsFingerprint(request));
       if (path === "/browser/challenges")
         return json(challengeConfig(env, url.hostname));
       if (path.startsWith("/icons/"))

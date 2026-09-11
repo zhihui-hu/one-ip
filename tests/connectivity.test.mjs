@@ -60,3 +60,57 @@ test("cancelled runs stop publishing progress and scheduling probes", async () =
     globalThis.fetch = original;
   }
 });
+
+test("two consecutive failures stop the target without inventing remaining samples", async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new TypeError("offline"); };
+  try {
+    const result = await testConnectivity("https://example.com");
+    assert.equal(calls, 2);
+    assert.deepEqual(result.samples, [-1, -1]);
+    assert.equal(result.median, null);
+  } finally { globalThis.fetch = original; }
+});
+
+test("a successful sample resets the failure streak on a flaky connection", async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => {
+    if (++calls % 2) throw new TypeError("temporary failure");
+    return new Response(null, { status: 204 });
+  };
+  try {
+    const result = await testConnectivity("https://example.com");
+    assert.equal(calls, 8);
+    assert.equal(result.samples.length, 8);
+    assert.ok(result.median >= 0);
+  } finally { globalThis.fetch = original; }
+});
+
+test("single probes allow weak-network responses beyond one second and abort at three seconds", async () => {
+  const original = globalThis.fetch;
+  const { probe } = await import("../src/lib/network.ts");
+  const keepAlive = setInterval(() => {}, 100);
+  try {
+    globalThis.fetch = (_, { signal }) => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        signal.removeEventListener("abort", abort);
+        resolve(new Response(null, { status: 204 }));
+      }, 1200);
+      const abort = () => { clearTimeout(timer); reject(signal.reason); };
+      signal.addEventListener("abort", abort, { once: true });
+    });
+    assert.ok(await probe("https://example.com") >= 1100);
+    globalThis.fetch = (_, { signal }) => new Promise((_, reject) => {
+      signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+    });
+    const start = performance.now();
+    assert.equal(await probe("https://example.com"), -1);
+    const elapsed = performance.now() - start;
+    assert.ok(elapsed >= 2800 && elapsed < 4500, `elapsed ${elapsed}`);
+  } finally {
+    clearInterval(keepAlive);
+    globalThis.fetch = original;
+  }
+});

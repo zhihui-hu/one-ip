@@ -1746,16 +1746,28 @@ body {
 
 .dns-exit-table table {
   width: 100%;
+  min-width: 680px;
   table-layout: fixed;
 }
 .dns-exit-table th:first-child {
-  width: 38%;
+  width: 28%;
 }
 .dns-exit-table th:nth-child(2) {
-  width: 42%;
+  width: 36%;
+}
+.dns-exit-table th:nth-child(3) {
+  width: 24%;
 }
 .dns-exit-table th:last-child {
-  width: 20%;
+  width: 12%;
+}
+.dns-exit-table th {
+  white-space: nowrap;
+}
+.dns-exit-table th:last-child,
+.dns-exit-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
 }
 @media (max-width: 48rem) {
   .dns-exit-table th,
@@ -1931,10 +1943,9 @@ body {
   color: var(--primary);
 }
 .home-page
-  :is(a, button, summary):not([data-slot="button"]):not(.underline-hover):is(
-    :hover,
-    :focus-visible
-  ) {
+  :is(a, button, summary):not([data-slot="button"]):not(.underline-hover):not(
+    :where(.home-shortcuts a)
+  ):is(:hover, :focus-visible) {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -2176,48 +2187,100 @@ body {
 .shortcut-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 24px;
-  row-gap: 4px;
+  gap: 10px;
 }
 .home-page .home-shortcuts a {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   min-width: 0;
-  padding: 9px 8px;
-  border-radius: 6px;
+  padding: 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
   color: var(--foreground);
-  font-size: 12px;
+  font-size: 14px;
   text-decoration: none;
-  transition: background-color 150ms;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
 }
 .shortcut-icon {
-  display: flex;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   flex: none;
-  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
 }
 .shortcut-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   stroke-width: 1.75;
 }
 .shortcut-label {
   flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.shortcut-label strong {
+  font-weight: 500;
+}
+.shortcut-description {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
 }
 .shortcut-arrow {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   flex: none;
-  color: var(--subtle);
+  color: var(--muted-foreground);
 }
 .home-page .home-shortcuts a:is(:hover, :focus-visible) {
   background: var(--muted);
-  color: var(--foreground);
+  border-color: var(--border);
   text-decoration: none;
+}
+.home-page .home-shortcuts .shortcut-feature {
+  margin-bottom: 12px;
+  padding: 16px;
+  background: color-mix(in srgb, #d97757 7%, var(--card));
+}
+.shortcut-feature .shortcut-icon {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+}
+.shortcut-feature .site-icon {
+  width: 32px;
+  height: 32px;
+}
+.shortcut-feature strong {
+  font-size: 16px;
+}
+.shortcut-grid > a:nth-child(3n + 1) .shortcut-icon {
+  color: #428873;
+  background: color-mix(in srgb, #69b49a 12%, var(--card));
+}
+.shortcut-grid > a:nth-child(3n + 2) .shortcut-icon {
+  color: #6989b5;
+  background: color-mix(in srgb, #8caedf 12%, var(--card));
+}
+.shortcut-grid > a:nth-child(3n) .shortcut-icon {
+  color: #9781ad;
+  background: color-mix(in srgb, #b59dc9 12%, var(--card));
 }
 @media (min-width: 48rem) {
   .shortcut-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 36rem) {
+  .shortcut-grid {
+    grid-template-columns: 1fr;
   }
 }
 @media (min-width: 48.001rem) {
@@ -2859,4 +2922,76 @@ body {
   overflow: visible;
   text-overflow: clip;
   overflow-wrap: anywhere;
+}
+
+.exit-map-dot {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: white;
+  font: 600 11px/1 sans-serif;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow:
+    0 0 0 4px #2563eb22,
+    0 2px 5px #0002;
+}
+.exit-map-tooltip.leaflet-tooltip {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 2px 8px #0001;
+}
+.exit-map-label {
+  display: grid;
+  gap: 1px;
+  width: max-content;
+  min-width: 120px;
+  max-width: 220px;
+  font: 11px/1.4 var(--font-sans, sans-serif);
+}
+.exit-map-label strong,
+.exit-map-label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.exit-map-label span {
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+
+.exit-map .leaflet-tile-pane {
+  filter: grayscale(1) brightness(1.08);
+  opacity: 0.8;
+}
+.exit-map.leaflet-container {
+  background: #edf0f2;
+}
+.dark .exit-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.65);
+}
+.dark .exit-map.leaflet-container {
+  background: #20252a;
+}
+.exit-map .leaflet-control-zoom {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px #0001;
+}
+.exit-map .leaflet-control-zoom a {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  font-size: 17px;
+  background: var(--background);
+  color: var(--foreground);
+}
+.exit-map .leaflet-control-attribution {
+  font-size: 9px;
 }

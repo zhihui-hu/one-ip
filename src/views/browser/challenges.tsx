@@ -8,12 +8,14 @@ import {
 } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UnderlineHover } from "@/components/underline-hover";
 import {
   useChallengeConfig,
   type ChallengeProvider as Provider,
 } from "@/hooks/use-challenge-config";
 import { t } from "@/i18n";
-import { endpoint } from "@/lib/network";
+import { useMutation } from "@tanstack/react-query";
+import { verifyChallenge } from "./api";
 
 type WidgetApi = {
   render(
@@ -32,13 +34,13 @@ declare global {
 }
 const scripts = new Map<string, Promise<WidgetApi>>();
 function loadWidget(id: Provider["id"], sitekey: string): Promise<WidgetApi> {
-  const key = `${id}:${sitekey}`;
+  const key = id === "recaptcha" ? `${id}:${sitekey}` : "turnstile";
   const existing = scripts.get(key);
   if (existing) return existing;
   const promise = new Promise<WidgetApi>((resolve, reject) => {
     const script = document.createElement("script");
     script.src =
-      id === "turnstile"
+      id !== "recaptcha"
         ? "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         : `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(sitekey)}`;
     script.async = true;
@@ -52,7 +54,7 @@ function loadWidget(id: Provider["id"], sitekey: string): Promise<WidgetApi> {
     script.onerror = fail;
     script.onload = () => {
       const ready = () => {
-        const api = id === "turnstile" ? window.turnstile : window.grecaptcha;
+        const api = id !== "recaptcha" ? window.turnstile : window.grecaptcha;
         if (!api || (id === "recaptcha" ? !api.execute : !api.render)) {
           fail();
           return;
@@ -69,12 +71,25 @@ function loadWidget(id: Provider["id"], sitekey: string): Promise<WidgetApi> {
   scripts.set(key, promise);
   return promise;
 }
-function Challenge({ provider }: { provider: Provider }) {
+function Challenge({
+  provider,
+  compact = false,
+}: {
+  provider: Provider;
+  compact?: boolean;
+}) {
   const container = useRef<HTMLDivElement>(null);
-  const [round, setRound] = useState(0);
+  const [round, setRound] = useState(1);
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState(t("待开始"));
+  const [status, setStatus] = useState(t("加载中"));
   const [elapsed, setElapsed] = useState<number>();
+  const [busy, setBusy] = useState(true);
+  const [interaction, setInteraction] = useState(false);
+  const [score, setScore] = useState<number>();
+  const { mutateAsync } = useMutation({
+    mutationFn: verifyChallenge,
+    retry: false,
+  });
   useEffect(() => {
     if (!round || !container.current || !provider.sitekey) return;
     let active = true;
@@ -82,10 +97,27 @@ function Challenge({ provider }: { provider: Provider }) {
     let widget: string | number | undefined;
     const host = container.current;
     const mount = document.createElement("div");
-    if (provider.id === "turnstile") mount.style.minWidth = "304px";
+    if (provider.id !== "recaptcha") mount.style.minWidth = "304px";
     host.append(mount);
     const abort = new AbortController();
     const started = performance.now();
+    setBusy(true);
+    setInteraction(false);
+    setScore(undefined);
+    const finish = () => {
+      clearTimeout(timer);
+      setBusy(false);
+      setElapsed(Math.round((performance.now() - started) / 1000));
+    };
+    const timer = setTimeout(() => {
+      if (!active) return;
+      active = false;
+      abort.abort();
+      setStatus(t("校验超时"));
+      setMessage(t("校验未及时完成，请检查网络后重试。"));
+      finish();
+      if (api && widget !== undefined) api.remove?.(widget);
+    }, 45000);
     setStatus(t("加载中"));
     setMessage("");
     setElapsed(undefined);
@@ -102,27 +134,19 @@ function Challenge({ provider }: { provider: Provider }) {
             if (!active) return;
             setStatus(t("确认结果中"));
             try {
-              const result = await endpoint<{
-                success: boolean;
-                message: string;
-                score?: number;
-              }>("/browser/challenges/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ provider: provider.id, token }),
+              const result = await mutateAsync({
+                provider: provider.id,
+                token,
                 signal: abort.signal,
               });
               if (!active) return;
               setStatus(result.success ? t("验证通过") : t("未通过"));
-              setMessage(
-                t(result.message) +
-                  (typeof result.score === "number"
-                    ? ` · ${t("评分")} ${result.score.toFixed(2)}`
-                    : ""),
-              );
-              setElapsed(Math.round((performance.now() - started) / 1000));
+              setMessage(t(result.message));
+              setScore(result.score);
+              finish();
             } catch (error) {
               if (active) {
+                finish();
                 setStatus(t("未完成"));
                 setMessage(
                   error instanceof Error ? error.message : t("验证请求失败"),
@@ -130,14 +154,35 @@ function Challenge({ provider }: { provider: Provider }) {
               }
             }
           },
+          retry: "never",
+          "refresh-expired": "manual",
+          "refresh-timeout": "manual",
+          "before-interactive-callback": () => {
+            if (active) {
+              setInteraction(true);
+              setStatus(t("需要交互"));
+            }
+          },
+          "after-interactive-callback": () => {
+            if (active) setStatus(t("等待验证"));
+          },
+          "timeout-callback": () => {
+            if (active) {
+              finish();
+              setStatus(t("校验超时"));
+              setMessage(t("请重新开始验证。"));
+            }
+          },
           "expired-callback": () => {
             if (active) {
+              finish();
               setStatus(t("已过期"));
               setMessage(t("请重新开始验证。"));
             }
           },
           "error-callback": () => {
             if (active) {
+              finish();
               setStatus(t("未完成"));
               setMessage(
                 t("Turnstile 无法完成验证，请检查网络连接及站点允许的域名。"),
@@ -156,12 +201,14 @@ function Challenge({ provider }: { provider: Provider }) {
       })
       .catch((error) => {
         if (active) {
+          finish();
           setStatus(t("加载失败"));
           setMessage(error.message);
         }
       });
     return () => {
       active = false;
+      clearTimeout(timer);
       abort.abort();
       if (api && widget !== undefined) {
         try {
@@ -173,7 +220,28 @@ function Challenge({ provider }: { provider: Provider }) {
       }
       host.replaceChildren();
     };
-  }, [round, provider.id, provider.sitekey]);
+  }, [round, provider.id, provider.sitekey, mutateAsync]);
+  if (compact)
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm" role="status">
+            {busy ? <Pending>{status}</Pending> : status}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={() => setRound((value) => value + 1)}
+          >
+            {t("重新校验")}
+          </Button>
+        </div>
+        <div ref={container} className="max-w-full overflow-x-auto" />
+        {message && <p className="text-xs text-muted-foreground">{message}</p>}
+      </div>
+    );
   return (
     <ToolCard title={provider.name}>
       <div className="row-between gap-3">
@@ -181,16 +249,34 @@ function Challenge({ provider }: { provider: Provider }) {
           {provider.configured ? status : t("未配置")}
         </Badge>
         <Button
-          disabled={!provider.configured}
+          disabled={!provider.configured || busy}
+          aria-busy={busy}
+          className="min-w-24"
           onClick={() => setRound((value) => value + 1)}
         >
-          {round ? t("重新开始") : t("开始体验")}
+          {busy ? <Pending>{t("校验中…")}</Pending> : t("重新开始")}
         </Button>
       </div>
+      {score !== undefined && (
+        <p className="mt-3 text-sm tabular-nums">
+          {t("可信评分")} {score.toFixed(2)} / 1.00 · {t("本站通过阈值")} 0.50
+        </p>
+      )}
+      {provider.id !== "recaptcha" && (
+        <p className="small muted mt-3">
+          {interaction
+            ? t("本次出现交互校验")
+            : busy
+              ? t("等待交互结果")
+              : status === t("验证通过")
+                ? t("本次无需交互")
+                : t("交互结果未确定")}
+        </p>
+      )}
       <div
         ref={container}
         className={
-          round && provider.id === "turnstile"
+          round && provider.id !== "recaptcha"
             ? "mt-4 min-h-20 w-full min-w-0 overflow-x-auto pb-1"
             : ""
         }
@@ -200,27 +286,38 @@ function Challenge({ provider }: { provider: Provider }) {
           ? provider.reason
             ? t(provider.reason)
             : t("当前站点尚未启用此验证。")
-          : message || t("点击后加载验证服务，按提示完成操作。")}
+          : message || t("页面已自动加载校验，按提示完成操作。")}
         {elapsed !== undefined && t(" · 用时 {0} 秒", [elapsed])}
       </p>
     </ToolCard>
   );
 }
-export default function ChallengesPage() {
+export function HumanVerification({
+  compact = false,
+}: { compact?: boolean } = {}) {
   const query = useChallengeConfig();
+  const configured =
+    query.data?.filter((provider) => provider.configured) ?? [];
+  const providers = compact
+    ? [
+        configured.find((provider) => provider.id === "turnstile") ??
+          configured[0],
+      ].filter((provider): provider is Provider => !!provider)
+    : configured;
   return (
     <>
-      <PageHeading title={t("验证体验")} description="" />
       <ErrorNotice error={query.error} />
       {query.isPending ? (
         <Pending>{t("正在读取验证服务…")}</Pending>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {query.data
-            ?.filter((provider) => provider.configured)
-            .map((provider) => (
-              <Challenge key={provider.id} provider={provider} />
-            ))}
+        <div className={compact ? "" : "grid gap-3 lg:grid-cols-2"}>
+          {providers.map((provider) => (
+            <Challenge
+              key={provider.id}
+              provider={provider}
+              compact={compact}
+            />
+          ))}
         </div>
       )}
       {!query.isPending &&
@@ -237,7 +334,7 @@ export default function ChallengesPage() {
           {t("重试")}
         </Button>
       )}
-      {!!query.data?.some((provider) => provider.configured) && (
+      {!compact && !!query.data?.some((provider) => provider.configured) && (
         <div className="mt-3">
           <ToolCard title={t("结果怎么看？")}>
             <p className="small muted">
@@ -247,11 +344,22 @@ export default function ChallengesPage() {
             </p>
             <p className="small muted mt-2">
               {t("FingerprintJS 用于计算浏览器标识，不提供验证码通过结论。")}
-              <Link to="/browser/fingerprint">{t("查看指纹检测 ›")}</Link>
+              <UnderlineHover asChild>
+                <Link to="/browser/fingerprint">{t("查看指纹检测 ›")}</Link>
+              </UnderlineHover>
             </p>
           </ToolCard>
         </div>
       )}
+    </>
+  );
+}
+
+export default function ChallengesPage() {
+  return (
+    <>
+      <PageHeading title={t("人机校验")} description="" />
+      <HumanVerification />
     </>
   );
 }

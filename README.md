@@ -139,3 +139,13 @@ reCAPTCHA 使用 v3 评分型密钥。服务端校验 hostname、`browser_check`
 - FingerprintJS 与 CreepJS：浏览器检测，模块说明见 [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)。
 
 欢迎提交 Issue 和改进建议。分享截图前，请遮盖 IP、位置和指纹标识等隐私信息。
+
+### 人机校验与 Claude 环境对照
+
+人机校验在页面打开后自动运行，展示校验阶段、Turnstile 是否出现交互、reCAPTCHA v3 分数及本站阈值（0.50）。单轮最多等待 45 秒，可重新开始；结果仅代表本站本次校验。
+
+可选的第二个 Turnstile 组件使用 `TURNSTILE_NONINTERACTIVE_SITE_KEY`、`TURNSTILE_NONINTERACTIVE_SECRET`、`TURNSTILE_NONINTERACTIVE_HOSTNAMES`。需在 Cloudflare 为该独立组件选择 **Non-interactive** 模式，域名须匹配；未配置时不显示。原有 `TURNSTILE_*` 组件保持其控制台配置。前端参数不能把同一个 Key 切换成另一种组件模式。
+
+Claude 页面自动比较 `claude.ai` 与 `claude.com` 出口，并展示 DNS、WebRTC 和语言、时区等浏览器信息。检测失败、不同出口或中文偏好均不直接代表账号风险。未接入 Cloudflare 企业版 Bot Management；不展示推算的企业版分数。
+
+Claude 页面还内嵌自动人机校验，并本地检测简繁中文字体、厂商字体、UA / Client Hints、Intl 区域及 Canvas 国旗渲染。检测字典参考 LinXiaoTao/FuckClaude，来源摘要与 MIT 许可证位于 `vendor/claude-environment/`。不使用其风险分数；不把字体、厂商或中文偏好解释为国籍或封禁概率。页面仅展示简洁人机状态和逐项更新的检测日志，不提供评分卡或文本输入。

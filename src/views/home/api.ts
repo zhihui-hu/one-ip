@@ -91,6 +91,7 @@ export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   throw new Error(t("国内出口未知：目标站点可能限制跨域读取"));
 }
 export interface Site {
+  extra?: string[];
   name: string;
   type: string;
   method: string;
@@ -103,8 +104,8 @@ export async function detectSite(
   signal?: AbortSignal,
 ): Promise<Geo> {
   signal = signal
-    ? AbortSignal.any([signal, AbortSignal.timeout(1000)])
-    : AbortSignal.timeout(1000);
+    ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
+    : AbortSignal.timeout(3000);
   signal.throwIfAborted();
   let geo: Geo;
   if (site.method === "cftrace" && site.domain)

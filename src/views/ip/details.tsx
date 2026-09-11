@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { CopyButton } from "@/components/copy-button";
 import { CountryFlag } from "@/components/country-flag";
 import { NumberTicker } from "@/components/number-ticker";
 import { IpText, ToolCard, DataTable } from "@/components/toolkit";
@@ -10,6 +11,9 @@ import { t } from "@/i18n";
 import { companyTypeColors } from "@/lib/ip-badge-colors";
 import { ipScoreColor } from "@/lib/ip-score";
 import type { Geo } from "@/lib/types";
+import { hideIpAtom } from "@/store/privacy";
+import { useAtom } from "jotai";
+import { Eye, EyeOff } from "lucide-react";
 import type { CoffeeLookup } from "./coffee";
 import { IpFacts } from "./field-help";
 import { IpLatency } from "./latency";
@@ -25,6 +29,7 @@ export function IpDetails({
   recent?: ReactNode;
 }) {
   const mobile = useIsMobile();
+  const [hidden, setHidden] = useAtom(hideIpAtom);
   const d = data.coffee;
   const chip = (label: string, tone = "neutral", title?: string) => (
     <span className={`ip-chip ip-chip-${tone}`} title={title}>
@@ -82,9 +87,29 @@ export function IpDetails({
       <div className="ip-dossier-top">
         <div className="ip-dossier-head">
           <div className="min-w-0">
-            <h2 className="break-all text-xl font-semibold">
-              <IpText ip={d.ip} link={false} />
-            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="min-w-0 break-all text-xl font-semibold">
+                <IpText ip={d.ip} link={false} />
+              </h2>
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={hidden ? t("显示 IP 地址") : t("隐藏 IP 地址")}
+                  title={hidden ? t("显示 IP 地址") : t("隐藏 IP 地址")}
+                  aria-pressed={hidden}
+                  onClick={() => setHidden((value) => !value)}
+                >
+                  {hidden ? (
+                    <EyeOff aria-hidden="true" />
+                  ) : (
+                    <Eye aria-hidden="true" />
+                  )}
+                </Button>
+                <CopyButton value={d.ip} />
+              </div>
+            </div>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <CountryFlag code={data.geo.country_code} />
               <span>
@@ -243,6 +268,7 @@ export function IpDetails({
         <DataTable<Geo>
           className="ip-geo-table"
           columns={[
+            { accessorKey: "source", header: t("数据来源") },
             { accessorKey: "country", header: t("国家 / 地区") },
             { accessorKey: "region", header: t("地区") },
             {

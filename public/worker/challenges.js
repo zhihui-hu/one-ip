@@ -6,6 +6,11 @@ const providers = {
     name: "Cloudflare Turnstile",
     url: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
   },
+  "turnstile-noninteractive": {
+    prefix: "TURNSTILE_NONINTERACTIVE",
+    name: "Cloudflare Turnstile · Non-interactive",
+    url: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+  },
   recaptcha: {
     prefix: "RECAPTCHA",
     name: "Google reCAPTCHA v3",
@@ -31,25 +36,31 @@ function settings(env, id) {
   return { ...provider, sitekey, secret, hostnames: safeHosts };
 }
 export function challengeConfig(env, hostname) {
-  return Object.keys(providers).map((id) => {
-    const config = settings(env, id);
-    const configured = Boolean(
-      config.sitekey && config.secret && config.hostnames.includes(hostname),
-    );
-    return {
-      id,
-      name: config.name,
-      configured,
-      reason: configured
-        ? undefined
-        : !config.sitekey
-          ? "当前运行环境缺少站点 Key。"
-          : !config.secret
-            ? "当前运行环境缺少服务端 Secret。"
-            : "当前访问域名不在此环境的验证白名单中。",
-      sitekey: configured ? config.sitekey : undefined,
-    };
-  });
+  return Object.keys(providers)
+    .filter(
+      (id) =>
+        id !== "turnstile-noninteractive" ||
+        env.TURNSTILE_NONINTERACTIVE_SITE_KEY,
+    )
+    .map((id) => {
+      const config = settings(env, id);
+      const configured = Boolean(
+        config.sitekey && config.secret && config.hostnames.includes(hostname),
+      );
+      return {
+        id,
+        name: config.name,
+        configured,
+        reason: configured
+          ? undefined
+          : !config.sitekey
+            ? "当前运行环境缺少站点 Key。"
+            : !config.secret
+              ? "当前运行环境缺少服务端 Secret。"
+              : "当前访问域名不在此环境的验证白名单中。",
+        sitekey: configured ? config.sitekey : undefined,
+      };
+    });
 }
 export async function verifyChallenge(body, env, hostname) {
   if (!body || typeof body.provider !== "string")
@@ -60,7 +71,7 @@ export async function verifyChallenge(body, env, hostname) {
   if (
     typeof body.token !== "string" ||
     !body.token.trim() ||
-    body.token.length > (body.provider === "turnstile" ? 2048 : 8192)
+    body.token.length > (body.provider !== "recaptcha" ? 2048 : 8192)
   )
     throw new HttpError(400, "验证凭证无效，请重新验证");
   let result;

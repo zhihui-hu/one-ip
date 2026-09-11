@@ -28,6 +28,7 @@ const descriptions: Record<string, string> = {
   "/network/connectivity": t(
     "检测常用网站的连通性和访问延迟，了解当前网络访问国内外服务的表现。",
   ),
+  "/network/exits": t("核对网站分流出口和地图位置"),
   "/network/ping": t(
     "从全球不同地区测试目标的网络延迟和丢包情况，比较各地的连接质量。",
   ),

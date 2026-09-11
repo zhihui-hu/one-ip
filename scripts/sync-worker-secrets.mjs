@@ -13,7 +13,17 @@ if (!existsSync(filename)) {
 const ignored = spawnSync("git", ["check-ignore", "-q", filename]);
 if (ignored.status !== 0) throw new Error("Secret file must be ignored by Git");
 const values = parseEnv(readFileSync(filename, "utf8"));
-const allowed = ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET", "TURNSTILE_HOSTNAMES", "RECAPTCHA_SITE_KEY", "RECAPTCHA_SECRET", "RECAPTCHA_HOSTNAMES"];
+const allowed = [
+  "TURNSTILE_NONINTERACTIVE_SITE_KEY",
+  "TURNSTILE_NONINTERACTIVE_SECRET",
+  "TURNSTILE_NONINTERACTIVE_HOSTNAMES",
+  "TURNSTILE_SITE_KEY",
+  "TURNSTILE_SECRET",
+  "TURNSTILE_HOSTNAMES",
+  "RECAPTCHA_SITE_KEY",
+  "RECAPTCHA_SECRET",
+  "RECAPTCHA_HOSTNAMES",
+];
 if (Object.keys(values).some((key) => !allowed.includes(key)))
   throw new Error("Secret file contains unsupported configuration keys");
 const secrets = Object.fromEntries(
@@ -30,14 +40,7 @@ if (process.argv.includes("--check")) {
 } else {
   const result = spawnSync(
     "pnpm",
-    [
-      "exec",
-      "wrangler",
-      "secret",
-      "bulk",
-      "--env",
-      "",
-    ],
+    ["exec", "wrangler", "secret", "bulk", "--env", ""],
     {
       input: JSON.stringify(secrets),
       encoding: "utf8",

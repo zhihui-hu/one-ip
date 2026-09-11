@@ -127,7 +127,27 @@ export function automationChecks(): Check[] {
     },
   ];
 }
-export async function fingerprint() {
+export type FingerprintAlgorithm = "modern" | "legacy";
+
+export async function fingerprint(algorithm: FingerprintAlgorithm = "modern") {
+  if (algorithm === "legacy") {
+    const { default: Fingerprint2 } = await import("fingerprintjs2");
+    // The legacy collector recommends waiting before collecting fonts and audio.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    const components = await Fingerprint2.getPromise({});
+    return {
+      visitorId: Fingerprint2.x64hash128(
+        components.map(({ value }) => value).join(""),
+        31,
+      ),
+      version: Fingerprint2.VERSION,
+      components: components.map(({ key, value }) => ({
+        name: key,
+        value: Fingerprint2.x64hash128(JSON.stringify(value) ?? "", 31),
+        detail: JSON.stringify(value),
+      })),
+    };
+  }
   const { load, hashComponents } = await import("@fingerprintjs/fingerprintjs");
   const result = await (await load({ monitoring: false })).get();
   const components = Object.entries(result.components).map(([name, value]) => ({

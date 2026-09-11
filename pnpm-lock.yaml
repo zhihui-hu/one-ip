@@ -32,12 +32,18 @@ importers:
       date-fns:
         specifier: latest
         version: 4.4.0
+      fingerprintjs2:
+        specifier: 2.1.4
+        version: 2.1.4
       gsap:
         specifier: latest
         version: 3.15.0
       jotai:
         specifier: latest
         version: 3.0.0(@types/react@19.2.18)(react@19.2.8)
+      leaflet:
+        specifier: ^1.9.4
+        version: 1.9.4
       lucide-react:
         specifier: latest
         version: 1.43.0(react@19.2.8)
@@ -87,6 +93,9 @@ importers:
       '@trivago/prettier-plugin-sort-imports':
         specifier: latest
         version: 6.0.2(prettier@3.9.6)
+      '@types/leaflet':
+        specifier: ^1.9.22
+        version: 1.9.22
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.3
@@ -2082,8 +2091,14 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
+  '@types/geojson@7946.0.16':
+    resolution: {integrity: sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==}
+
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/leaflet@1.9.22':
+    resolution: {integrity: sha512-h3lhECYEKDasG7LFHu+GiHqAvsgLuQvlJvVZzJDGONo3sEL+wUOqSFLnwkZlK0qVxnxbuGFW8iBlJNYs5wgndA==}
 
   '@types/node@24.13.3':
     resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
@@ -2600,6 +2615,10 @@ packages:
     resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
     engines: {node: '>=10'}
 
+  fingerprintjs2@2.1.4:
+    resolution: {integrity: sha512-veP2yVsnYvjDVkzZMyIEwpqCAQfsBLH+U4PK5MlFAnLjZrttbdRqEArE1fPcnJFz5oS5CrdONbsV7J6FGpIJEQ==}
+    deprecated: Package has been renamed to @fingerprintjs/fingerprintjs. Install @fingerprintjs/fingerprintjs to get updates.
+
   flat-cache@6.1.23:
     resolution: {integrity: sha512-f++BY9pTk+983xK1FLzlLpmM0i0z+jHmx3QESGkURMXujQZz1k5wzwX6hjnQ8goaD0B+sYnDK1yZ6MTyZfUaqA==}
 
@@ -2903,6 +2922,9 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+
+  leaflet@1.9.4:
+    resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
 
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
@@ -5612,7 +5634,13 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
+  '@types/geojson@7946.0.16': {}
+
   '@types/json-schema@7.0.15': {}
+
+  '@types/leaflet@1.9.22':
+    dependencies:
+      '@types/geojson': 7946.0.16
 
   '@types/node@24.13.3':
     dependencies:
@@ -6149,6 +6177,8 @@ snapshots:
       locate-path: 6.0.0
       path-exists: 4.0.0
 
+  fingerprintjs2@2.1.4: {}
+
   flat-cache@6.1.23:
     dependencies:
       cacheable: 2.5.0
@@ -6368,6 +6398,8 @@ snapshots:
   kleur@3.0.3: {}
 
   kleur@4.1.5: {}
+
+  leaflet@1.9.4: {}
 
   levn@0.4.1:
     dependencies:

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DetailText } from "@/components/detail-text";
+import { OverflowDetailText } from "@/components/overflow-detail-text";
 import { SiteLogo } from "@/components/site-logo";
 import {
   PageHeading,
@@ -28,7 +28,7 @@ const columns: ColumnDef<Row>[] = [
     cell: ({ row }) => (
       <span className="site-cell">
         <SiteLogo website={providerWebsite(row.original.name)} />
-        <DetailText text={row.original.name} title={t("CDN 厂商")} />
+        <OverflowDetailText text={row.original.name} title={t("CDN 厂商")} />
       </span>
     ),
   },
@@ -39,14 +39,17 @@ const columns: ColumnDef<Row>[] = [
       row.original.loading ? (
         <Pending>{t("检测中...")}</Pending>
       ) : (
-        <DetailText text={row.original.node ?? t("未知")} />
+        <OverflowDetailText text={row.original.node ?? t("未知")} />
       ),
   },
   {
     accessorKey: "cache",
     header: t("缓存"),
     cell: ({ row }) => (
-      <DetailText text={row.original.cache ?? "—"} title={t("缓存状态")} />
+      <OverflowDetailText
+        text={row.original.cache ?? "—"}
+        title={t("缓存状态")}
+      />
     ),
   },
   {
@@ -56,7 +59,7 @@ const columns: ColumnDef<Row>[] = [
       row.original.loading ? (
         <Pending>{t("检测中...")}</Pending>
       ) : (
-        <DetailText text={row.original.error ?? t("已完成")} />
+        <OverflowDetailText text={row.original.error ?? t("已完成")} />
       ),
   },
 ];

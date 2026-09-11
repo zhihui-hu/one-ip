@@ -347,5 +347,124 @@
     "slug": "mercadolibre",
     "url": "https://http2.mlstatic.com/favicon.ico",
     "icon": "https://icons.duckduckgo.com/ip3/mercadolibre.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "coinbase.com",
+    "host": "coinbase.com",
+    "url": "https://coinbase.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/coinbase.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "www.okx.com",
+    "host": "www.okx.com",
+    "url": "https://www.okx.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.okx.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "binance.com",
+    "host": "www.binance.com",
+    "url": "https://www.binance.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/binance.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "crypto.com",
+    "host": "crypto.com",
+    "url": "https://crypto.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/crypto.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "shopify.com",
+    "host": "shopify.com",
+    "url": "https://shopify.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/shopify.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "kraken.com",
+    "host": "www.kraken.com",
+    "url": "https://www.kraken.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.kraken.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "bybit.com",
+    "host": "www.bybit.com",
+    "url": "https://www.bybit.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.bybit.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "bitget.com",
+    "host": "www.bitget.com",
+    "url": "https://www.bitget.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.bitget.com.ico"
+  },
+  {
+    "cc": "crypto",
+    "name": "kucoin.com",
+    "host": "www.kucoin.com",
+    "url": "https://www.kucoin.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.kucoin.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "amazon.com",
+    "host": "www.amazon.com",
+    "url": "https://www.amazon.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.amazon.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "ebay.com",
+    "host": "www.ebay.com",
+    "url": "https://www.ebay.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.ebay.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "aliexpress.com",
+    "host": "www.aliexpress.com",
+    "url": "https://www.aliexpress.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.aliexpress.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "temu.com",
+    "host": "www.temu.com",
+    "url": "https://www.temu.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.temu.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "shein.com",
+    "host": "www.shein.com",
+    "url": "https://www.shein.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.shein.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "etsy.com",
+    "host": "www.etsy.com",
+    "url": "https://www.etsy.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.etsy.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "shopee.com",
+    "host": "shopee.com",
+    "url": "https://shopee.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/shopee.com.ico"
+  },
+  {
+    "cc": "ecommerce",
+    "name": "lazada.com",
+    "host": "www.lazada.com",
+    "url": "https://www.lazada.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.lazada.com.ico"
   }
 ]

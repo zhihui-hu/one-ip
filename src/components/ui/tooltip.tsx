@@ -1,8 +1,16 @@
 "use client";
 
 import * as React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { t } from "@/i18n";
 import { cn } from "cn";
-import { Tooltip as TooltipPrimitive } from "radix-ui";
+import { Slot, Tooltip as TooltipPrimitive } from "radix-ui";
+import { ResponsiveDialog } from "./responsive-dialog";
+
+const MobileTooltip = React.createContext<{
+  open: boolean;
+  setOpen: (value: boolean) => void;
+} | null>(null);
 
 function TooltipProvider({
   delayDuration = 0,
@@ -20,12 +28,56 @@ function TooltipProvider({
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+  const mobile = useIsMobile();
+  const [open, setOpen] = React.useState(props.defaultOpen ?? false);
+  if (mobile)
+    return (
+      <MobileTooltip.Provider
+        value={{
+          open: props.open ?? open,
+          setOpen: (value) => {
+            setOpen(value);
+            props.onOpenChange?.(value);
+          },
+        }}
+      >
+        {props.children}
+      </MobileTooltip.Provider>
+    );
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
 }
 
 function TooltipTrigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+  const mobile = React.useContext(MobileTooltip);
+  if (mobile) {
+    const { asChild, ...triggerProps } = props;
+    const Trigger = asChild ? Slot.Root : "button";
+    return (
+      <Trigger
+        {...triggerProps}
+        data-slot="tooltip-trigger"
+        aria-haspopup="dialog"
+        aria-expanded={mobile.open}
+        onClickCapture={(event) => {
+          if (triggerProps.disabled) return;
+          event.preventDefault();
+          event.stopPropagation();
+          mobile.setOpen(true);
+        }}
+        onKeyDown={(event) => {
+          if (
+            event.currentTarget.tagName !== "BUTTON" &&
+            (event.key === "Enter" || event.key === " ")
+          ) {
+            event.preventDefault();
+            mobile.setOpen(true);
+          }
+        }}
+      />
+    );
+  }
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
@@ -35,6 +87,20 @@ function TooltipContent({
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
+  const mobile = React.useContext(MobileTooltip);
+  if (mobile)
+    return (
+      <ResponsiveDialog
+        open={mobile.open}
+        onOpenChange={mobile.setOpen}
+        title={t("完整内容")}
+        description=""
+      >
+        <div className="whitespace-pre-wrap break-words text-sm leading-relaxed [overflow-wrap:anywhere]">
+          {children}
+        </div>
+      </ResponsiveDialog>
+    );
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content

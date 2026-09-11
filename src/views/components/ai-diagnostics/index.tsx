@@ -43,7 +43,9 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
     retry: false,
   });
   const exit = useQuery({
-    queryKey: [kind, "exit"],
+    queryKey:
+      kind === "claude" ? ["claude-domain-exit", "claude.ai"] : [kind, "exit"],
+    staleTime: 60_000,
     queryFn: ({ signal }) => api.exit(signal),
     retry: false,
   });

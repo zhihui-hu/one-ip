@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { CompactText } from "@/components/compact-text";
 import { CountryFlag } from "@/components/country-flag";
 import { SiteLogo } from "@/components/site-logo";
-import { DataTable, IpText, Pending } from "@/components/toolkit";
+import { IpText, Pending, ActionButton } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -11,8 +10,8 @@ import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
 import type { Geo } from "@/lib/types";
 import { useQueries } from "@tanstack/react-query";
-import type { ColumnDef } from "@tanstack/react-table";
 import { detectSite, getGeo, type Site } from "./api";
+import { ExitGroups } from "./exit-groups";
 import rawsites from "./sites.json";
 
 const sites = rawsites.map((item) => ({ ...item, name: t(item.name) }));
@@ -25,101 +24,8 @@ interface Row extends Site {
   pending: boolean;
   geoPending: boolean;
 }
-function VisibleSite({ row }: { row: Row }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { name, visible, onVisible } = row;
-  useEffect(() => {
-    if (visible || !ref.current) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        onVisible(name);
-        observer.disconnect();
-      }
-    });
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [name, visible, onVisible]);
-  return (
-    <div ref={ref} className="site-cell">
-      {visible ? <SiteLogo src={row.icon} /> : <span className="site-icon" />}
-      <UnderlineHover asChild>
-        <button
-          type="button"
-          className="min-w-0 truncate text-primary"
-          onClick={() => row.onDetail(name)}
-        >
-          {name}
-        </button>
-      </UnderlineHover>
-      <Badge
-        variant="secondary"
-        className={
-          row.type === "domestic" ? "tag-domestic" : "tag-international"
-        }
-      >
-        {row.type === "domestic" ? t("国内") : t("国际")}
-      </Badge>
-    </div>
-  );
-}
-
-const columns: ColumnDef<Row>[] = [
-  {
-    accessorKey: "name",
-    header: t("网站"),
-    cell: ({ row }) => <VisibleSite row={row.original} />,
-  },
-  {
-    id: "flag",
-    header: "",
-    cell: ({ row }) =>
-      row.original.geo ? (
-        <CountryFlag code={row.original.geo.country_code} />
-      ) : (
-        ""
-      ),
-  },
-  {
-    id: "ip",
-    header: "IP",
-    cell: ({ row }) =>
-      !row.original.visible ? (
-        "—"
-      ) : row.original.pending ? (
-        <Pending />
-      ) : (
-        <IpText ip={row.original.geo?.ip} />
-      ),
-  },
-  {
-    id: "geo",
-    header: t("归属地"),
-    cell: ({ row }) => (
-      <span className="muted">
-        {!row.original.visible ? (
-          "—"
-        ) : row.original.geoPending ? (
-          <Pending>{t("查询中…")}</Pending>
-        ) : row.original.geo ? (
-          <CompactText
-            text={
-              [
-                row.original.geo.country,
-                row.original.geo.city,
-                row.original.geo.isp,
-              ]
-                .filter(Boolean)
-                .join(" · ") || t("归属地未知")
-            }
-          />
-        ) : (
-          <CompactText text={t("未知（跨域限制或连接失败）")} />
-        )}
-      </span>
-    ),
-  },
-];
 export function SplitResults({ summary = false }: { summary?: boolean }) {
+  const [round, setRound] = useState(0);
   const [detailName, setDetailName] = useState<string | null>(null);
   const [detailIp, setDetailIp] = useState<string | null>(null);
   const [visibleSites, setVisibleSites] = useState<Set<string>>(
@@ -132,7 +38,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   }, []);
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!summary || !container.current) return;
+    if (!container.current) return;
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
         setVisibleSites(new Set(sites.map((site) => site.name)));
@@ -144,7 +50,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   }, [summary]);
   const queries = useQueries({
     queries: sites.map((site) => ({
-      queryKey: ["split", site.name],
+      queryKey: ["split", site.name, round],
       enabled: visibleSites.has(site.name),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         detectSite(site, signal),
@@ -161,9 +67,8 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   ];
   const geoQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["geoip", ip, 1000],
-      queryFn: ({ signal }: { signal: AbortSignal }) =>
-        getGeo(ip, signal, 1000),
+      queryKey: ["geoip", ip],
+      queryFn: ({ signal }: { signal: AbortSignal }) => getGeo(ip, signal),
       staleTime: 60_000,
       retry: false,
     })),
@@ -177,11 +82,16 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     geo: queries[i].data
       ? { ...queries[i].data!, ...geoByIp.get(queries[i].data!.ip)?.data }
       : undefined,
-    pending: queries[i].isPending,
+    pending: queries[i].isFetching || queries[i].isPending,
     geoPending:
       queries[i].isPending ||
       Boolean(queries[i].data && geoByIp.get(queries[i].data!.ip)?.isPending),
   }));
+  rows.sort((a, b) => {
+    const aBlocked = a.visible && !a.pending && !a.geo;
+    const bBlocked = b.visible && !b.pending && !b.geo;
+    return Number(bBlocked) - Number(aBlocked);
+  });
   const exits = [
     ...new Map(
       rows.flatMap((row) => (row.geo ? [[row.geo.ip, row.geo] as const] : [])),
@@ -189,19 +99,38 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   ];
   const detail = rows.find((row) => row.name === detailName);
   const pending = queries.some((q) => q.isFetching);
+  const Container = summary ? Card : "div";
+  const Content = summary ? CardContent : "div";
   return (
-    <Card ref={container} className="mb-3">
-      <CardHeader>
-        <div className="row-between">
-          <CardTitle>{t("网站分流出口")}</CardTitle>
-          {summary && (
-            <Link className="small muted" to="/network/connectivity?view=exits">
-              {t("查看全部 ›")}
-            </Link>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
+    <Container ref={container} className="mb-3">
+      {summary && (
+        <CardHeader>
+          <div className="row-between">
+            <CardTitle>{t("网站分流出口")}</CardTitle>
+            {summary && (
+              <Link className="small muted" to="/network/exits">
+                {t("查看全部 ›")}
+              </Link>
+            )}
+          </div>
+        </CardHeader>
+      )}
+      <Content>
+        {!summary && (
+          <div className="mb-3 flex justify-end">
+            <ActionButton
+              busy={pending}
+              onClick={() => {
+                setDetailName(null);
+                setDetailIp(null);
+                setVisibleSites(new Set(sites.map((site) => site.name)));
+                setRound((value) => value + 1);
+              }}
+            >
+              {pending ? t("检测中...") : t("重新检测")}
+            </ActionButton>
+          </div>
+        )}
         {summary ? (
           <div className="grid grid-cols-1 items-start gap-x-4 gap-y-1 sm:grid-cols-2">
             {exits.map((geo) => (
@@ -241,9 +170,9 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             </p>
           </div>
         ) : (
-          <DataTable data={rows} columns={columns} className="split-table" />
+          <ExitGroups rows={rows} onSelect={setDetailName} />
         )}
-      </CardContent>
+      </Content>
       <ResponsiveDialog
         open={detailName !== null || detailIp !== null}
         onOpenChange={(open) => {
@@ -261,9 +190,12 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
       >
         {detail ? (
           <div className="space-y-3 text-sm">
+            <p className="break-all text-muted-foreground">
+              {detail.domain ?? detail.url ?? detail.name}
+            </p>
             <div>
               {t("出口 IP：")}
-              <IpText ip={detail.geo?.ip} />
+              {detail.geo?.ip ? <IpText ip={detail.geo.ip} /> : t("检测受阻")}
             </div>
             <p>
               {[detail.geo?.country, detail.geo?.city, detail.geo?.isp]
@@ -275,7 +207,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 ? t("检测中…")
                 : detail.geo
                   ? t("已读取出口")
-                  : t("未获取到出口，可能受跨域或连接限制。")}
+                  : t("出口检测受阻（接口不支持、跨域限制或连接失败）")}
             </p>
           </div>
         ) : (
@@ -304,6 +236,6 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
           </div>
         )}
       </ResponsiveDialog>
-    </Card>
+    </Container>
   );
 }

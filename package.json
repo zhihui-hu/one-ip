@@ -30,8 +30,10 @@
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "date-fns": "latest",
+    "fingerprintjs2": "2.1.4",
     "gsap": "latest",
     "jotai": "latest",
+    "leaflet": "^1.9.4",
     "lucide-react": "latest",
     "nprogress": "latest",
     "qrcode.react": "^4.2.0",
@@ -50,6 +52,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "latest",
     "@trivago/prettier-plugin-sort-imports": "latest",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^24.13.3",
     "@types/nprogress": "latest",
     "@types/react": "^19.2.18",

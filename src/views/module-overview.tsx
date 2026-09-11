@@ -13,7 +13,8 @@ import { ArrowUpRight } from "lucide-react";
 const descriptions: Record<string, string> = {
   "/network/ip": t("查询归属地、运营商、ASN 和地图位置"),
   "/network/whois": t("查看域名、IP 和 AS 注册资料"),
-  "/network/connectivity": t("比较网站响应，核对不同站点的分流出口"),
+  "/network/connectivity": t("检测网站连通性和访问延迟"),
+  "/network/exits": t("核对网站分流出口和地图位置"),
   "/network/ping": t("从全球探针测量延迟与丢包"),
   "/network/dns": t("查看域名解析经过的出口网络"),
   "/network/cdn": t("查看内容分发网络的接入节点"),
@@ -38,6 +39,21 @@ export default function ModuleOverview({
   return (
     <div className="space-y-3">
       <PageHeading title={titles[group]} description="" />
+      {group === "network" && (
+        <ToolCard title={t("当前网络响应")}>
+          <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+            {homeTargets.map((target) => (
+              <ConnectivityTile key={target.name} target={target} />
+            ))}
+          </div>
+        </ToolCard>
+      )}
+      {group === "browser" && <BrowserSummary />}
+      {group === "ai" && (
+        <AiNetworkCheck
+          domains={aiPlatforms.map((platform) => platform.domain)}
+        />
+      )}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (
           <Card key={tool.path}>
@@ -56,21 +72,6 @@ export default function ModuleOverview({
           </Card>
         ))}
       </div>
-      {group === "network" && (
-        <ToolCard title={t("当前网络响应")}>
-          <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
-            {homeTargets.map((target) => (
-              <ConnectivityTile key={target.name} target={target} />
-            ))}
-          </div>
-        </ToolCard>
-      )}
-      {group === "browser" && <BrowserSummary />}
-      {group === "ai" && (
-        <AiNetworkCheck
-          domains={aiPlatforms.map((platform) => platform.domain)}
-        />
-      )}
     </div>
   );
 }
