@@ -100,7 +100,7 @@ export function AiNetworkCheck({
       </CardHeader>
       <CardContent>
         <div ref={sortRef}>
-          <Table>
+          <Table className="ai-connectivity-table">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("域名")}</TableHead>
@@ -111,13 +111,14 @@ export function AiNetworkCheck({
             <TableBody>
               {orderedDomains.map(({ domain, result, exit }) => (
                 <TableRow key={domain} data-sort-id={domain}>
-                  <TableCell>
+                  <TableCell className="ai-connectivity-site">
                     <span className="flex min-w-0 items-center gap-2">
                       <SiteLogo website={`https://${domain}`} />
                       <span>{domain}</span>
                     </span>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="ai-connectivity-exit text-muted-foreground">
+                    <span className="sm:hidden">{t("出口 IP：")} </span>
                     {exit.isFetching ? (
                       <Pending>{t("检测中…")}</Pending>
                     ) : exit.data?.ip ? (
@@ -128,8 +129,8 @@ export function AiNetworkCheck({
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {busy ? (
+                  <TableCell className="ai-connectivity-latency text-right">
+                    {query.isFetching ? (
                       <Pending>{t("检测中…")}</Pending>
                     ) : result?.median != null ? (
                       <span title={result.description}>

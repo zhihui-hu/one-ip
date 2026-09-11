@@ -12,20 +12,37 @@ export async function request<T>(
   const signal = init.signal
     ? AbortSignal.any([init.signal, timeout])
     : timeout;
-  const response = await fetch(url, { ...init, signal });
-  if (mode === "opaque") return undefined as T;
-  if (!response.ok) {
-    let message = t("请求失败 ({0})", [response.status]);
-    try {
-      const body = await response.json();
-      if (typeof body.error === "string") message = t(body.error);
-    } catch {
-      /* Non-JSON upstream. */
-    }
-    throw new Error(message);
+  signal.throwIfAborted();
+  let onAbort: () => void = () => {};
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => reject(signal.reason);
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+  try {
+    return await Promise.race([
+      (async () => {
+        const response = await fetch(url, { ...init, signal });
+        if (mode === "opaque") return undefined as T;
+        if (!response.ok) {
+          let message = t("请求失败 ({0})", [response.status]);
+          try {
+            const body = await response.json();
+            if (typeof body.error === "string") message = t(body.error);
+          } catch {
+            /* Non-JSON upstream. */
+          }
+          throw new Error(message);
+        }
+        if (mode === "headers") return response.headers as T;
+        return (
+          mode === "text" ? response.text() : response.json()
+        ) as Promise<T>;
+      })(),
+      aborted,
+    ]);
+  } finally {
+    signal.removeEventListener("abort", onAbort);
   }
-  if (mode === "headers") return response.headers as T;
-  return (mode === "text" ? response.text() : response.json()) as Promise<T>;
 }
 
 export function endpoint<T>(path: string, init?: RequestInit) {
@@ -59,7 +76,12 @@ export async function trace(domain: string, signal?: AbortSignal) {
   return parseTrace(
     await request<string>(
       `https://${domain}/cdn-cgi/trace`,
-      { signal, cache: "no-store" },
+      {
+        signal: signal
+          ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
+          : AbortSignal.timeout(3000),
+        cache: "no-store",
+      },
       "text",
     ),
   );
