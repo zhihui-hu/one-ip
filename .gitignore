@@ -14,7 +14,6 @@ dist-ssr
 .wrangler
 .dev.vars
 .dev.vars.*
-!.dev.vars.example
 worker-configuration.d.ts
 .worker-test
 

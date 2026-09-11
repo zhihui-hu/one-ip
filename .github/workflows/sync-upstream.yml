@@ -1,0 +1,46 @@
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event.repository.fork && (github.event_name == 'workflow_dispatch' || vars.AUTO_SYNC_UPSTREAM == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      ENABLE_CF_DEPLOY: ${{ vars.ENABLE_CF_DEPLOY }}
+    steps:
+      - name: Sync without overwriting fork changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          metadata=$(gh api "repos/$REPO")
+          parent=$(jq -r '.parent.full_name' <<< "$metadata")
+          branch=$(jq -r '.default_branch' <<< "$metadata")
+          if [ "$parent" != 'zhihui-hu/one-ip' ]; then
+            echo 'Only direct forks of zhihui-hu/one-ip are synchronized.'
+            exit 0
+          fi
+          before=$(gh api "repos/$REPO/commits/$branch" --jq '.sha')
+          # The GitHub merge-upstream endpoint fails on conflicts; no force reset.
+          gh api --method POST "repos/$REPO/merge-upstream" -f branch="$branch"
+          after=$(gh api "repos/$REPO/commits/$branch" --jq '.sha')
+          if [ "$before" != "$after" ] && [ "$ENABLE_CF_DEPLOY" = 'true' ]; then
+            # GITHUB_TOKEN pushes do not trigger push workflows. Dispatch explicitly.
+            gh workflow run pages.yml --repo "$REPO" --ref "$branch"
+          fi

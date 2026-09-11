@@ -101,7 +101,7 @@ export function HomePage() {
     queries: [
       {
         queryKey: ["home-domestic-ip", 3],
-        retry: 1,
+        retry: false,
         queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
       },
       {
@@ -139,7 +139,8 @@ export function HomePage() {
   const typeQueries = useQueries({
     queries: ips.map((ip) => ({
       queryKey: ["lookup-ip-coffee", ip],
-      queryFn: ({ signal }: { signal: AbortSignal }) => lookupIp(ip, signal),
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        lookupIp(ip, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
       staleTime: 3600_000,
       retry: false,
       refetchOnWindowFocus: false,

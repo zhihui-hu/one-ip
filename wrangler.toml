@@ -20,13 +20,6 @@ invocation_logs = false
 [observability.traces]
 enabled = false
 
-[vars]
-APP_ENV = "prod"
-TURNSTILE_SITE_KEY = "0x4AAAAAAEtyMPcY065Ucqu6"
-TURNSTILE_HOSTNAMES = "ip.huzhihui.com"
-RECAPTCHA_SITE_KEY = "6LcpELItAAAAAG1CjwcLLeLCvHfP1i5dSF7kYcVY"
-RECAPTCHA_HOSTNAMES = "ip.huzhihui.com"
-
 [[ratelimits]]
 name = "API_LIMITER"
 namespace_id = "1001"

@@ -55,13 +55,13 @@
 body {
   line-height: 1.6;
 }
-.coffee-container {
+.app-container {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 16px 20px;
 }
-.coffee-nav {
+.app-nav {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -82,7 +82,7 @@ body {
   [data-slot="scroll-area-scrollbar"][data-orientation="vertical"] {
   display: none;
 }
-.coffee-nav .site-icon {
+.app-nav .site-icon {
   width: 16px;
   height: 16px;
 }
@@ -195,10 +195,6 @@ body {
   color: var(--subtle);
   font-size: 0.72rem;
   margin-top: 10px;
-}
-.ping-col {
-  flex: 1;
-  min-width: 0;
 }
 .ping-grid {
   display: grid;
@@ -398,7 +394,7 @@ body {
   gap: 12px;
   margin: 16px 0;
 }
-.coffee-container [data-slot="card"] {
+.app-container [data-slot="card"] {
   border: 0;
   box-shadow: none;
   --card-spacing: 12px;
@@ -512,12 +508,6 @@ body {
   font-size: 0.8rem;
   font-weight: 400;
   color: var(--subtle);
-}
-.explanation-text {
-  white-space: pre-line;
-  color: var(--muted-foreground);
-  font-size: 0.9rem;
-  line-height: 1.9;
 }
 .feature-strip {
   display: grid;
@@ -798,7 +788,7 @@ body {
   padding: 14px 18px;
   margin: 14px 0;
 }
-.coffee-footer {
+.app-footer {
   text-align: center;
   font-size: 0.82rem;
   color: var(--subtle);
@@ -812,17 +802,11 @@ body {
   z-index: 50;
 }
 @media (max-width: 60rem) {
-  .coffee-nav {
+  .app-nav {
     gap: 10px;
   }
   .three-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .ip-heroes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .ip-heroes .ip-value {
-    font-size: 1.15rem;
   }
 }
 @media (max-width: 48rem) {
@@ -833,9 +817,6 @@ body {
   .ip-info {
     flex: auto;
     min-width: 0;
-  }
-  .ping-col {
-    width: 100%;
   }
   .split-table th:first-child {
     width: auto;
@@ -867,10 +848,10 @@ body {
   }
 }
 @media (max-width: 36rem) {
-  .coffee-container {
+  .app-container {
     padding: 10px 12px;
   }
-  .coffee-nav {
+  .app-nav {
     gap: 8px;
   }
   .nav-full {
@@ -951,12 +932,6 @@ body {
   .history-grid {
     grid-template-columns: 1fr;
   }
-  .ip-heroes {
-    gap: 10px;
-  }
-  .ip-heroes .ip-value {
-    margin-bottom: 4px;
-  }
   .connectivity-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -985,18 +960,6 @@ body {
   .underline-hover::after {
     transition: none;
   }
-}
-
-.home-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.home-heading h1 {
-  font-size: 1.25rem;
-  font-weight: 700;
 }
 .home-overview {
   display: grid;
@@ -1083,7 +1046,7 @@ body {
 .exit-card [data-slot="card-title"] {
   font-size: 0.85rem;
 }
-.coffee-nav {
+.app-nav {
   justify-content: space-between;
 }
 
@@ -1188,18 +1151,6 @@ body {
   display: grid;
   gap: 16px;
 }
-.primary-ip-details {
-  display: grid;
-  gap: 8px;
-  font-size: 0.82rem;
-}
-.primary-ip-details dt {
-  color: var(--subtle);
-  font-size: 0.75rem;
-}
-.primary-ip-details dd {
-  overflow-wrap: anywhere;
-}
 .source-ip-item {
   display: grid;
   gap: 5px;
@@ -1234,25 +1185,6 @@ body {
 .primary-ip-block .ip-value {
   margin-bottom: 8px;
   font-size: 0.95rem;
-}
-.primary-ip-details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-}
-.primary-ip-details > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  max-width: 100%;
-}
-.primary-ip-details > div:first-child {
-  flex-basis: 100%;
-}
-.primary-ip-details dd {
-  min-width: 0;
-  overflow-wrap: anywhere;
 }
 .source-ip-item {
   gap: 5px;
@@ -1346,10 +1278,6 @@ body {
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 10px;
-}
-.home-ip-overview .primary-ip-details {
-  color: var(--muted-foreground);
-  font-size: 0.8rem;
 }
 
 .lookup-faq {
@@ -2019,27 +1947,27 @@ body {
 
 /* Compact mobile overview and navigation. */
 @media (max-width: 48rem) {
-  .coffee-nav {
+  .app-nav {
     gap: 4px;
     padding: 4px;
     margin-bottom: 10px;
   }
-  .coffee-nav .site-home-link {
+  .app-nav .site-home-link {
     display: none;
   }
-  .coffee-nav [role="tablist"] {
+  .app-nav [role="tablist"] {
     width: 100%;
     gap: 0;
   }
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tab"] {
     flex: 1;
     padding-inline: 5px;
     font-size: 13px;
   }
-  .coffee-nav [role="tab"] svg {
+  .app-nav [role="tab"] svg {
     display: none;
   }
-  .coffee-nav > button {
+  .app-nav > button {
     width: 32px;
     height: 32px;
   }
@@ -2109,10 +2037,10 @@ body {
     justify-content: space-between;
     margin-bottom: 8px;
   }
-  .coffee-container {
+  .app-container {
     padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
-  .coffee-nav {
+  .app-nav {
     position: fixed;
     z-index: 40;
     left: max(12px, env(safe-area-inset-left, 0px));
@@ -2129,18 +2057,18 @@ body {
     -webkit-backdrop-filter: blur(22px) saturate(180%);
     backdrop-filter: blur(22px) saturate(180%);
   }
-  .coffee-nav > button {
+  .app-nav > button {
     display: none;
   }
-  .coffee-nav .nav-tabs-scroll {
+  .app-nav .nav-tabs-scroll {
     width: 100%;
   }
-  .coffee-nav [role="tablist"] {
+  .app-nav [role="tablist"] {
     display: flex;
     width: 100%;
     height: 56px;
   }
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tab"] {
     height: 56px;
     min-width: 0;
     flex: 1 1 0;
@@ -2151,23 +2079,23 @@ body {
     font-size: 11px;
     line-height: 16px;
   }
-  .coffee-nav [role="tab"] svg {
+  .app-nav [role="tab"] svg {
     display: block;
     width: 21px;
     height: 21px;
   }
-  .coffee-nav [role="tab"] .nav-full {
+  .app-nav [role="tab"] .nav-full {
     display: none;
   }
-  .coffee-nav [role="tab"] .nav-short {
+  .app-nav [role="tab"] .nav-short {
     display: inline;
   }
-  .coffee-nav [role="tablist"] > span {
+  .app-nav [role="tablist"] > span {
     border-radius: 21px;
     background: color-mix(in srgb, var(--primary) 13%, transparent);
     box-shadow: inset 0 1px 0 #ffffff55;
   }
-  .dark .coffee-nav {
+  .dark .app-nav {
     background: color-mix(in srgb, var(--card) 85%, transparent);
     box-shadow:
       0 8px 32px #0006,
@@ -2177,12 +2105,12 @@ body {
     bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   }
   @supports not (backdrop-filter: blur(1px)) {
-    .coffee-nav {
+    .app-nav {
       background: var(--card);
     }
   }
   @media (prefers-reduced-transparency: reduce) {
-    .coffee-nav {
+    .app-nav {
       background: var(--card);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
@@ -2292,11 +2220,8 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-.desktop-brand {
-  display: none;
-}
 @media (min-width: 48.001rem) {
-  .coffee-nav {
+  .app-nav {
     padding: 0;
     gap: 32px;
     margin-bottom: 24px;
@@ -2304,25 +2229,25 @@ body {
     border-radius: 0;
     background: transparent;
   }
-  .coffee-nav .site-home-link {
+  .app-nav .site-home-link {
     display: flex;
     width: 32px;
     height: 40px;
     padding: 0;
   }
-  .coffee-nav .site-home-link img {
+  .app-nav .site-home-link img {
     width: 26px;
     height: 26px;
   }
-  .coffee-nav .nav-tabs-scroll {
+  .app-nav .nav-tabs-scroll {
     border-radius: 0;
   }
-  .coffee-nav [role="tablist"] {
+  .app-nav [role="tablist"] {
     height: 40px;
     gap: 24px;
     border-radius: 0;
   }
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tab"] {
     height: 40px;
     padding: 0 2px;
     border-radius: 0;
@@ -2330,23 +2255,23 @@ body {
     font-weight: 500;
     background: transparent;
   }
-  .coffee-nav [role="tab"] svg {
+  .app-nav [role="tab"] svg {
     display: none;
   }
-  .coffee-nav [role="tab"]:hover {
+  .app-nav [role="tab"]:hover {
     color: var(--foreground);
   }
-  .coffee-nav [role="tab"][data-state="active"] {
+  .app-nav [role="tab"][data-state="active"] {
     color: var(--primary);
     font-weight: 600;
   }
-  .coffee-nav [role="tablist"] > span {
+  .app-nav [role="tablist"] > span {
     display: none;
   }
-  .coffee-nav .desktop-preferences {
+  .app-nav .desktop-preferences {
     gap: 4px;
   }
-  .coffee-nav .desktop-preferences button {
+  .app-nav .desktop-preferences button {
     width: 32px;
     height: 32px;
   }
@@ -2365,31 +2290,31 @@ body {
   .home-page .home-metric {
     font-size: 12px;
   }
-  .coffee-nav {
+  .app-nav {
     max-width: 420px;
     margin-inline: auto;
     padding: 4px;
     border-radius: 22px;
   }
-  .coffee-nav [role="tablist"],
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tablist"],
+  .app-nav [role="tab"] {
     height: 46px;
   }
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tab"] {
     border-radius: 18px;
     gap: 2px;
     padding: 4px 2px;
     font-size: 10px;
     line-height: 14px;
   }
-  .coffee-nav [role="tab"] svg {
+  .app-nav [role="tab"] svg {
     width: 19px;
     height: 19px;
   }
-  .coffee-nav [role="tablist"] > span {
+  .app-nav [role="tablist"] > span {
     border-radius: 18px;
   }
-  .coffee-container {
+  .app-container {
     padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
   .update-notices {
@@ -2399,7 +2324,7 @@ body {
 
 /* Mobile glass: one bounded surface shared by both themes. */
 @media (max-width: 48rem) {
-  .coffee-nav {
+  .app-nav {
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -2418,7 +2343,7 @@ body {
     border: 0;
     border-radius: 20px;
   }
-  .coffee-nav:has(.mobile-nav-glass) {
+  .app-nav:has(.mobile-nav-glass) {
     background: transparent;
     box-shadow: none;
     backdrop-filter: none;
@@ -2435,20 +2360,20 @@ body {
       0 5px 20px rgb(0 0 0 / 28%),
       inset 0 0 0 1px rgb(255 255 255 / 12%);
   }
-  .coffee-nav:has(.mobile-nav-glass) > .nav-tabs-scroll {
+  .app-nav:has(.mobile-nav-glass) > .nav-tabs-scroll {
     position: relative;
     z-index: 1;
   }
-  .coffee-nav [role="tablist"] {
+  .app-nav [role="tablist"] {
     justify-content: center;
     gap: 0;
   }
-  .coffee-nav [role="tab"] {
+  .app-nav [role="tab"] {
     justify-content: center;
     align-items: center;
     border-radius: 17px;
   }
-  .coffee-nav [role="tablist"] > span {
+  .app-nav [role="tablist"] > span {
     border-radius: 17px;
     box-shadow: none;
     background: color-mix(in srgb, var(--primary) 13%, transparent);
@@ -2520,7 +2445,7 @@ body {
 }
 
 @media (max-width: 48rem) {
-  .coffee-nav .desktop-preferences {
+  .app-nav .desktop-preferences {
     display: none;
   }
 }

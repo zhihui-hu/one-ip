@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { PageHeading, ToolCard } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAvailableTools } from "@/hooks/use-available-tools";
 import { t } from "@/i18n";
 import { toolGroups } from "@/layout/routes";
 import { AiNetworkCheck } from "@/views/ai/network-check";
@@ -33,11 +34,12 @@ export default function ModuleOverview({
 }: {
   group: keyof typeof toolGroups;
 }) {
+  const tools = useAvailableTools(group);
   return (
     <div className="space-y-3">
       <PageHeading title={titles[group]} description="" />
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {toolGroups[group].map((tool) => (
+        {tools.map((tool) => (
           <Card key={tool.path}>
             <CardContent>
               <Link to={tool.path} className="group block">

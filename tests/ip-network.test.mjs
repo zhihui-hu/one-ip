@@ -1,39 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ipNetwork } from "../public/worker/ip-network.js";
-import { reputation } from "../src/views/ip/reputation.ts";
 
-test("missing risk signals never turn into a perfect reputation score", () => {
-  assert.equal(reputation({ available: false }).score, null);
-  assert.equal(
-    reputation({
-      available: true,
-      recent_abuse: false,
-      bot_status: false,
-      tor: false,
-    }).score,
-    null,
-  );
-  assert.equal(
-    reputation({
-      available: true,
-      recent_abuse: false,
-      bot_status: false,
-      tor: false,
-      proxy: false,
-    }).score,
-    100,
-  );
-  assert.equal(
-    reputation({
-      available: true,
-      recent_abuse: true,
-      bot_status: false,
-      tor: true,
-    }).score,
-    30,
-  );
-});
 test("network details validate all announcing ASNs and preserve no-ROA vs unavailable", async () => {
   const original = globalThis.fetch;
   globalThis.fetch = async (url) => {

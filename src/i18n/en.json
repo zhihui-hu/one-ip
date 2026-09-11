@@ -185,6 +185,7 @@
   "验证组件未完成加载。若上方提示密钥类型无效，请使用 reCAPTCHA v2「我不是机器人」复选框类型的站点 Key 和配套 Secret；v3 或其他类型不能用于此组件。": "The verification component did not finish loading. If an invalid key type is reported above, use a reCAPTCHA v2 “I'm not a robot” checkbox site key and its matching secret; v3 and other types are not compatible with this component.",
   "Turnstile 无法完成验证，请检查网络连接及站点允许的域名。": "Turnstile could not complete verification. Check connectivity and the site's allowed domains.",
   "加载失败": "Load failed",
+  "页面暂时无法显示，请刷新页面重试。": "This page could not be displayed. Refresh the page to try again.",
   "未配置": "Not configured",
   "重新开始": "Restart",
   "开始体验": "Try verification",

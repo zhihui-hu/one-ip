@@ -4,8 +4,21 @@ import type { Geo, RtcResult } from "@/lib/types";
 
 export function isPublicCandidate(ip: string) {
   if (ip.includes(":")) {
-    const s = ip.toLowerCase();
-    if (s.startsWith("::ffff:")) return isPublicCandidate(s.slice(7));
+    let s: string;
+    try {
+      s = new URL(`https://[${ip}]/`).hostname.slice(1, -1);
+    } catch {
+      return false;
+    }
+    if (s.startsWith("::ffff:")) {
+      const [high, low] = s
+        .slice(7)
+        .split(":")
+        .map((part) => parseInt(part, 16));
+      return isPublicCandidate(
+        `${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`,
+      );
+    }
     return (
       /^[\da-f:]+$/i.test(s) &&
       !["::", "::1"].includes(s) &&

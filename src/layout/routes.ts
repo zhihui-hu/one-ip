@@ -66,3 +66,12 @@ export function activeNavigationRoute(pathname: string) {
     ? "/status/"
     : "not-found";
 }
+
+export function visibleTools(
+  group: keyof typeof toolGroups,
+  challengesConfigured: boolean,
+) {
+  return toolGroups[group].filter(
+    (tool) => tool.path !== "/browser/challenges" || challengesConfigured,
+  );
+}

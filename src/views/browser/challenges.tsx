@@ -8,17 +8,13 @@ import {
 } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  useChallengeConfig,
+  type ChallengeProvider as Provider,
+} from "@/hooks/use-challenge-config";
 import { t } from "@/i18n";
 import { endpoint } from "@/lib/network";
-import { useQuery } from "@tanstack/react-query";
 
-type Provider = {
-  id: "turnstile" | "recaptcha";
-  name: string;
-  configured: boolean;
-  reason?: string;
-  sitekey?: string;
-};
 type WidgetApi = {
   render(
     container: HTMLElement,
@@ -211,12 +207,7 @@ function Challenge({ provider }: { provider: Provider }) {
   );
 }
 export default function ChallengesPage() {
-  const query = useQuery({
-    queryKey: ["challenge-config"],
-    queryFn: ({ signal }) =>
-      endpoint<Provider[]>("/browser/challenges", { signal }),
-    retry: false,
-  });
+  const query = useChallengeConfig();
   return (
     <>
       <PageHeading title={t("验证体验")} description="" />
@@ -225,24 +216,28 @@ export default function ChallengesPage() {
         <Pending>{t("正在读取验证服务…")}</Pending>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
-          {query.data?.map((provider) => (
-            <Challenge key={provider.id} provider={provider} />
-          ))}
+          {query.data
+            ?.filter((provider) => provider.configured)
+            .map((provider) => (
+              <Challenge key={provider.id} provider={provider} />
+            ))}
         </div>
       )}
-      {!query.isPending && !query.isError && !query.data?.length && (
-        <p className="text-sm text-muted-foreground">
-          {t(
-            "当前环境没有可用的验证配置，请检查正式 Worker 的站点 Key、Secret 和域名白名单。",
-          )}
-        </p>
-      )}
+      {!query.isPending &&
+        !query.isError &&
+        !query.data?.some((provider) => provider.configured) && (
+          <p className="text-sm text-muted-foreground">
+            {t(
+              "当前环境没有可用的验证配置，请检查正式 Worker 的站点 Key、Secret 和域名白名单。",
+            )}
+          </p>
+        )}
       {query.isError && (
         <Button variant="outline" onClick={() => query.refetch()}>
           {t("重试")}
         </Button>
       )}
-      {!!query.data?.length && (
+      {!!query.data?.some((provider) => provider.configured) && (
         <div className="mt-3">
           <ToolCard title={t("结果怎么看？")}>
             <p className="small muted">

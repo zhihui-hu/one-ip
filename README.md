@@ -1,284 +1,141 @@
-<div align="center">
+<img src="public/icon.svg" alt="One IP Logo" width="96" height="96" />
 
 # One IP
 
-一个集 IP 查询、网络诊断、浏览器检测和 AI 服务状态于一体的工具箱。
+IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
-![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
-![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
+**中文** · [English](README.en.md)
 
-[功能特性](#-功能特性) · [界面预览](#-界面预览) · [部署方法](#-部署方法) · [本地开发](#-本地开发) · [配置说明](#-配置说明) · [使用说明](#-使用说明)
+[在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
-</div>
+点击下方按钮，一键部署到 Cloudflare。
 
-## ✨ 功能特性
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
 
-| 模块       | 功能                                                                            |
-| ---------- | ------------------------------------------------------------------------------- |
-| 首页       | IPv4 / IPv6 出口、分流汇总、网络连通性、浏览器指纹、WebRTC、AI 访问与服务状态   |
-| IP 信息    | 公网 IP 归属地、运营商、ASN、地图、多源对比及可选风险信息                       |
-| WHOIS      | 域名、IP、ASN 的 RDAP 注册信息，支持状态、DNS、时间与实体详情                   |
-| 网络诊断   | 网站分流、HTTP 连通性、全球 ICMP Ping、DNS 出口和 CDN 命中节点                  |
-| 浏览器检测 | 环境信息、指纹、环境一致性、自动化特征、权限隐私与验证码体验                    |
-| AI 平台    | ChatGPT、Claude、Gemini、DeepSeek、Grok、Perplexity、通义千问和 Kimi 的访问检测 |
-| 服务状态   | 聚合官方数据，按分类展示运行情况，点击查看组件与事件                            |
+## Cloudflare 部署教程
 
-- **移动端导航**：底部悬浮液态玻璃菜单，五个入口完整显示；支持深浅主题、安全区和减少透明度偏好。二级菜单可横向滚动，桌面保留顶部导航。
-- **紧凑布局**：手机首页采用双列连通性卡片，归属信息减少重复标签；无 IPv6、无 WebRTC 地址等情况不展示空结果区域。
-- **手机服务状态**：故障与维护优先，三项紧凑统计与分组列表突出服务状态和事件；分类、时间等细节点击后查看。页面用途说明使用低对比度辅助文字。
-- **响应式详情**：桌面弹窗、手机底部抽屉；字段优先左右同排，放不下再换行，长文本可查看完整内容。
-- **渐进检测**：网站进入视口后再请求，支持逐步返回结果和 GSAP 排序动画。
-- **本地历史**：IP、WHOIS 各保存最近 10 条成功查询；点击历史还原，再次查询可更新。
-- **主题与提示**：浅色 / 深色主题，可关闭的功能说明记住当前浏览器的选择。
-- **统一部署**：前端静态文件与 API 由同一个 Cloudflare Worker 提供，无需单独部署 Node 服务或 Docker 容器。
+1. [Fork 本项目](https://github.com/zhihui-hu/one-ip/fork)到你的 GitHub 账号。
+2. 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)，进入 **Workers & Pages**，创建 Worker，选择导入 Git 仓库。
+3. 连接 GitHub，选择你的 `one-ip` Fork，生产分支填 `main`。
+4. 构建命令填 `pnpm build`，部署命令填 `pnpm deploy`。使用 Node.js 24 和 pnpm 10.32.1，根目录保持默认。
+5. 点击部署，完成后打开 `workers.dev` 地址。自定义域名在 Worker 设置中绑定。
 
-## 🧭 页面与导航
+项目使用 **Cloudflare Workers + Static Assets**，`/api/*` 接口需要 Worker。基础功能无需应用环境变量或 API Key。Turnstile 和 reCAPTCHA 的配置见“验证体验”。
 
-一级入口为 **概览 / 网络 / 浏览器 / AI / 状态**，各模块由共用 Layout 承载二级导航和页面说明。`/network`、`/browser`、`/ai` 默认进入各自概述页，提供工具入口与实时检测摘要；二级菜单可随时返回“概述”。
+Workers Builds 会在 `main` 收到提交时构建和部署。上方按钮使用原项目地址；需要保留 Fork 关系和更新工作流时，请按教程导入你的 Fork。
 
-| 一级入口   | 页面与路由                                                                                                                               |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 概览       | `/`：当前网络与浏览器概览                                                                                                                |
-| 网络检测   | `/network/ip`、`/network/whois`、`/network/connectivity`、`/network/ping`、`/network/dns`、`/network/cdn`                                |
-| 浏览器检测 | `/browser/environment`、`/browser/fingerprint`、`/browser/consistency`、`/browser/automation`、`/browser/privacy`、`/browser/challenges` |
-| AI 检测    | `/ai/gpt`、`/ai/claude`、`/ai/gemini`、`/ai/deepseek`、`/ai/grok`、`/ai/perplexity`、`/ai/qwen`、`/ai/kimi`                              |
-| 服务状态   | `/status`，OpenAI / Claude 详情为 `/status/openai`、`/status/claude`                                                                     |
+## 功能
 
-IP 详情地址为 `/network/ip/:ip`；完整网站分流表格位于 `/network/connectivity?view=exits`。旧的 `/ip`、`/query/*`、`/webrtc`、`/gpt`、`/claude` 等入口自动跳转，保留查询参数与锚点。
+| 模块             | 支持的功能                                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| 首页概览         | 国内与外部 IPv4 探测、归属地、运营商、信誉分与类型标签                                                    |
+| IP 详情          | IPv4 / IPv6 查询、ASN、CIDR、注册信息、网络属性、风险标记、地图、多源位置对比与关联地址；字段取决于数据源 |
+| 网站分流与连通性 | 检查不同网站的出口 IP，按地址汇总；多轮 HTTP 采样、中位耗时与排序                                         |
+| 全球 Ping        | Globalping 全球探针、地区与城市选择、延迟与丢包、分批返回结果                                             |
+| DNS / CDN        | DNS 解析出口、CDN 命中节点及可读取的缓存信息                                                              |
+| WHOIS            | 域名、IP、ASN 的 RDAP 注册资料与原始响应                                                                  |
+| 浏览器检测       | 环境信息、FingerprintJS 指纹、环境一致性、CreepJS 深度检测、自动化特征、权限与 WebRTC                     |
+| AI 访问          | ChatGPT、Claude、Grok、Perplexity、Gemini、DeepSeek、通义千问、Kimi 的资源连通性与部分平台出口对照        |
+| 服务状态         | 聚合官方运行状态、故障、维护、组件与事件详情                                                              |
+| 使用体验         | 中英文、深浅主题、移动端布局与底部抽屉、查询历史、二维码分享与复制链接                                    |
+| 可选验证体验     | Cloudflare Turnstile、Google reCAPTCHA v3；入口需要配置和域名匹配                                         |
 
-### 首页概览
+第三方服务的限流和跨域限制会影响查询结果。HTTP 耗时与 ICMP Ping 的测量方式不同。IP 类型和信誉分供参考，不代表 AI 平台的官方判断。
 
-- **IP 与连通性**：展示出口 IP、归属地、运营商和 ASN；没有 IPv6 时，宽屏将 IPv4 与连通性并排，手机连通性使用双列布局。
-- **分流汇总**：按出口 IP 汇总站点数量，可展开站点或进入完整分流检测。
-- **浏览器环境**：展示系统、语言、时区、User-Agent，并自动计算 FingerprintJS Visitor ID；点击进入指纹详情。
-- **WebRTC 独立卡片**：自动采集候选地址，公网 UDP 与 HTTP 出口对照；本地地址收进响应式详情弹窗，避免占满首页。
-- **AI 与状态**：展示平台资源响应耗时及独立的官方服务状态，并保留进入各工具的快捷入口。
+## 界面预览
 
-首页不显示功能说明 Alert。查询失败不会伪造归属地、风险或检测结果；归属信息不可用时提供重试入口。
+截图遮盖了 IP、具体位置及运营商 / ASN，数值不是实时结果。
 
-### 浏览器检测结果
-
-指纹表格显示中文项目名和可读数据，例如字体数量、内存提示、分辨率和显卡名称；哈希保留在详情中用于比较。详情默认按字段、列表和绘图样本格式化展示，可切换原始 JSON。缺少数据的项目与空字段隐藏，`false`、`0` 等有效值保留。
-
-“环境一致性”页包含基于 CreepJS 精选模块的深度检测。点击后显示总体结论、每个模块的说明和需要核对的信号，并区分读取错误、无法检测与未发现差异；不以“已读取数据”代替“检测通过”。
-
-## 🖼️ 界面预览
-
-以下截图已遮盖 IP 地址、具体位置信息及运营商 / ASN。延迟、评分与服务状态仅为截图时的展示结果。
-
-### 桌面端
-
-![One IP 桌面首页：网络连通性、AI 访问与服务状态（已打码）](docs/screenshots/desktop-home-redacted.png)
-
-### 移动端
+![桌面首页（已打码）](docs/screenshots/desktop-home-redacted.png)
 
 <table>
+  <tr><th>手机 · 浅色</th><th>手机 · 深色</th></tr>
   <tr>
-    <th>浅色模式</th>
-    <th>深色模式</th>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="One IP 移动端浅色首页（已打码）" width="390" /></td>
-    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="One IP 移动端深色首页（已打码）" width="390" /></td>
+    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="手机浅色首页（已打码）" width="360" /></td>
+    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="手机深色首页（已打码）" width="360" /></td>
   </tr>
 </table>
 
-## 🚀 部署方法
+## Fork 更新
 
-### GitHub Actions 自动部署
+在 GitHub 仓库页面点击 **Sync fork → Update branch**。有代码改动时检查差异，通过合并处理冲突。
 
-1. 将项目放入自己的 GitHub 仓库，默认部署分支为 `main`。
-2. 在 **Settings → Secrets and variables → Actions** 中添加：
+定时同步使用 `Sync upstream` 工作流：
 
-   | Secret                  | 用途                                                             |
-   | ----------------------- | ---------------------------------------------------------------- |
-   | `CLOUDFLARE_API_TOKEN`  | 目标 Cloudflare 账户的 Workers 部署凭证，需具备 Workers 编辑权限 |
-   | `CLOUDFLARE_ACCOUNT_ID` | 目标 Cloudflare 账户 ID                                          |
+1. 在 Fork 的 Actions 页面启用工作流。
+2. 在 Settings → Secrets and variables → Actions → **Variables** 添加 `AUTO_SYNC_UPSTREAM=true`。
+3. 工作流在每天 UTC 04:23 检查更新。Actions 页面提供运行入口。
 
-3. 推送到 `main`，或在 Actions 中选择 **Build and deploy one-ip**，从 `main` 手动运行。
-4. 工作流依次安装依赖、构建、测试，再部署 `one-ip`。部署地址见 Actions 日志或 Cloudflare 控制台。
+支持范围是从 `zhihui-hu/one-ip` 创建的 Fork，无需个人访问令牌（PAT）。工作流通过 GitHub 的 `merge-upstream` 接口合并更新，遇到冲突时停止，保留你的提交。需要审核更新时，使用 GitHub 的 Sync fork。
 
-工作流位于 [`.github/workflows/pages.yml`](.github/workflows/pages.yml)。虽然文件名保留为 `pages.yml`，实际部署目标是 **Workers + Static Assets**，不是 GitHub Pages 或 Cloudflare Pages。
+- **Workers Builds**：连接 Fork 的生产分支，在 Cloudflare 构建历史中检查同步提交的部署记录。
+- **GitHub Actions 部署**：同步产生更新时，工作流触发部署任务。`GITHUB_TOKEN` 产生的推送不会触发普通 `push` 工作流。
+- 分支保护阻止合并时，通过 PR 处理。
+- Fork 的定时工作流需要启用。公开仓库 60 天无活动可能导致 GitHub 停用定时任务，恢复入口在 Actions 页面。
 
-首次部署自动创建 `one-ip`，之后更新同名 Worker。Pull Request 只构建和测试，不部署。构建或测试失败时不会进入部署步骤。
+参考：[同步 Fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/syncing-a-fork)、[GITHUB_TOKEN 触发规则](https://docs.github.com/en/actions/concepts/security/github_token)、[定时工作流停用规则](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows)。
 
-### 本地命令部署
+## GitHub Actions 部署（可选）
 
-先完成依赖安装，再登录 Cloudflare 并部署：
+Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布。Actions 默认执行构建和测试；开启部署需要在仓库的 Actions 设置中添加：
 
-```bash
-pnpm exec wrangler login
-make deploy
-```
+| 类型     | 名称                    | 用途                       |
+| -------- | ----------------------- | -------------------------- |
+| Variable | `ENABLE_CF_DEPLOY=true` | 开启部署                   |
+| Secret   | `CLOUDFLARE_API_TOKEN`  | 目标账户的 Worker 部署凭证 |
+| Secret   | `CLOUDFLARE_ACCOUNT_ID` | 目标 Cloudflare 账户 ID    |
 
-| 环境     | Worker 名称      | 命令              |
-| -------- | ---------------- | ----------------- |
-| 生产     | `one-ip`         | `make deploy`     |
-| 本地调试 | `one-ip`（本地） | `make worker-dev` |
+推送到 `main`，或运行 `Build and deploy one-ip`。构建和测试通过后进入部署。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
 
-配置文件为 [`wrangler.toml`](wrangler.toml)。`make deploy` 会先按上海时间更新版本，再构建与部署；GitHub Actions 使用仓库中的版本。
-
-自定义域名及生产密钥需在对应 Worker 上配置。从旧 Worker 更名到 `one-ip` 不会迁移其密钥和域名，也不会删除旧项目。
-
-## 🛠️ 本地开发
-
-### 环境要求
-
-- Node.js **24**
-- pnpm **10.32.1**（与 CI 保持一致）
-- Make（使用 `make` 命令时需要）
-
-### 安装与启动
+## 本地开发与部署
 
 ```bash
 pnpm install --frozen-lockfile
-make worker-dev
+pnpm worker:dev
 ```
 
-打开 **http://127.0.0.1:8787/**。
-
-该命令同时启动 Vite `5137` 和 Worker `8787`：API 由 Worker 处理，页面和 HMR WebSocket 转发到 Vite。无需提前构建，修改前端代码即可热更新。
-
-不使用 Make 时，可运行 `pnpm worker:dev`。`pnpm dev` 仅启动前端，API 仍需要本地 Worker。
-
-### 常用命令
-
-| 命令                 | 说明                                     |
-| -------------------- | ---------------------------------------- |
-| `make worker-dev`    | 同时启动前端与 Worker                    |
-| `make build`         | TypeScript 检查与生产构建，输出到 `dist` |
-| `make test`          | Worker dry-run 与自动化测试，需要先构建  |
-| `pnpm lint`          | 静态代码检查                             |
-| `pnpm preview`       | 预览前端构建产物，不启动 Worker API      |
-| `pnpm worker:types`  | 生成 Worker 环境类型                     |
-| `pnpm browser:build` | 重建本地浏览器深度检测脚本               |
-
-完整检查：
+打开 `http://127.0.0.1:8787`。命令启动 Vite 和本地 Worker，支持热更新。启动脚本为本地进程设置 `LOCAL_DEV=true`，无需修改 Wrangler 配置。
 
 ```bash
-make build
-make test
+pnpm build
+pnpm test
 pnpm lint
+
+# 登录 Cloudflare 并部署
+pnpm exec wrangler login
+pnpm deploy
 ```
 
-## ⚙️ 配置说明
+`pnpm deploy` 使用 `dist` 中的构建产物，运行前需要执行 `pnpm build`。`make deploy` 包含版本更新、构建和部署，无需密钥文件。
 
-基础查询和公开数据源通常无需配置密钥；高级风险查询、验证码体验等功能按需启用。
+## 验证体验（可选）
 
-### 本地配置
+选择 Turnstile 或 reCAPTCHA，填写 Site Key、Secret 和允许访问的域名。配置齐全且访问域名匹配时，页面显示“验证体验”入口；缺少配置时隐藏入口。
 
-首次配置验证码体验时，将 [`.dev.vars.example`](.dev.vars.example) 复制为 `.dev.vars`，填入自己的配置。已有 `.dev.vars` 时直接编辑，不要覆盖。
+| 提供商       | 配置项                                                          |
+| ------------ | --------------------------------------------------------------- |
+| Turnstile    | `TURNSTILE_SITE_KEY`、`TURNSTILE_SECRET`、`TURNSTILE_HOSTNAMES` |
+| reCAPTCHA v3 | `RECAPTCHA_SITE_KEY`、`RECAPTCHA_SECRET`、`RECAPTCHA_HOSTNAMES` |
 
-| 配置项                                    | 用途                                                         |
-| ----------------------------------------- | ------------------------------------------------------------ |
-| `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET` | Cloudflare Turnstile 站点密钥与服务端密钥                    |
-| `TURNSTILE_HOSTNAMES`                     | Turnstile 允许的 hostname，逗号分隔                          |
-| `RECAPTCHA_SITE_KEY` / `RECAPTCHA_SECRET` | Google reCAPTCHA v3 评分型密钥                               |
-| `RECAPTCHA_HOSTNAMES`                     | reCAPTCHA 允许的 hostname，逗号分隔                          |
-| `VITE_API_BASE_URL`                       | 前端 API 地址，默认 `/api`；如需覆盖，配置在对应 `.env` 文件 |
+本地开发：把[配置示例](docs/config/challenges.env.example)复制到根目录 `.dev.vars`，填写密钥并重启。文件存在时编辑原文件。域名用逗号分隔，填写格式为 `example.com`，提供商控制台需要允许对应域名。
 
-hostname 只填写主机名，不含协议或端口，并与验证码服务商后台配置一致。`TURNSTILE_SITE_KEY`、`RECAPTCHA_SITE_KEY` 可留空；未填写时显示未配置提示。填写 Site Key 后，如服务端 Secret 缺失或 hostname 不匹配，组件显示不可用。
-
-### 生产配置
-
-`.dev.vars` 仅供本地使用，不随部署上传。公开 site key 和 hostname 列表放在 [`wrangler.toml`](wrangler.toml) `[vars]` 中；敏感值使用 Worker Secrets，例如：
-
-```bash
-pnpm exec wrangler secret put TURNSTILE_SECRET --env=""
-pnpm exec wrangler secret put RECAPTCHA_SECRET --env=""
-```
-
-仅设置实际使用的密钥。生产 hostname 不应包含 `localhost` 或 `127.0.0.1`；不要将密钥放入 `VITE_*`，这些值会进入前端产物。
-
-## 🎯 使用说明
-
-1. **查看出口**：首页展示浏览器当前 IPv4 / IPv6，IPv6 获取失败时不显示空卡片。
-2. **检查分流**：查看不同网站返回的出口 IP。网站请求从浏览器发起，结果反映对应访问路径。
-3. **查询地址**：在 IP 或 WHOIS 页面输入地址，或点击最近查询 / 推荐 Badge。
-4. **全球 Ping**：选择全球、区域或自定义方案，查看各节点逐步返回的延迟与丢包；可停止检测并保留已有结果。
-5. **排查 DNS / CDN**：查看递归 DNS 出口及 CDN 节点；长内容可通过 Tooltip 或详情弹窗查看。
-6. **检查浏览器**：首页自动检测指纹与 WebRTC；进入指纹页可查看组成数据并再次比较，环境一致性页可主动运行深度检测。定位和媒体权限测试只在用户点击后申请。
-7. **核对 AI 服务**：访问延迟与官方服务状态分别展示。未接入官方数据源的平台会明确标注，不推断为正常。
-
-### AI 探测方式
-
-首页和 AI 详情使用同一套探测逻辑，从访问者浏览器直接请求目标域名，不以服务端连通结果代替用户网络。
-
-| 平台               | 探测资源                       | 结果含义                                           |
-| ------------------ | ------------------------------ | -------------------------------------------------- |
-| Claude、Perplexity | 各自域名的 `/cdn-cgi/trace`    | 读取并校验边缘网络响应，不证明源站、登录或对话可用 |
-| Gemini             | `gemini.google.com/robots.txt` | 检测同域资源响应，避免使用返回 404 的图标地址      |
-| 其他平台           | 当前配置域名的 `/favicon.ico`  | 检测资源响应；不等同于账号或模型权限检查           |
-
-单次等待上限为 6 秒，失败后再试一次。探测失败显示“未确认”，不会直接判定网站打不开；跨域不透明响应也不能用于判断 HTTP 状态码。AI 页面保留打开平台、服务状态、API / 文档等已配置的快捷链接。
-
-### 如何理解结果
-
-- **HTTP 耗时不等于 ICMP 延迟**。收到响应也不代表登录、对话或模型 API 可用。
-- **未知不等于故障**。跨域策略、网络超时、未公开的响应头和数据源限制都可能导致未知。
-- **地理位置是估计值**。IP 数据库可能有更新延迟，不能据此确定设备精确位置。
-- **DNS 出口不等于设备配置地址**。安全 DNS、代理远程解析及系统设置都会影响结果。
-- **浏览器信号不是身份或风险结论**。指纹 ID、自动化信号和一致性结果不能独立证明真人、机器人或验证码通过率。
-
-## 🔒 数据与隐私
-
-IP / WHOIS 历史、主题和说明关闭状态保存在当前浏览器，清除站点数据可移除。网络检测会访问相应的第三方站点。首页和分流的归属查询由浏览器直连 **IP.SB（api.ip.sb）**，失败后使用 **IPWhois（ipwho.is）**；待查公网 IP 会发送给对应数据源，不需要本站密钥，仍受数据源跨域策略、限流和网络环境影响。IP 详情的多源查询、RDAP、Globalping 和官方状态等 API 继续由 Worker 请求对应服务。
-
-FingerprintJS 在浏览器本地计算，不向业务后端上传指纹。深度检测基于固定版本的 CreepJS 精选模块，在独立上下文运行；不包含官方联网预测、评分或全部检测能力。
-
-验证码脚本在用户点击体验后加载，凭证由 Worker 提交给服务商校验。结果只表示本站本次验证，不代表其他网站的验证结果。
-
-## 📁 项目结构
-
-```text
-src/
-  components/          通用 UI、响应式弹窗、底部玻璃导航、表格与动画
-  hooks/               检测与本地历史逻辑
-  layout/              导航与路由分组
-  views/               首页、网络、浏览器、AI 与服务状态
-public/worker/         Cloudflare Worker API
-vendor/browser-diagnostics/  浏览器深度检测来源与许可证
-scripts/               开发服务与资源构建脚本
-tests/                 自动化测试
-make/                  开发、版本和部署命令
-.github/workflows/     CI 与 Worker 部署
-wrangler.toml          Worker 与静态资源配置
-```
-
-## 🤝 贡献
-
-欢迎提交 Issue 或 Pull Request。反馈问题时，请说明页面、操作步骤、浏览器及是否使用代理，附上已遮盖敏感信息的截图或错误内容。
-
-提交前运行构建和测试。接口变更请补充相应用例；涉及浏览器权限、跨域或第三方验证的功能，还需在真实浏览器中检查。
-
-## 🙏 致谢
-
-- [Globalping](https://globalping.io/)：远端网络测量。
-- [IANA RDAP Bootstrap](https://data.iana.org/rdap/)：注册信息服务目录。
-- [shadcn/ui](https://ui.shadcn.com/)、[TanStack](https://tanstack.com/)、[GSAP](https://gsap.com/)：界面、数据和动画。
-- [FingerprintJS](https://github.com/fingerprintjs/fingerprintjs)、[CreepJS](https://github.com/abrahamjuliot/creepjs)：浏览器检测能力参考与依赖。
-
-浏览器深度检测的来源版本、校验值和许可证见 [`vendor/browser-diagnostics/README.md`](vendor/browser-diagnostics/README.md) 与对应目录中的 `LICENSE`。各第三方依赖遵循各自许可证。
-
-### 项目内管理正式环境密钥
-
-- 公开配置：`wrangler.toml` 的 `[vars]`（生产）填写 `*_SITE_KEY` 与 `*_HOSTNAMES`。
-- 密钥：将 `.secrets.example` 复制为 `.secrets.production.env`，填写对应环境的 Secret；这些文件已被 Git 忽略。
-- `make deploy` 会先检查本地配置，构建部署后通过标准输入上传非空密钥，不在日志中显示密钥值，也不删除已有的其他 Secret。
-- 首次自动生成的正式配置来自现有本地配置，请确认密钥本身支持正式域名；验证码平台后台也必须允许这些域名。
-- `.dev.vars` 仍仅供本地开发使用。更改它不会同步修改正式密钥文件。
-- 这里只接入本地 Make 部署。GitHub Actions 不会读取未提交的文件；CI 部署需要单独使用 GitHub Secrets，或者保留已上传的 Worker Secrets。
-
-仅检查、不上传：
+线上部署：在 Worker → Settings → Variables and Secrets 填写配置，或执行 `pnpm exec wrangler secret put 名称`。使用配置文件时，把 `.secrets.example` 复制为 `.secrets.production.env`，填写后运行：
 
 ```bash
 node scripts/sync-worker-secrets.mjs production --check
+node scripts/sync-worker-secrets.mjs production
 ```
 
-部署与 Secrets 同步是两个步骤；如果同步失败，命令会报错，已部署的代码不会自动回滚。修正后可单独执行 `node scripts/sync-worker-secrets.mjs production` 重试密钥同步。
+脚本上传非空项，保留已有 Secret，跳过缺失的可选文件。敏感文件在 Git 忽略列表中。Secret 应放在 Worker 配置中，不能放进 `VITE_*`。`/api/browser/challenges` 的 `configured` 字段用于检查配置结果。
 
-Wrangler 仅保留默认生产配置（`APP_ENV=prod`，Worker 名称 `one-ip`），不设置 dev/stage 命名环境。本地 `pnpm worker:dev` 使用同一配置，通过命令行临时设置 `LOCAL_DEV=true` 对接 Vite；本地密钥统一放在 `.dev.vars`，该标记不会写入生产配置。
+reCAPTCHA 使用 v3 评分型密钥。服务端校验 hostname、`browser_check` action 和 score，通过阈值为 0.5。v2 复选框和 Enterprise assessment 不在支持范围内，生产环境不接受 localhost。
 
-Google 验证体验使用 reCAPTCHA v3：前端执行 `browser_check`，服务端校验 hostname、action 和 0–1 范围的 score；当前体验通过阈值为 0.5。必须使用配套的 v3 Site Key 与 Secret。
+## 项目结构与数据来源
+
+- `src/app.css`：界面样式；`src/components/ui`：shadcn/ui 组件。
+- `src/views`：网络、浏览器、AI 与状态页面；`public/worker`：Worker API。
+- Net.Coffee：IP 详情，展示字段取决于接口返回。
+- Globalping：全球测量；IANA / RDAP：注册资料；各平台官方状态源：运行状态。
+- FingerprintJS 与 CreepJS：浏览器检测，模块说明见 [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)。
+
+欢迎提交 Issue 和改进建议。分享截图前，请遮盖 IP、位置和指纹标识等隐私信息。

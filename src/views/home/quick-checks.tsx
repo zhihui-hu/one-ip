@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/input-group";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
-import { request } from "@/lib/network";
+import { sampleDnsExit } from "@/views/dns-exit/api";
 import { runWebRtc } from "@/views/webrtc/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -24,15 +24,7 @@ export function QuickChecks() {
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
-    queryFn: async ({ signal }) => {
-      const token = crypto.randomUUID().replaceAll("-", "");
-      const data = await request<{ dns?: { ip: string; geo: string } }>(
-        `https://${token}.edns.ip-api.com/json`,
-        { signal, cache: "no-store" },
-      );
-      if (!data.dns?.ip) throw new Error(t("未获取到 DNS 出口"));
-      return data.dns;
-    },
+    queryFn: ({ signal }) => sampleDnsExit(signal),
   });
   const rtc = useQuery({
     queryKey: ["home-webrtc"],

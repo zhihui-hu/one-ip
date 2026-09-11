@@ -15,6 +15,7 @@ import { t } from "@/i18n";
 import { Search, Globe, Cable, Activity, Sparkles } from "lucide-react";
 import { Tabs } from "radix-ui";
 import { Toaster } from "sonner";
+import { RouteErrorBoundary } from "./route-error-boundary";
 import { activeNavigationRoute, navigationRoutes } from "./routes";
 
 const MobileNavGlass = lazy(() => import("@/components/mobile-nav-glass"));
@@ -77,7 +78,7 @@ export function AppLayout() {
 
   return (
     <>
-      <div className="coffee-container">
+      <div className="app-container">
         <header className="mobile-site-header">
           <Link
             to="/"
@@ -105,7 +106,7 @@ export function AppLayout() {
           highlightClassName="rounded-lg bg-primary/10 shadow-none ring-0"
           triggerClassName="h-9 flex-none rounded-lg border-0 px-2 text-[13px] text-muted-foreground hover:bg-accent/50 data-[state=active]:font-semibold data-[state=active]:text-primary"
           renderList={(list) => (
-            <nav ref={navRef} className="coffee-nav" aria-label={t("主导航")}>
+            <nav ref={navRef} className="app-nav" aria-label={t("主导航")}>
               {mobile && (
                 <Suspense fallback={null}>
                   <MobileNavGlass light={resolvedTheme === "light"} />
@@ -132,19 +133,21 @@ export function AppLayout() {
         >
           <Tabs.Content value={activeRoute} asChild>
             <main className="outline-none">
-              <Suspense
-                fallback={
-                  <p className="status-line">
-                    <Pending>{t("正在加载页面…")}</Pending>
-                  </p>
-                }
-              >
-                <Outlet />
-              </Suspense>
+              <RouteErrorBoundary key={pathname}>
+                <Suspense
+                  fallback={
+                    <p className="status-line">
+                      <Pending>{t("正在加载页面…")}</Pending>
+                    </p>
+                  }
+                >
+                  <Outlet />
+                </Suspense>
+              </RouteErrorBoundary>
             </main>
           </Tabs.Content>
         </AnimatedSegmentedTabs>
-        <footer className="coffee-footer">
+        <footer className="app-footer">
           © {new Date().getFullYear()} {t("IP 网络工具 ·")}{" "}
           <UnderlineHover asChild>
             <Link to="/">{t("IP 查询")}</Link>

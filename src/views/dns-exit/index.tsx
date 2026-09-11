@@ -11,9 +11,9 @@ import {
 } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
-import { request } from "@/lib/network";
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
+import { sampleDnsExit } from "./api";
 
 type Resolver = { ip: string; geo: string; samples: number };
 type Progress = { results: Resolver[]; count: number; failed: number };
@@ -56,14 +56,7 @@ export default function DnsExitPage() {
       client.setQueryData(progressKey, state);
       for (let i = 0; i < samples; i++) {
         try {
-          const token = crypto.randomUUID().replaceAll("-", "");
-          const data = await request<{ dns?: { ip: string; geo: string } }>(
-            `https://${token}.edns.ip-api.com/json`,
-            { signal, cache: "no-store" },
-          );
-          signal.throwIfAborted();
-          if (!data.dns?.ip) throw new Error(t("未返回 DNS 出口"));
-          const resolver = data.dns;
+          const resolver = await sampleDnsExit(signal);
           const found = state.results.some((item) => item.ip === resolver.ip);
           state = {
             ...state,

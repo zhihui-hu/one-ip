@@ -161,8 +161,9 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   ];
   const geoQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["geoip", ip],
-      queryFn: ({ signal }: { signal: AbortSignal }) => getGeo(ip, signal),
+      queryKey: ["geoip", ip, 1000],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        getGeo(ip, signal, 1000),
       staleTime: 60_000,
       retry: false,
     })),

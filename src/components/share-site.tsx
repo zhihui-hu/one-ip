@@ -7,9 +7,8 @@ import { Button } from "./ui/button";
 import { InputGroup, InputGroupInput, InputGroupAddon } from "./ui/input-group";
 import { ResponsiveDialog } from "./ui/responsive-dialog";
 
-const siteUrl = "https://ip.huzhihui.com/";
-
 export function ShareSite() {
+  const siteUrl = `${window.location.origin}/`;
   const [open, setOpen] = useState(false);
   return (
     <>

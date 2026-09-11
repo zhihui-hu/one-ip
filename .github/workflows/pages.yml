@@ -50,7 +50,7 @@ jobs:
 
   deploy:
     name: Create or update one-ip Worker
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.ENABLE_CF_DEPLOY == 'true'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15

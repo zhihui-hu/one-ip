@@ -4,12 +4,14 @@ import type { Geo } from "@/lib/types";
 
 export const getMyIp = (signal?: AbortSignal) =>
   endpoint<Geo>("/me", { signal });
-export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
-  const options = () => ({
-    signal: signal
-      ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
-      : AbortSignal.timeout(5000),
-  });
+export async function getGeo(
+  ip: string,
+  signal?: AbortSignal,
+  timeoutMs = 3000,
+): Promise<Geo> {
+  const timeout = AbortSignal.timeout(timeoutMs);
+  signal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  const options = () => ({ signal });
   try {
     const data = await request<Geo>(
       `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
@@ -48,6 +50,8 @@ export async function getGeo(ip: string, signal?: AbortSignal): Promise<Geo> {
   }
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
+  const timeout = AbortSignal.timeout(3000);
+  signal = signal ? AbortSignal.any([signal, timeout]) : timeout;
   const sources = [
     {
       url: "https://necaptcha.nosdn.127.net/ab7f4275c1744aa28e0a8f3a1c58c532.png",
@@ -69,9 +73,7 @@ export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
           credentials: "omit",
           redirect: "error",
           cache: "no-store",
-          signal: signal
-            ? AbortSignal.any([signal, AbortSignal.timeout(5000)])
-            : AbortSignal.timeout(5000),
+          signal,
         },
         "headers",
       );
@@ -160,8 +162,8 @@ export async function getBrowserIp(
     `https://${version === 4 ? "api4" : "api6"}.ipify.org?format=json`,
     {
       signal: signal
-        ? AbortSignal.any([signal, AbortSignal.timeout(8000)])
-        : AbortSignal.timeout(8000),
+        ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
+        : AbortSignal.timeout(3000),
       cache: "no-store",
     },
   );

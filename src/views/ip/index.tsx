@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, useId } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LookupForm } from "@/components/lookup-form";
-import { IpText, ErrorNotice } from "@/components/toolkit";
+import { IpText, ErrorNotice, Pending } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
 import { useLookupHistory } from "@/hooks/use-lookup-history";
 import { t } from "@/i18n";
@@ -128,6 +128,11 @@ export default function IpPage() {
     <div className="lookup-page ip-detail-page">
       <h1 className="sr-only">{t("IP 信息查询")}</h1>
       <ErrorNotice error={query.error} />
+      {query.isFetching && (
+        <p className="status-line" role="status">
+          <Pending>{t("查询中…")}</Pending>
+        </p>
+      )}
       {query.data ? (
         <IpDetails data={query.data} search={search} recent={recent} />
       ) : (
