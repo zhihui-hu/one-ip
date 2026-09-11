@@ -23,6 +23,8 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 [在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
+社区友链：[LINUX DO](https://linux.do/) · 真诚、友善、团结、专业。
+
 点击下方按钮，一键部署到 Cloudflare。
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
