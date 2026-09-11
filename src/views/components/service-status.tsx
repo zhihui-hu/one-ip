@@ -21,6 +21,7 @@ export function ServiceStatusPage({
     queryKey: ["service-status", service.id],
     queryFn: ({ signal }) => getStatus(service.id, signal),
     retry: false,
+    staleTime: 60_000,
     refetchInterval: 120_000,
   });
   return (

@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
-run_worker_first = true
+run_worker_first = ["/api/*", "/worker", "/worker/*"]
 
 [observability]
 enabled = true
@@ -26,6 +26,23 @@ namespace_id = "1001"
 simple = { limit = 180, period = 60 }
 
 [[ratelimits]]
+name = "ACTION_LIMITER"
+namespace_id = "1002"
+simple = { limit = 5, period = 60 }
+
+# Local development forwards all page and asset requests to Vite.
+[env.local.assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = true
+
+[[env.local.ratelimits]]
+name = "API_LIMITER"
+namespace_id = "1001"
+simple = { limit = 180, period = 60 }
+
+[[env.local.ratelimits]]
 name = "ACTION_LIMITER"
 namespace_id = "1002"
 simple = { limit = 5, period = 60 }

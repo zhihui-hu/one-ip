@@ -8,6 +8,8 @@ const children = [
       "exec",
       "wrangler",
       "dev",
+      "--env",
+      "local",
       "--var",
       "LOCAL_DEV:true",
       "--assets",
