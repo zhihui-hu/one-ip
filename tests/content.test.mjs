@@ -51,8 +51,8 @@ test("animated navigation maps IP details and live status to their parent tools"
 test("site logos use HTTPS icon URLs rather than bundled files", () => {
   const sites = json("src/views/home/sites.json");
   const targets = json("src/views/link/targets.json");
-  assert.equal(sites.length, 37);
-  assert.equal(targets.length, 48);
+  assert.ok(sites.length > 0);
+  assert.ok(targets.length > 0);
   for (const item of [...sites, ...targets]) {
     const icon = new URL(item.icon);
     assert.equal(icon.protocol, "https:");

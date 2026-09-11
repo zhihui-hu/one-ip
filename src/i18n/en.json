@@ -1275,5 +1275,9 @@
   "平台未提供": "Not provided by platform",
   "加密套件": "Cipher suite",
   "TLS 指纹接口请求失败，请重试。": "TLS fingerprint request failed. Please retry.",
-  "JA3/JA4 需 Cloudflare Enterprise Bot Management；本地环境或平台未提供字段时无法显示。": "JA3/JA4 requires Cloudflare Enterprise Bot Management. Values are unavailable locally or when the platform does not provide them."
+  "JA3/JA4 需 Cloudflare Enterprise Bot Management；本地环境或平台未提供字段时无法显示。": "JA3/JA4 requires Cloudflare Enterprise Bot Management. Values are unavailable locally or when the platform does not provide them.",
+  "低风险": "Low risk",
+  "中风险": "Medium risk",
+  "高风险": "High risk",
+  "检测不完整": "Incomplete detection"
 }

@@ -8,8 +8,9 @@ test("DNS samples use unique hosts, bypass cache, and return resolver data", asy
   globalThis.fetch = async (url, init) => {
     hosts.push(new URL(url).hostname);
     assert.equal(init.cache, "no-store");
+    assert.equal(init.credentials, "omit");
     assert.ok(init.signal instanceof AbortSignal);
-    return Response.json({ dns: { ip: "1.1.1.1", geo: "test" } });
+    return Response.json({ "1.1.1.1": { ISP: "test", IP: "1.1.1.1" } });
   };
   try {
     const signal = new AbortController().signal;
@@ -20,14 +21,14 @@ test("DNS samples use unique hosts, bypass cache, and return resolver data", asy
     await sampleDnsExit(signal);
     assert.notEqual(hosts[0], hosts[1]);
     assert.ok(
-      hosts.every((host) => /^[a-f0-9]{32}\.edns\.ip-api\.com$/.test(host)),
+      hosts.every((host) => /^[a-f0-9]{10}\.ipv4\.surfsharkdns\.com$/.test(host)),
     );
     globalThis.fetch = async () => Response.json({});
     await assert.rejects(sampleDnsExit(signal), /DNS/);
     const controller = new AbortController();
     globalThis.fetch = async () => {
       controller.abort();
-      return Response.json({ dns: { ip: "1.1.1.1", geo: "test" } });
+      return Response.json({ "1.1.1.1": { ISP: "test", IP: "1.1.1.1" } });
     };
     await assert.rejects(sampleDnsExit(controller.signal), {
       name: "AbortError",
