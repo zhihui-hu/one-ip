@@ -2,11 +2,11 @@ import { endpoint } from "@/lib/network";
 
 export interface ServiceStatus {
   status: { indicator: string; description: string };
-  incidents: {
+  incidents?: {
     id: string;
     name: string;
     status: string;
-    updated_at: string;
+    updated_at?: string;
     shortlink?: string;
   }[];
   components?: { id: string; name: string; status: string }[];

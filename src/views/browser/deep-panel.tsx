@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DataTable,
   ErrorNotice,
@@ -24,10 +24,9 @@ export function DeepPanel() {
   const [result, setResult] = useState<DiagnosticResult>();
   const [detail, setDetail] = useState<DiagnosticModule | null>(null);
   const [error, setError] = useState<Error>();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(true);
   const controller = useRef<AbortController | null>(null);
-  useEffect(() => () => controller.current?.abort(), []);
-  async function run() {
+  const run = useCallback(async () => {
     controller.current?.abort();
     const active = new AbortController();
     controller.current = active;
@@ -51,7 +50,14 @@ export function DeepPanel() {
     } finally {
       if (!active.signal.aborted) setBusy(false);
     }
-  }
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => void run(), 0);
+    return () => {
+      clearTimeout(timer);
+      controller.current?.abort();
+    };
+  }, [run]);
   const reports = result?.modules.map((module) => ({
     ...module,
     report: moduleReport(module.name, parseDetail(module.detail)),

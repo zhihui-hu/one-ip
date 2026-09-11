@@ -8,52 +8,87 @@ async function pageText(url) {
   return response.text();
 }
 
-export function parseDeepSeek(html) {
-  // Read serialized data only; never execute scripts from the status page.
-  for (const match of html.matchAll(
-    /self\.__next_f\.push\((\[.*?\])\)<\/script>/g,
-  )) {
-    const chunk = JSON.parse(match[1])[1];
-    if (typeof chunk !== "string" || !chunk.includes('"initialData"')) continue;
-    for (const line of chunk.split("\n")) {
-      const start = line.indexOf(":[");
-      if (start < 0) continue;
-      const props = JSON.parse(line.slice(start + 1))[3];
-      const data = props?.initialData;
-      if (
-        !Array.isArray(data?.page?.components) ||
-        !Array.isArray(data.active_changes)
-      )
-        continue;
-      const active = data.active_changes.filter(
-        (item) =>
-          !["resolved", "completed", "cancelled", "scheduled"].includes(
-            item.status,
-          ),
-      );
-      const incidents = active.map((item) => ({
-        id: String(item.change_id),
-        name: item.title,
-        status: item.status,
-        updated_at: item.updated_at_seconds
-          ? new Date(item.updated_at_seconds * 1000).toISOString()
-          : undefined,
-        shortlink: `https://status.deepseek.com/incidents/${item.change_id}`,
-      }));
-      return {
-        status: {
-          indicator: active.some((item) => item.type === "incident")
-            ? "minor"
-            : active.length
-              ? "maintenance"
-              : "none",
-          description: active.length ? "存在服务故障或维护" : "正常运行",
-        },
-        incidents,
+function rssItems(xml) {
+  if (
+    !/<rss\b/.test(xml) ||
+    !/<channel\b/.test(xml) ||
+    !/<\/channel>\s*<\/rss>\s*$/.test(xml)
+  )
+    throw unavailable();
+  const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/g)];
+  if (items.length !== (xml.match(/<item\b/g) ?? []).length)
+    throw unavailable();
+  return items;
+}
+function rssField(body, tag) {
+  const value =
+    body
+      .match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`))?.[1]
+      .trim() ?? "";
+  if (value.startsWith("<![CDATA[") && value.endsWith("]]>"))
+    return value.slice(9, -3);
+  return value.replace(
+    /&(?:amp|lt|gt|quot|apos|#\d+|#x[\da-fA-F]+);/g,
+    (entity) => {
+      const named = {
+        "&amp;": "&",
+        "&lt;": "<",
+        "&gt;": ">",
+        "&quot;": '"',
+        "&apos;": "'",
       };
-    }
+      if (named[entity]) return named[entity];
+      const code = entity.startsWith("&#x")
+        ? parseInt(entity.slice(3, -1), 16)
+        : Number(entity.slice(2, -1));
+      if (code < 0 || code > 0x10ffff) throw unavailable();
+      return String.fromCodePoint(code);
+    },
+  );
+}
+export function parseDeepSeek(xml) {
+  const incidents = [];
+  for (const [, body] of rssItems(xml)) {
+    const description = rssField(body, "description");
+    const state = description
+      .match(/<strong>\s*Status:\s*<\/strong>\s*([\w-]+)/i)?.[1]
+      .toLowerCase();
+    if (["resolved", "completed", "cancelled", "scheduled"].includes(state))
+      continue;
+    if (
+      ![
+        "investigating",
+        "identified",
+        "monitoring",
+        "ongoing",
+        "in_progress",
+        "verifying",
+      ].includes(state)
+    )
+      throw unavailable();
+    const id = rssField(body, "guid");
+    const name = rssField(body, "title");
+    const shortlink = rssField(body, "link");
+    if (!id || !name || !shortlink.startsWith("https://status.deepseek.com/"))
+      throw unavailable();
+    // RSS pubDate is publication time, not necessarily the latest update time.
+    incidents.push({ id, name, status: state, shortlink });
   }
-  throw unavailable();
+  return {
+    status: {
+      indicator: incidents.some((item) =>
+        ["investigating", "identified", "monitoring"].includes(item.status),
+      )
+        ? "minor"
+        : incidents.length
+          ? "maintenance"
+          : "none",
+      description: incidents.length
+        ? "存在公开服务事件"
+        : "订阅源未报告未解决事件",
+    },
+    incidents,
+  };
 }
 
 export function parseGemini(data) {
@@ -96,6 +131,16 @@ export function parseGemini(data) {
 }
 
 export async function getAiStatus(service) {
+  if (service.id === "33") return parseGrokFeed(await pageText(service.url));
+  if (service.id === "11") {
+    return parseReplicate(
+      await upstream(service.url, {
+        headers: {
+          "User-Agent": "One-IP/1.0 (+https://github.com/zhihui-hu/one-ip)",
+        },
+      }),
+    );
+  }
   if (service.id === "32") {
     let html;
     try {
@@ -103,7 +148,7 @@ export async function getAiStatus(service) {
     } catch {
       throw new HttpError(
         502,
-        "DeepSeek 官方状态页连接失败，请稍后重试或查看官方页面。",
+        "DeepSeek 官方订阅源连接失败，请稍后重试或查看官方页面。",
       );
     }
     try {
@@ -139,4 +184,107 @@ export async function getAiStatus(service) {
     throw unavailable();
   }
   return upstream(service.url);
+}
+
+export function parseGrokFeed(xml) {
+  const items = rssItems(xml);
+  const incidents = [];
+  for (const [, body] of items) {
+    // Categories describe the current state; description contains historical updates too.
+    const metadata = body.replace(
+      /<description\b[^>]*>[\s\S]*?<\/description>/g,
+      "",
+    );
+    const categories = [
+      ...metadata.matchAll(/<category>([^<]+)<\/category>/g),
+    ].map((match) => match[1].trim().toLowerCase());
+    if (categories.includes("resolved")) continue;
+    const description = rssField(body, "description");
+    const state = description
+      .match(/<h3>\s*Status:\s*([\w -]+)\s*<\/h3>/i)?.[1]
+      .trim()
+      .toLowerCase();
+    if (
+      !state ||
+      ![
+        "investigating",
+        "identified",
+        "monitoring",
+        "open",
+        "ongoing",
+      ].includes(state)
+    )
+      throw unavailable();
+    const id = rssField(metadata, "guid");
+    const name = rssField(metadata, "title");
+    const shortlink = rssField(metadata, "link");
+    if (!id || !name || !shortlink.startsWith("https://status.x.ai/"))
+      throw unavailable();
+    const dates = [...description.matchAll(/<strong>([^<]+)<\/strong>/g)]
+      .map((match) => Date.parse(match[1]))
+      .filter(Number.isFinite);
+    const published = Date.parse(rssField(metadata, "pubDate"));
+    if (Number.isFinite(published)) dates.push(published);
+    incidents.push({
+      id,
+      name,
+      status: state,
+      shortlink,
+      ...(dates.length
+        ? { updated_at: new Date(Math.max(...dates)).toISOString() }
+        : {}),
+    });
+  }
+  return {
+    status: {
+      indicator: incidents.length ? "minor" : "none",
+      description: incidents.length
+        ? "存在公开服务事件"
+        : "订阅源未报告未解决事件",
+    },
+    incidents,
+  };
+}
+
+export function parseReplicate(data) {
+  const component = data?.components?.find(
+    (item) => item.id === "fvgfcmy66tdr",
+  );
+  const states = {
+    operational: "none",
+    degraded_performance: "minor",
+    partial_outage: "minor",
+    major_outage: "major",
+    under_maintenance: "maintenance",
+  };
+  if (
+    !component ||
+    !states[component.status] ||
+    !Array.isArray(data.incidents) ||
+    !Array.isArray(data.scheduled_maintenances)
+  )
+    throw unavailable();
+  const affectsReplicate = (item) =>
+    item.components?.some((part) => part.id === component.id);
+  const incidents = data.incidents.filter(
+    (item) =>
+      ["investigating", "identified", "monitoring"].includes(item.status) &&
+      affectsReplicate(item),
+  );
+  const maintenance = data.scheduled_maintenances.filter(
+    (item) =>
+      ["in_progress", "verifying"].includes(item.status) &&
+      affectsReplicate(item),
+  );
+  return {
+    status: {
+      indicator:
+        component.status === "operational" && maintenance.length
+          ? "maintenance"
+          : states[component.status],
+      description: component.status,
+    },
+    components: [component],
+    incidents: [...incidents, ...maintenance],
+  };
 }

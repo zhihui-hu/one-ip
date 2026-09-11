@@ -60,7 +60,9 @@ export function ServiceStatusPage({
               query.data.incidents.map((i) => (
                 <ToolCard title={i.name} key={i.id}>
                   <p>
-                    {i.status} · {new Date(i.updated_at).toLocaleString(locale)}
+                    {i.status}
+                    {i.updated_at &&
+                      ` · ${new Date(i.updated_at).toLocaleString(locale)}`}
                   </p>
                 </ToolCard>
               ))

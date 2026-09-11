@@ -1,5 +1,20 @@
 # One IP
 
+<p align="left">
+  <img src="https://img.shields.io/badge/React-19-282C34?logo=react&amp;logoColor=61DAFB" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&amp;logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&amp;logoColor=white" alt="TypeScript 6" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&amp;logoColor=white" alt="shadcn/ui" />
+  <img src="https://img.shields.io/badge/Lucide-F56565?logo=lucide&amp;logoColor=white" alt="Lucide" />
+  <img src="https://img.shields.io/badge/Jotai-000000" alt="Jotai" />
+  <img src="https://img.shields.io/badge/TanStack_Query-FF4154?logo=reactquery&amp;logoColor=white" alt="TanStack Query" />
+  <img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflareworkers&amp;logoColor=white" alt="Cloudflare Workers" />
+  <img src="https://img.shields.io/badge/Leaflet-199900?logo=leaflet&amp;logoColor=white" alt="Leaflet" />
+  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&amp;logoColor=white" alt="pnpm 10" />
+  <img src="https://img.shields.io/badge/Prettier-F7B93E?logo=prettier&amp;logoColor=black" alt="Prettier" />
+</p>
+
 A toolbox for IP lookups, network diagnostics, browser checks and AI service status.
 
 [中文](README.md) · **English**
@@ -9,6 +24,26 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 Click the button below for one-click deployment to Cloudflare.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
+
+## Terminal and API
+
+After deploying this version, use `GET /api/ip/health` without an API key:
+
+```bash
+# Current request's public egress IP, readable terminal output
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'
+# JSON (default)
+curl -fsS 'https://ip.huzhihui.com/api/ip/health'
+# Explicit public IPv4 or IPv6
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=2606:4700:4700::1111&format=text'
+```
+
+Replace the domain for your deployment. Local development uses `http://127.0.0.1:8787` and requires `ip`. Without `ip`, the API uses the caller address identified by Cloudflare; a proxy changes that egress address.
+
+Returns `ip`, `source`, `checked_at`, `score`, `status`, location, ISP, ASN and `flags` (residential, datacenter, mobile, VPN, proxy, Tor, crawler, abuser). The trust score ranges from 0 to 100, higher is better. Matching the UI, 75–100 is `good`, 45–74 is `moderate`, below 45 is `poor`. Missing or invalid scores yield `score: null` and `status: "unknown"`; missing flags are `null`, not `false`.
+
+`format` accepts `json` (default) or `text`. Errors always use JSON `{ "error": "…" }`: 400 for invalid input, 429 for rate limits, 503 when the caller IP is unavailable, and 502 for provider failures or mismatched IPs. Existing API rate limits apply; responses are not cached. This reports third-party IP reputation, not terminal speed tests, browser diagnostics or AI account availability.
 
 ## Deploy to Cloudflare
 

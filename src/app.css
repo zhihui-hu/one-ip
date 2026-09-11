@@ -2995,3 +2995,46 @@ body {
 .exit-map .leaflet-control-attribution {
   font-size: 9px;
 }
+
+.api-code-block {
+  overflow: hidden;
+  border: 1px solid #d1d9e0;
+  border-radius: 8px;
+  background: #fff;
+}
+.api-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid #d1d9e0;
+  background: #f6f8fa;
+  color: #59636e;
+  font-size: 12px;
+  font-weight: 500;
+}
+.api-code-block pre.shiki {
+  margin: 0;
+  padding: 16px 20px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre;
+}
+.api-code-block code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.dark .api-code-block {
+  border-color: #3d444d;
+  background: #24292e;
+}
+.dark .api-code-header {
+  border-color: #3d444d;
+  background: #161b22;
+  color: #9198a1;
+}
+.dark .api-code-block .shiki,
+.dark .api-code-block .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}

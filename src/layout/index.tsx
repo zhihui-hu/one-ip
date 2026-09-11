@@ -150,15 +150,25 @@ export function AppLayout() {
         <footer className="app-footer">
           © {new Date().getFullYear()} {t("IP 网络工具 ·")}{" "}
           <UnderlineHover asChild>
-            <Link to="/">{t("IP 查询")}</Link>
+            <a
+              href="https://huzhihui.com/blog/one-ip-guide"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("使用文档")}
+            </a>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/browser/privacy/">{t("WebRTC 检测")}</Link>
+            <Link to="/docs/api">API</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <Link to="/network/whois/">{t("WHOIS 查询")}</Link>
+            <Link to="/terms">{t("使用条款")}</Link>
+          </UnderlineHover>{" "}
+          ·{" "}
+          <UnderlineHover asChild>
+            <Link to="/privacy">{t("隐私政策")}</Link>
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
@@ -170,6 +180,10 @@ export function AppLayout() {
             >
               GitHub
             </a>
+          </UnderlineHover>{" "}
+          ·{" "}
+          <UnderlineHover asChild>
+            <a href="mailto:ip@huzhihui.com">{t("联系作者")}</a>
           </UnderlineHover>
         </footer>
       </div>

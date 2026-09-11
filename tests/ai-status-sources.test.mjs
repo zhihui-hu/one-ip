@@ -3,15 +3,13 @@ import { test } from "node:test";
 import { readFileSync } from "node:fs";
 import { getAiStatus, parseDeepSeek, parseGemini } from "../public/worker/ai-status.js";
 
-const deepPage = (changes) => `<script>self.__next_f.push(${JSON.stringify([1, '1e:' + JSON.stringify(['$', '$L1', null, { initialData: { page: { components: [] }, active_changes: changes } }])])})</script>`;
-test("DeepSeek reads current changes, ignoring resolved incidents and future maintenance", () => {
-  assert.equal(parseDeepSeek(deepPage([{ status: "resolved" }, { status: "scheduled" }])).status.indicator, "none");
-  const incident = { type: "incident", status: "investigating", change_id: 123, title: "API outage" };
-  const result = parseDeepSeek(deepPage([incident]));
-  assert.equal(result.status.indicator, "minor");
-  assert.equal(result.incidents[0].name, "API outage");
-  assert.equal(parseDeepSeek(deepPage([{ type: "maintenance", status: "ongoing" }])).status.indicator, "maintenance");
-  assert.throws(() => parseDeepSeek('<html>Unavailable</html>'));
+const deepFeed = (state) => `<rss><channel><item><title>API issue</title><guid>event-1</guid><link>https://status.deepseek.com/incidents/1</link><description>&lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; ${state}&lt;/p&gt;</description></item></channel></rss>`;
+test("DeepSeek RSS reads explicit status and excludes resolved events", () => {
+  for (const state of ["resolved", "scheduled", "completed", "cancelled"]) assert.equal(parseDeepSeek(deepFeed(state)).status.indicator, "none");
+  assert.equal(parseDeepSeek(deepFeed("investigating")).status.indicator, "minor");
+  assert.equal(parseDeepSeek(deepFeed("ongoing")).status.indicator, "maintenance");
+  assert.throws(() => parseDeepSeek("<html>Unavailable</html>"));
+  assert.throws(() => parseDeepSeek(deepFeed("unexpected")));
 });
 test("Gemini uses the latest timestamp, not array order, to determine resolution", () => {
   const row = ["test", "API unavailable", 1, [[4, "", ["200"]], [1, "", ["100"]]]];

@@ -2,6 +2,21 @@
 
 # One IP
 
+<p align="left">
+  <img src="https://img.shields.io/badge/React-19-282C34?logo=react&amp;logoColor=61DAFB" alt="React 19" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&amp;logoColor=white" alt="Vite 8" />
+  <img src="https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&amp;logoColor=white" alt="TypeScript 6" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&amp;logoColor=white" alt="shadcn/ui" />
+  <img src="https://img.shields.io/badge/Lucide-F56565?logo=lucide&amp;logoColor=white" alt="Lucide" />
+  <img src="https://img.shields.io/badge/Jotai-000000" alt="Jotai" />
+  <img src="https://img.shields.io/badge/TanStack_Query-FF4154?logo=reactquery&amp;logoColor=white" alt="TanStack Query" />
+  <img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflareworkers&amp;logoColor=white" alt="Cloudflare Workers" />
+  <img src="https://img.shields.io/badge/Leaflet-199900?logo=leaflet&amp;logoColor=white" alt="Leaflet" />
+  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&amp;logoColor=white" alt="pnpm 10" />
+  <img src="https://img.shields.io/badge/Prettier-F7B93E?logo=prettier&amp;logoColor=black" alt="Prettier" />
+</p>
+
 IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 **中文** · [English](README.en.md)
@@ -41,6 +56,28 @@ Workers Builds 会在 `main` 收到提交时构建和部署。上方按钮使用
 | 可选验证体验     | Cloudflare Turnstile、Google reCAPTCHA v3；入口需要配置和域名匹配                                         |
 
 第三方服务的限流和跨域限制会影响查询结果。HTTP 耗时与 ICMP Ping 的测量方式不同。IP 类型和信誉分供参考，不代表 AI 平台的官方判断。
+
+## 终端与 API
+
+部署此版本后，可通过 `GET /api/ip/health` 查询 IP 健康度，无需 API Key。
+
+```bash
+# 当前请求的公网出口 IP，终端文本
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'
+
+# 默认返回 JSON，便于脚本处理
+curl -fsS 'https://ip.huzhihui.com/api/ip/health'
+
+# 指定公网 IPv4 或 IPv6
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=2606:4700:4700::1111&format=text'
+```
+
+自部署时替换域名。本地开发使用 `http://127.0.0.1:8787`，必须指定 `ip`。省略 `ip` 时使用 Cloudflare 识别的本次请求出口；经过代理时会查询代理出口。
+
+返回 `ip`、`source`、`checked_at`、`score`、`status`、位置、ISP、ASN 和 `flags`（住宅、数据中心、移动网络、VPN、代理、Tor、爬虫、滥用标记）。信誉分范围 0–100，越高越好；与网页相同，75–100 为 `good`、45–74 为 `moderate`、低于 45 为 `poor`。缺失或无效分数返回 `score: null`、`status: "unknown"`；缺失标记返回 `null`，不视为 `false`。
+
+`format` 支持 `json`（默认）和 `text`。错误始终返回 JSON `{ "error": "…" }`：无效参数为 400、限流为 429、无法识别访客 IP 为 503、数据源故障或地址不匹配为 502。接口沿用现有请求限流，响应不缓存。健康度仅表示第三方 IP 信誉，不包含终端网络测速、浏览器检测或 AI 账号可用性判断。
 
 ## 界面预览
 

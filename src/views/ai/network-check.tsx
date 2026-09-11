@@ -1,13 +1,23 @@
 import { type ReactNode, useState } from "react";
 import { LatencyBadge } from "@/components/latency-badge";
 import { SiteLogo } from "@/components/site-logo";
-import { Pending } from "@/components/toolkit";
+import { IpText, Pending } from "@/components/toolkit";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
+import { trace } from "@/lib/network";
 import { withDetectionAnimation } from "@/views/browser/with-feedback";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { aiPlatforms } from "./platforms";
 import { probeAiDomain } from "./probe";
 
 export function AiNetworkCheck({
@@ -26,10 +36,26 @@ export function AiNetworkCheck({
     retry: false,
     refetchOnWindowFocus: false,
   });
-  const busy = refreshing || query.isFetching;
+  const platforms = domains.map((domain) =>
+    aiPlatforms.find((platform) => platform.domain === domain),
+  );
+  const exits = useQueries({
+    queries: platforms.map((platform, index) => ({
+      queryKey: [platform?.id ?? domains[index], "exit"],
+      enabled: Boolean(platform?.traceDomain),
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        trace(platform!.traceDomain!, signal),
+      staleTime: 60_000,
+      retry: false,
+      refetchOnWindowFocus: false,
+    })),
+  });
+  const busy =
+    refreshing || query.isFetching || exits.some((exit) => exit.isFetching);
   const orderedDomains = domains.map((domain, index) => ({
     domain,
     result: query.data?.[index],
+    exit: exits[index],
   }));
   if (!busy && query.data)
     orderedDomains.sort(
@@ -50,8 +76,13 @@ export function AiNetworkCheck({
             onClick={async () => {
               setRefreshing(true);
               try {
-                const next = await withDetectionAnimation(() =>
-                  query.refetch({ throwOnError: true }),
+                const [next] = await withDetectionAnimation(() =>
+                  Promise.all([
+                    query.refetch({ throwOnError: true }),
+                    ...exits
+                      .filter((_, index) => platforms[index]?.traceDomain)
+                      .map((exit) => exit.refetch()),
+                  ]),
                 );
                 if (next.data?.every((result) => result.median != null))
                   toast.success(t("网络检测完成"));
@@ -69,34 +100,56 @@ export function AiNetworkCheck({
       </CardHeader>
       <CardContent>
         <div ref={sortRef}>
-          {orderedDomains.map(({ domain, result }) => (
-            <div
-              key={domain}
-              data-sort-id={domain}
-              className="flex items-center justify-between gap-3 py-2 text-sm"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <SiteLogo website={`https://${domain}`} />
-                <span className="truncate">{domain}</span>
-              </span>
-              {busy ? (
-                <Pending>{t("检测中…")}</Pending>
-              ) : result?.median != null ? (
-                <span title={result.description}>
-                  <LatencyBadge result={result} running={false} />
-                </span>
-              ) : (
-                <span
-                  className="text-xs text-muted-foreground"
-                  title={result?.description}
-                >
-                  {result?.status === "restricted"
-                    ? t("检测受限")
-                    : t("未确认")}
-                </span>
-              )}
-            </div>
-          ))}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("域名")}</TableHead>
+                <TableHead>{t("出口")} IP</TableHead>
+                <TableHead className="text-right">{t("延迟")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orderedDomains.map(({ domain, result, exit }) => (
+                <TableRow key={domain} data-sort-id={domain}>
+                  <TableCell>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <SiteLogo website={`https://${domain}`} />
+                      <span>{domain}</span>
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {exit.isFetching ? (
+                      <Pending>{t("检测中…")}</Pending>
+                    ) : exit.data?.ip ? (
+                      <IpText ip={exit.data.ip} />
+                    ) : (
+                      <span title={t("未获取到出口，可能受跨域或连接限制。")}>
+                        {t("暂不可用")}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {busy ? (
+                      <Pending>{t("检测中…")}</Pending>
+                    ) : result?.median != null ? (
+                      <span title={result.description}>
+                        <LatencyBadge result={result} running={false} />
+                      </span>
+                    ) : (
+                      <span
+                        className="text-xs text-muted-foreground"
+                        title={result?.description}
+                      >
+                        {result?.status === "restricted"
+                          ? t("检测受限")
+                          : t("未确认")}
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
         <p className="small muted mt-2">
           {t(

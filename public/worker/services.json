@@ -68,7 +68,7 @@
     "id": "10",
     "name": "Perplexity",
     "group": "AI",
-    "url": "https://status.perplexity.com/summary.json",
+    "url": "https://status.perplexity.com/api/v2/summary.json",
     "page": "https://status.perplexity.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.perplexity.ai.ico"
   },
@@ -76,8 +76,10 @@
     "id": "11",
     "name": "Replicate",
     "group": "AI",
-    "url": "https://status.replicate.com/api/v2/summary.json",
-    "page": "https://www.replicatestatus.com/"
+    "url": "https://www.cloudflarestatus.com/api/v2/summary.json",
+    "page": "https://www.cloudflarestatus.com/services?search=replicate",
+    "icon": "https://icons.duckduckgo.com/ip3/replicate.com.ico",
+    "note": "Replicate 已迁入 Cloudflare 官方状态页，仅展示 Replicate 组件及关联事件。"
   },
   {
     "id": "12",
@@ -226,31 +228,31 @@
     "id": "32",
     "name": "DeepSeek",
     "group": "AI",
-    "url": "https://status.deepseek.com",
+    "url": "https://status.deepseek.com/feed.rss",
     "page": "https://status.deepseek.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.deepseek.com.ico",
-    "note": "读取 DeepSeek 官方状态页的当前事件数据。",
+    "note": "读取 DeepSeek 官方 RSS 中未解决的事件，已恢复事件不计入故障。",
     "officialStatus": true
   },
   {
     "id": "33",
     "name": "Grok",
     "group": "AI",
-    "url": "",
+    "url": "https://status.x.ai/feed.xml",
     "page": "https://status.x.ai",
     "icon": "https://icons.duckduckgo.com/ip3/grok.com.ico",
-    "note": "官方状态页与 RSS 当前拒绝自动读取（HTTP 403），可前往官方页面查看。",
+    "note": "读取官方 RSS 中未解决的事件；不包含状态页的实时监控指标。",
     "officialStatus": true
   },
   {
     "id": "34",
     "name": "通义千问",
     "group": "AI",
-    "url": "",
-    "page": "https://chat.qwen.ai",
+    "url": "https://status.aliyun.com/api/status/listCurrentProductStatus?regionId=non-regional",
+    "page": "https://status.aliyun.com/#/?region=non-regional",
     "icon": "https://icons.duckduckgo.com/ip3/chat.qwen.ai.ico",
-    "note": "暂未确认独立的公开状态页，可前往平台官网查看。",
-    "officialStatus": false
+    "note": "展示阿里云非区域性「百炼」产品状态，覆盖千问 API；不代表千问聊天网站状态。",
+    "officialStatus": true
   },
   {
     "id": "35",
@@ -260,6 +262,86 @@
     "page": "https://status.moonshot.cn",
     "icon": "https://icons.duckduckgo.com/ip3/www.kimi.com.ico",
     "note": "Moonshot AI 官方状态，涵盖 Kimi 与开放平台 API。",
+    "officialStatus": true
+  },
+  {
+    "id": "dmit",
+    "name": "DMIT",
+    "group": "VPS",
+    "url": "https://does.dmit.fail/api/v1/status?locale=en",
+    "page": "https://does.dmit.fail/",
+    "icon": "https://icons.duckduckgo.com/ip3/dmit.io.ico",
+    "note": "展示官方汇总与机房线路状态；完整事件请查看官方状态页。",
+    "officialStatus": true
+  },
+  {
+    "id": "bandwagonhost",
+    "name": "搬瓦工 (BandwagonHost)",
+    "group": "VPS",
+    "url": "https://bwhstatus.com/",
+    "page": "https://bwhstatus.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/bandwagonhost.com.ico",
+    "note": "读取官方页面的当前汇总状态；完整事件请查看官方状态页。",
+    "officialStatus": true
+  },
+  {
+    "id": "aws",
+    "name": "Amazon Web Services (AWS)",
+    "group": "云服务",
+    "url": "https://health.aws.amazon.com/public/currentevents",
+    "page": "https://health.aws.amazon.com/health/status",
+    "icon": "https://icons.duckduckgo.com/ip3/aws.amazon.com.ico",
+    "note": "仅涵盖公开服务事件，不代表账户或实例的专属健康状态。",
+    "officialStatus": true
+  },
+  {
+    "id": "aliyun",
+    "name": "阿里云",
+    "group": "云服务",
+    "url": "https://status.aliyun.com/api/status/listEventInProgress",
+    "page": "https://status.aliyun.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/aliyun.com.ico",
+    "note": "读取阿里云官方进行中事件，已恢复事件不计入当前故障。",
+    "officialStatus": true
+  },
+  {
+    "id": "tencent-cloud",
+    "name": "腾讯云",
+    "group": "云服务",
+    "url": "https://status.tencentcloud.com/v1/api/status/DescribeRegions?BelongSite=1",
+    "page": "https://status.tencentcloud.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/tencentcloud.com.ico",
+    "note": "读取腾讯云官方区域状态与当前公告，隐藏或已恢复公告不计入故障。",
+    "officialStatus": true
+  },
+  {
+    "id": "google-cloud",
+    "name": "Google Cloud",
+    "group": "云服务",
+    "url": "https://status.cloud.google.com/incidents.json",
+    "page": "https://status.cloud.google.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/cloud.google.com.ico",
+    "note": "仅涵盖公开服务事件，不代表账户或实例的专属健康状态。",
+    "officialStatus": true
+  },
+  {
+    "id": "azure",
+    "name": "Microsoft Azure",
+    "group": "云服务",
+    "url": "https://azure.status.microsoft/en-us/status/",
+    "page": "https://azure.status.microsoft/en-us/status/",
+    "icon": "https://icons.duckduckgo.com/ip3/azure.microsoft.com.ico",
+    "note": "读取 Azure 官方 Current Impact；仅涵盖公开的广泛影响事件，不代表账户专属健康状态。",
+    "officialStatus": true
+  },
+  {
+    "id": "oracle-cloud",
+    "name": "Oracle Cloud (OCI)",
+    "group": "云服务",
+    "url": "https://ocistatus.oraclecloud.com/api/v2/status.json",
+    "page": "https://ocistatus.oraclecloud.com/",
+    "icon": "https://icons.duckduckgo.com/ip3/oracle.com.ico",
+    "note": "展示 OCI 商业区域的官方汇总状态；区域详情请查看官方页面。",
     "officialStatus": true
   }
 ]

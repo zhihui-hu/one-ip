@@ -1,8 +1,10 @@
 import { getAiStatus } from "./ai-status.js";
 import { challengeConfig, verifyChallenge } from "./challenges.js";
+import { getCloudStatus } from "./cloud-status.js";
 import { cfGeo, geoIp, secondaryGeo } from "./geo.js";
 import { HttpError, inputJson, json, publicIp } from "./http.js";
 import { siteIcon } from "./icons.js";
+import { ipHealth } from "./ip-health.js";
 import { ipNetwork } from "./ip-network.js";
 import { ipType } from "./ip-type.js";
 import { startPing, pingResult, pingNodes } from "./ping.js";
@@ -66,6 +68,7 @@ export default {
           );
         return json(data);
       }
+      if (path === "/ip/health") return await ipHealth(request, env);
       if (path.startsWith("/ip-type/"))
         return await ipType(decodeURIComponent(path.slice(9)), url.origin);
       if (path.startsWith("/geoip/"))
@@ -110,7 +113,18 @@ export default {
             503,
             "该服务未提供已接入的公开状态接口，请查看官方状态页",
           );
-        const data = await getAiStatus(service);
+        const data = await (service.group === "VPS" ||
+        [
+          "aws",
+          "google-cloud",
+          "oracle-cloud",
+          "34",
+          "aliyun",
+          "tencent-cloud",
+          "azure",
+        ].includes(service.id)
+          ? getCloudStatus(service)
+          : getAiStatus(service));
         return json({
           ...normalizeStatus(data),
           fetchedAt: new Date().toISOString(),

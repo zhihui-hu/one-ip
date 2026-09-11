@@ -67,7 +67,15 @@ export default function StatusPage() {
   const sections = [
     [
       t("故障 / 维护"),
-      rows.filter((s) => statusOrder(s.query.data?.status?.indicator) === 0),
+      rows
+        .filter((s) => statusOrder(s.query.data?.status?.indicator) === 0)
+        .sort((a, b) => {
+          const severity = ["critical", "major", "minor", "maintenance"];
+          return (
+            severity.indexOf(a.query.data!.status.indicator) -
+            severity.indexOf(b.query.data!.status.indicator)
+          );
+        }),
     ],
     [
       t("运行中"),
@@ -191,7 +199,7 @@ export default function StatusPage() {
       />
       <div className="toolbar">
         <div className="filter-tabs">
-          {["全部", "AI", "云服务", "开发", "社区"].map((group) => (
+          {["全部", "AI", "VPS", "云服务", "开发", "社区"].map((group) => (
             <Button
               size="sm"
               variant={group === filter ? "secondary" : "ghost"}
@@ -318,8 +326,8 @@ export default function StatusPage() {
           detail?.loading
             ? t("正在查询服务状态…")
             : t(
-                detail?.note ??
-                  detail?.error ??
+                detail?.error ??
+                  detail?.note ??
                   detail?.data?.status?.description ??
                   t("暂无说明"),
               )
@@ -367,11 +375,17 @@ export default function StatusPage() {
         {!detail?.loading &&
           !detail?.error &&
           detail?.data &&
-          !detail.data.incidents?.length && (
+          Array.isArray(detail.data.incidents) &&
+          !detail.data.incidents.length && (
             <p className="text-sm text-muted-foreground">
               {t("数据源未报告当前事件。")}
             </p>
           )}
+        {detail?.data && !detail.data.incidents && (
+          <p className="text-sm text-muted-foreground">
+            {t("此数据源仅提供汇总状态，事件详情请查看官方页面。")}
+          </p>
+        )}
         {detail?.data?.incidents?.map((incident) => (
           <section
             key={incident.id}
@@ -380,9 +394,11 @@ export default function StatusPage() {
             <h3 className="font-medium">{incident.name}</h3>
             <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
               <Badge variant="secondary">{incident.status}</Badge>
-              <time>
-                {new Date(incident.updated_at).toLocaleString(locale)}
-              </time>
+              {incident.updated_at && (
+                <time>
+                  {new Date(incident.updated_at).toLocaleString(locale)}
+                </time>
+              )}
             </div>
           </section>
         ))}
