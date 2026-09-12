@@ -97,6 +97,8 @@ export default function StatusPage() {
       loading: Boolean(service.url) && service.query.isPending,
       integrated: Boolean(service.url),
       officialStatus: service.officialStatus !== false,
+      statusSource:
+        "statusSource" in service ? service.statusSource : undefined,
       note: service.note,
       fetching: service.query.isFetching,
       error: service.query.error?.message,
@@ -184,7 +186,11 @@ export default function StatusPage() {
             rel="noreferrer"
             className="small"
           >
-            {row.original.officialStatus ? t("官方状态 ↗") : t("平台官网 ↗")}
+            {row.original.statusSource
+              ? t("第三方 · {0} ↗", [row.original.statusSource])
+              : row.original.officialStatus
+                ? t("官方状态 ↗")
+                : t("平台官网 ↗")}
           </a>
         </UnderlineHover>
       ),
@@ -195,7 +201,7 @@ export default function StatusPage() {
     <div className="service-status-page">
       <PageHeading
         title={t("服务状态")}
-        description={t("各服务官方运行状态与故障事件")}
+        description={t("各服务运行状态与故障事件，第三方来源单独标注")}
       />
       <div className="toolbar">
         <div className="filter-tabs">
@@ -345,6 +351,16 @@ export default function StatusPage() {
                 : (labels[detail.data?.status?.indicator ?? ""] ?? t("未知"))}
             </Badge>
             <span>{t(detail.group)}</span>
+            {detail.statusSource && (
+              <span>{t("第三方 · {0} ↗", [detail.statusSource])}</span>
+            )}
+            {detail.data?.checkedAt && (
+              <time>
+                {t("来源检测时间：{0}", [
+                  new Date(detail.data.checkedAt).toLocaleString(locale),
+                ])}
+              </time>
+            )}
             {detail.data?.fetchedAt && (
               <time>
                 {t("更新于")}
@@ -383,7 +399,7 @@ export default function StatusPage() {
           )}
         {detail?.data && !detail.data.incidents && (
           <p className="text-sm text-muted-foreground">
-            {t("此数据源仅提供汇总状态，事件详情请查看官方页面。")}
+            {t("此数据源仅提供汇总状态，事件详情请查看来源页面。")}
           </p>
         )}
         {detail?.data?.incidents?.map((incident) => (
@@ -409,9 +425,11 @@ export default function StatusPage() {
             target="_blank"
             rel="noreferrer"
           >
-            {detail.officialStatus
-              ? t("查看官方状态页 ↗")
-              : t("前往平台官网 ↗")}
+            {detail.statusSource
+              ? t("第三方 · {0} ↗", [detail.statusSource])
+              : detail.officialStatus
+                ? t("查看官方状态页 ↗")
+                : t("前往平台官网 ↗")}
           </a>
         )}
       </ResponsiveDialog>

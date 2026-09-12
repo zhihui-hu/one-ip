@@ -1,4 +1,5 @@
 import { boundedJson, HttpError, upstream } from "./http.js";
+import { parseTelegramStatus } from "./telegram-status.js";
 
 const unavailable = () => new HttpError(502, "官方状态数据暂不可用");
 
@@ -131,6 +132,12 @@ export function parseGemini(data) {
 }
 
 export async function getAiStatus(service) {
+  if (service.id === "telegram")
+    return parseTelegramStatus(
+      await upstream(service.url, {
+        cf: { cacheTtl: 60, cacheEverything: true },
+      }),
+    );
   if (service.id === "33") return parseGrokFeed(await pageText(service.url));
   if (service.id === "11") {
     return parseReplicate(

@@ -1364,5 +1364,13 @@
   "以下为示意数据，并非实时查询结果。": "Illustrative data, not a live query result.",
   "信誉分越高越好；未知字段为 null。接口有频率限制，收到 429 后请稍后重试。": "Higher reputation scores are better. Unknown fields are null. The API is rate-limited; retry later after a 429 response.",
   "暂未接入可读取 Telegram 出口 IP 的接口；网页连通性请使用网站连通检测。": "No readable Telegram egress IP endpoint is integrated. Use website connectivity to check web access.",
-  "暂未接入 Telegram 官方实时状态接口，请查看官方公告；待确认不代表服务故障。": "No official live Telegram status feed is integrated. Check official announcements; unconfirmed does not mean an outage."
+  "暂未接入 Telegram 官方实时状态接口，请查看官方公告；待确认不代表服务故障。": "No official live Telegram status feed is integrated. Check official announcements; unconfirmed does not mean an outage.",
+  "第三方来源：UptimeRobot。仅监测 telegram.org 网站可用性，不代表 Telegram 全球消息收发状态；数据过期或不可用时显示待确认。": "Third-party source: UptimeRobot. Monitors telegram.org website availability only, not global Telegram messaging. Stale or unavailable data is shown as unconfirmed.",
+  "第三方 · {0} ↗": "Third party \u00b7 {0} \u2197",
+  "各服务运行状态与故障事件，第三方来源单独标注": "Service status and incidents; third-party sources are labeled separately",
+  "此数据源仅提供汇总状态，事件详情请查看来源页面。": "This source provides aggregate status only. See the source page for incident details.",
+  "第三方状态数据暂不可用": "Third-party status data is unavailable",
+  "第三方网站监测正常": "Third-party website monitor: operational",
+  "第三方网站监测异常": "Third-party website monitor: outage",
+  "来源检测时间：{0}": "Source checked at: {0}"
 }
