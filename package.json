@@ -11,7 +11,8 @@
   "scripts": {
     "dev": "vite",
     "deploy": "wrangler deploy",
-    "build": "tsc -b && vite build",
+    "terminal:manifest": "node scripts/generate-terminal-manifest.mjs",
+    "build": "pnpm terminal:manifest && tsc -b && vite build",
     "worker:dev": "node scripts/worker-dev.mjs",
     "worker:types": "wrangler types",
     "test": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",

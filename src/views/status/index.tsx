@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AnimatedValue } from "@/components/animated-value";
+import { DataTable } from "@/components/data-table";
 import { NumberTicker } from "@/components/number-ticker";
 import { SiteLogo } from "@/components/site-logo";
-import {
-  PageHeading,
-  Pending,
-  ToolCard,
-  DataTable,
-} from "@/components/toolkit";
+import { PageHeading, Pending, ToolCard } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,9 +12,11 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { t, locale } from "@/i18n";
-import { useQueries } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getStatus } from "./api";
+import { statusLoadBatch, statusLoadIds } from "./loading";
 import { statusOrder } from "./order";
 import rawservices from "./services.json";
 
@@ -44,25 +42,42 @@ const labels: Record<string, string> = {
 };
 export default function StatusPage() {
   const mobile = useIsMobile();
+  const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
   const [detailId, setDetailId] = useState<string | null>(() => {
     const id = params.get("service");
     return services.some((service) => service.id === id) ? id : null;
   });
+  const allBatch = statusLoadBatch(services, (service) => {
+    const state = queryClient.getQueryState(
+      queryKeys.status.service(service.id),
+    );
+    return state?.status === "success" || state?.status === "error";
+  });
   const filter = params.get("group") ?? "全部";
+  const requestedIds = useMemo(
+    () => statusLoadIds(services, filter, detailId, allBatch),
+    [allBatch, detailId, filter],
+  );
   const queries = useQueries({
     queries: services.map((s) => ({
-      queryKey: ["service-status", s.id],
-      enabled: Boolean(s.url),
+      queryKey: queryKeys.status.service(s.id),
+      enabled: Boolean(s.url) && requestedIds.has(s.id),
       queryFn: ({ signal }: { signal: AbortSignal }) => getStatus(s.id, signal),
       retry: false,
       staleTime: 60_000,
       refetchInterval: 120_000,
     })),
   });
-  const pending = queries.some((q) => q.isFetching);
+  const pending = queries.some(
+    (q, index) => requestedIds.has(services[index].id) && q.isFetching,
+  );
   const rows = services
-    .map((service, i) => ({ ...service, query: queries[i] }))
+    .map((service, i) => ({
+      ...service,
+      requested: requestedIds.has(service.id),
+      query: queries[i],
+    }))
     .filter((s) => filter === "全部" || s.group === filter);
   const sections = [
     [
@@ -94,12 +109,13 @@ export default function StatusPage() {
       page: service.page,
       icon: service.icon,
       data: service.query.data,
-      loading: Boolean(service.url) && service.query.isPending,
+      loading:
+        service.requested && Boolean(service.url) && service.query.isPending,
       integrated: Boolean(service.url),
       officialStatus: service.officialStatus !== false,
       note: service.note,
-      fetching: service.query.isFetching,
-      error: service.query.error?.message,
+      fetching: service.requested && service.query.isFetching,
+      error: service.requested ? service.query.error?.message : undefined,
     })),
   );
   const columns: ColumnDef<(typeof tableRows)[number]>[] = [
@@ -218,7 +234,10 @@ export default function StatusPage() {
           onClick={() => {
             void Promise.all(
               queries
-                .filter((_, index) => services[index].url)
+                .filter(
+                  (_, index) =>
+                    services[index].url && requestedIds.has(services[index].id),
+                )
                 .map((q) => q.refetch()),
             );
           }}
@@ -281,7 +300,9 @@ export default function StatusPage() {
                               <span
                                 className={`service-card service-${indicator ?? "unknown"} shrink-0 text-xs`}
                               >
-                                {service.query.isFetching && !service.query.data
+                                {service.requested &&
+                                service.query.isFetching &&
+                                !service.query.data
                                   ? t("查询中")
                                   : !service.url
                                     ? t("未接入")

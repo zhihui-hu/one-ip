@@ -13,6 +13,7 @@ import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
 import { companyTypeColors } from "@/lib/ip-badge-colors";
 import { ipScoreColor } from "@/lib/ip-score";
+import { isHomeQueryKey, queryKeys } from "@/lib/query-keys";
 import { BrowserSummary } from "@/views/browser/summary";
 import { lookupIp } from "@/views/ip/api";
 import { testConnectivity, type ProbeResult } from "@/views/link/api";
@@ -37,21 +38,7 @@ export function HomePage() {
     setRefreshing(true);
     const filters = {
       predicate: (query: { queryKey: readonly unknown[] }) =>
-        [
-          "home-domestic-ip",
-          "browser-ip",
-          "split",
-          "geoip",
-          "lookup-ip-coffee",
-          "connectivity",
-          "connectivity-progress",
-          "ai-preview",
-          "service-status",
-          "home-dns",
-          "home-webrtc",
-          "webrtc-diagnostic",
-          "home-browser-fingerprint",
-        ].includes(String(query.queryKey[0])),
+        isHomeQueryKey(query.queryKey),
     };
     try {
       await client.cancelQueries(filters);
@@ -62,11 +49,14 @@ export function HomePage() {
   };
   const connectivity = useQueries({
     queries: homeTargets.map((target) => ({
-      queryKey: ["connectivity", target.url, 0],
+      queryKey: queryKeys.home.connectivity(target.url),
       enabled: false,
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         testConnectivity(target.url, signal, (result) =>
-          client.setQueryData(["connectivity-progress", target.url, 0], result),
+          client.setQueryData(
+            queryKeys.home.connectivityProgress(target.url),
+            result,
+          ),
         ),
       retry: false,
       staleTime: 60_000,
@@ -99,12 +89,12 @@ export function HomePage() {
   const probes = useQueries({
     queries: [
       {
-        queryKey: ["home-domestic-ip", 3],
+        queryKey: queryKeys.egress.domestic(),
         retry: false,
         queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
       },
       {
-        queryKey: ["browser-ip", 4],
+        queryKey: queryKeys.home.browserIp(),
         queryFn: ({ signal }: { signal: AbortSignal }) =>
           getBrowserIp(4, signal),
       },
@@ -128,7 +118,7 @@ export function HomePage() {
   ];
   const geoQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["geoip", ip],
+      queryKey: queryKeys.geo.byIp(ip),
       queryFn: ({ signal }: { signal: AbortSignal }) => getGeo(ip, signal),
       staleTime: 60_000,
       retry: false,
@@ -137,7 +127,7 @@ export function HomePage() {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   const typeQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["lookup-ip-coffee", ip],
+      queryKey: queryKeys.ip.classification(ip),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         lookupIp(ip, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
       staleTime: 3600_000,

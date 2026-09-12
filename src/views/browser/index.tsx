@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CompactText } from "@/components/compact-text";
+import { DataTable } from "@/components/data-table";
 import {
-  DataTable,
   Facts,
   ToolCard,
   PageHeading,

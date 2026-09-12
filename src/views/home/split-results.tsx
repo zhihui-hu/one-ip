@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CountryFlag } from "@/components/country-flag";
 import { SiteLogo } from "@/components/site-logo";
@@ -8,40 +8,58 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
+import type { DiagnosticResult } from "@/lib/diagnostics";
+import { queryKeys } from "@/lib/query-keys";
 import type { Geo } from "@/lib/types";
 import { useQueries } from "@tanstack/react-query";
-import { detectSite, getGeo, type Site } from "./api";
+import { detectSiteResult, getGeo } from "./api";
 import { ExitGroups } from "./exit-groups";
-import rawsites from "./sites.json";
+import { sourceRegistry, type SourceDefinition } from "./source-registry";
 
-const sites = rawsites.map((item) => ({ ...item, name: t(item.name) }));
+const allSites = sourceRegistry.map((item) => ({
+  ...item,
+  name: t(item.name),
+}));
+const initialSites = allSites
+  .filter(
+    (site) => site.enabledByDefault && site.execution === "client-request",
+  )
+  .slice(0, 8);
+const initialSiteIds = new Set(initialSites.map((site) => site.id));
 
-interface Row extends Site {
-  onDetail: (name: string) => void;
+function statusText(result: DiagnosticResult | undefined, note?: string) {
+  if (!result)
+    return t(note ?? "出口检测受阻（接口不支持、跨域限制或连接失败）");
+  if (result.status === "ok") return t("已读取出口");
+  if (result.status === "timeout")
+    return t("检测超时，部分浏览器可能限制了检测接口。");
+  if (result.status === "rate_limited") return t("外部数据源限流，请稍后重试");
+  if (result.status === "cancelled") return t("检测已取消");
+  return t(note ?? "出口检测受阻（接口不支持、跨域限制或连接失败）");
+}
+
+type Row = SourceDefinition & {
   visible: boolean;
-  onVisible: (name: string) => void;
   geo?: Geo;
+  diagnostic?: DiagnosticResult;
   pending: boolean;
   geoPending: boolean;
-}
+};
 export function SplitResults({ summary = false }: { summary?: boolean }) {
+  const sites = summary ? initialSites : allSites;
   const [round, setRound] = useState(0);
-  const [detailName, setDetailName] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [detailIp, setDetailIp] = useState<string | null>(null);
+  const runId = `split-${round}`;
   const [visibleSites, setVisibleSites] = useState<Set<string>>(
     () => new Set(),
   );
-  const showSite = useCallback((name: string) => {
-    setVisibleSites((previous) =>
-      previous.has(name) ? previous : new Set(previous).add(name),
-    );
-  }, []);
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!container.current) return;
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
-        setVisibleSites(new Set(sites.map((site) => site.name)));
+        setVisibleSites(new Set(initialSiteIds));
         observer.disconnect();
       }
     });
@@ -50,10 +68,10 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   }, [summary]);
   const queries = useQueries({
     queries: sites.map((site) => ({
-      queryKey: ["split", site.name, round],
-      enabled: visibleSites.has(site.name),
+      queryKey: queryKeys.home.split(site.id, round),
+      enabled: visibleSites.has(site.id),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
-        detectSite(site, signal),
+        detectSiteResult(site, runId, signal),
       staleTime: 60_000,
       retry: false,
     })),
@@ -61,13 +79,15 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   const ips = [
     ...new Set(
       [
-        ...queries.filter((_, index) => visibleSites.has(sites[index].name)),
-      ].flatMap((query) => (query.data ? [query.data.ip] : [])),
+        ...queries.filter((_, index) => visibleSites.has(sites[index].id)),
+      ].flatMap((query) =>
+        query.data?.status === "ok" && query.data.ip ? [query.data.ip] : [],
+      ),
     ),
   ];
   const geoQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["geoip", ip],
+      queryKey: queryKeys.geo.byIp(ip),
       queryFn: ({ signal }: { signal: AbortSignal }) => getGeo(ip, signal),
       staleTime: 60_000,
       retry: false,
@@ -76,16 +96,29 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   const rows: Row[] = sites.map((site, i) => ({
     ...site,
-    onDetail: setDetailName,
-    visible: visibleSites.has(site.name),
-    onVisible: showSite,
-    geo: queries[i].data
-      ? { ...queries[i].data!, ...geoByIp.get(queries[i].data!.ip)?.data }
-      : undefined,
-    pending: queries[i].isFetching || queries[i].isPending,
+    visible: visibleSites.has(site.id),
+    diagnostic: queries[i].data,
+    geo:
+      visibleSites.has(site.id) &&
+      queries[i].data?.status === "ok" &&
+      queries[i].data.ip
+        ? {
+            ip: queries[i].data.ip,
+            source: site.name,
+            ...geoByIp.get(queries[i].data.ip)?.data,
+          }
+        : undefined,
+    pending:
+      visibleSites.has(site.id) &&
+      (queries[i].isFetching || queries[i].isPending),
     geoPending:
-      queries[i].isPending ||
-      Boolean(queries[i].data && geoByIp.get(queries[i].data!.ip)?.isPending),
+      visibleSites.has(site.id) &&
+      (queries[i].isPending ||
+        Boolean(
+          queries[i].data?.status === "ok" &&
+          queries[i].data.ip &&
+          geoByIp.get(queries[i].data.ip)?.isPending,
+        )),
   }));
   rows.sort((a, b) => {
     const aBlocked = a.visible && !a.pending && !a.geo;
@@ -97,7 +130,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
       rows.flatMap((row) => (row.geo ? [[row.geo.ip, row.geo] as const] : [])),
     ).values(),
   ];
-  const detail = rows.find((row) => row.name === detailName);
+  const detail = rows.find((row) => row.id === detailId);
   const pending = queries.some((q) => q.isFetching);
   const Container = summary ? Card : "div";
   const Content = summary ? CardContent : "div";
@@ -121,13 +154,17 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             <ActionButton
               busy={pending}
               onClick={() => {
-                setDetailName(null);
+                setDetailId(null);
                 setDetailIp(null);
-                setVisibleSites(new Set(sites.map((site) => site.name)));
+                setVisibleSites(new Set(sites.map((site) => site.id)));
                 setRound((value) => value + 1);
               }}
             >
-              {pending ? t("检测中...") : t("重新检测")}
+              {pending
+                ? t("检测中...")
+                : visibleSites.size < sites.length
+                  ? t("检测全部")
+                  : t("重新检测")}
             </ActionButton>
           </div>
         )}
@@ -147,7 +184,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                     type="button"
                     className="shrink-0 text-muted-foreground"
                     onClick={() => {
-                      setDetailName(null);
+                      setDetailId(null);
                       setDetailIp(geo.ip);
                     }}
                   >
@@ -170,14 +207,14 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             </p>
           </div>
         ) : (
-          <ExitGroups rows={rows} onSelect={setDetailName} />
+          <ExitGroups rows={rows} onSelect={setDetailId} />
         )}
       </Content>
       <ResponsiveDialog
-        open={detailName !== null || detailIp !== null}
+        open={detailId !== null || detailIp !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setDetailName(null);
+            setDetailId(null);
             setDetailIp(null);
           }
         }}
@@ -205,12 +242,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             <p className="text-muted-foreground">
               {detail.pending
                 ? t("检测中…")
-                : detail.geo
-                  ? t("已读取出口")
-                  : t(
-                      detail.note ??
-                        "出口检测受阻（接口不支持、跨域限制或连接失败）",
-                    )}
+                : statusText(detail.diagnostic, detail.note)}
             </p>
           </div>
         ) : (
@@ -221,15 +253,12 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 .filter((row) => row.geo?.ip === detailIp)
                 .map((row) => (
                   <Badge
-                    key={row.name}
+                    key={row.id}
                     variant="secondary"
                     className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground [&_.site-icon]:size-3.5"
                     asChild
                   >
-                    <button
-                      type="button"
-                      onClick={() => setDetailName(row.name)}
-                    >
+                    <button type="button" onClick={() => setDetailId(row.id)}>
                       <SiteLogo src={row.icon} />
                       <span className="min-w-0 truncate">{row.name}</span>
                     </button>

@@ -10,8 +10,30 @@ import { ipType } from "./ip-type.js";
 import { startPing, pingResult, pingNodes } from "./ping.js";
 import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
+import { cachedStatus, STATUS_CACHE_CONTROL } from "./status-cache.js";
 import { tlsFingerprint } from "./tls-fingerprint.js";
+import { reportWebRtc } from "./webrtc.js";
 import { lookupRegistration } from "./whois.js";
+
+async function loadServiceStatus(service) {
+  const data = await (service.group === "VPS" ||
+  [
+    "aws",
+    "google-cloud",
+    "oracle-cloud",
+    "34",
+    "aliyun",
+    "tencent-cloud",
+    "azure",
+  ].includes(service.id)
+    ? getCloudStatus(service)
+    : getAiStatus(service));
+  return {
+    ...normalizeStatus(data),
+    fetchedAt: new Date().toISOString(),
+    source: service.url,
+  };
+}
 
 /** @type {ExportedHandler<Env>} */
 export default {
@@ -43,7 +65,9 @@ export default {
       if (path === "/dns" || path.startsWith("/dns/"))
         throw new HttpError(404, "接口不存在");
       const isAction =
-        path === "/ping/start" || path === "/browser/challenges/verify";
+        path === "/ping/start" ||
+        path === "/browser/challenges/verify" ||
+        path === "/webrtc/report";
       if (
         (isAction && request.method !== "POST") ||
         (!isAction && request.method !== "GET")
@@ -59,6 +83,8 @@ export default {
         return json(
           await verifyChallenge(await inputJson(request), env, url.hostname),
         );
+      if (path === "/webrtc/report")
+        return json(reportWebRtc(request, await inputJson(request, 20_000)));
       if (path === "/me") {
         const data = cfGeo(request);
         if (!data.ip || key === "local" || env.LOCAL_DEV === "true")
@@ -113,23 +139,14 @@ export default {
             503,
             "该服务未提供已接入的公开状态接口，请查看官方状态页",
           );
-        const data = await (service.group === "VPS" ||
-        [
-          "aws",
-          "google-cloud",
-          "oracle-cloud",
-          "34",
-          "aliyun",
-          "tencent-cloud",
-          "azure",
-        ].includes(service.id)
-          ? getCloudStatus(service)
-          : getAiStatus(service));
-        return json({
-          ...normalizeStatus(data),
-          fetchedAt: new Date().toISOString(),
-          source: service.url,
-        });
+        const result = await cachedStatus(request, service, () =>
+          loadServiceStatus(service),
+        );
+        return json(
+          result.data,
+          200,
+          result.cacheable ? { "Cache-Control": STATUS_CACHE_CONTROL } : {},
+        );
       }
       throw new HttpError(404, "接口不存在");
     } catch (error) {

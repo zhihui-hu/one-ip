@@ -8,6 +8,7 @@ import {
 } from "@/components/toolkit";
 import { t } from "@/i18n";
 import { trace } from "@/lib/network";
+import { queryKeys } from "@/lib/query-keys";
 import { getGeo, getDomesticIp } from "@/views/home/api";
 import { useQuery } from "@tanstack/react-query";
 import { AiNetworkCheck } from "./network-check";
@@ -20,26 +21,26 @@ export default function PlatformDiagnostics({
   platform: AiPlatform;
 }) {
   const exit = useQuery({
-    queryKey: [platform.id, "exit"],
+    queryKey: queryKeys.ai.exit(platform.id),
     enabled: Boolean(platform.traceDomain),
     queryFn: ({ signal }) => trace(platform.traceDomain!, signal),
     staleTime: 60_000,
     retry: false,
   });
   const geo = useQuery({
-    queryKey: ["geoip", exit.data?.ip],
+    queryKey: queryKeys.geo.byIp(exit.data?.ip),
     enabled: Boolean(exit.data?.ip),
     queryFn: ({ signal }) => getGeo(exit.data!.ip, signal),
     staleTime: 60_000,
     retry: false,
   });
   const domestic = useQuery({
-    queryKey: ["domestic-ip"],
+    queryKey: queryKeys.egress.domestic(),
     queryFn: ({ signal }) => getDomesticIp(signal),
     retry: false,
   });
   const cf = useQuery({
-    queryKey: ["cf-exit"],
+    queryKey: queryKeys.egress.cloudflare(),
     queryFn: ({ signal }) => trace("1.1.1.1", signal),
     retry: false,
   });

@@ -1,64 +1,63 @@
 import { t } from "@/i18n";
+import { normalizePublicIp } from "@/lib/diagnostics";
 import { endpoint, trace } from "@/lib/network";
 import type { Geo, RtcResult } from "@/lib/types";
 
-export function isPublicCandidate(ip: string) {
-  if (ip.includes(":")) {
-    let s: string;
-    try {
-      s = new URL(`https://[${ip}]/`).hostname.slice(1, -1);
-    } catch {
-      return false;
-    }
-    if (s.startsWith("::ffff:")) {
-      const [high, low] = s
-        .slice(7)
-        .split(":")
-        .map((part) => parseInt(part, 16));
-      return isPublicCandidate(
-        `${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`,
-      );
-    }
-    return (
-      /^[\da-f:]+$/i.test(s) &&
-      !["::", "::1"].includes(s) &&
-      !/^(f[cd]|fe[89ab]|ff)/i.test(s)
-    );
-  }
-  const parts = ip.split(".").map(Number);
-  if (
-    parts.length !== 4 ||
-    parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)
-  )
-    return false;
-  const [a, b] = parts;
-  return !(
-    a === 0 ||
-    a === 10 ||
-    a === 127 ||
-    a >= 224 ||
-    (a === 169 && b === 254) ||
-    (a === 172 && b >= 16 && b <= 31) ||
-    (a === 192 && b === 168) ||
-    (a === 100 && b >= 64 && b <= 127) ||
-    (a === 198 && (b === 18 || b === 19))
-  );
+const DEFAULT_STUN_ENDPOINTS = [
+  "stun:stun.l.google.com:19302",
+  "stun:stun.cloudflare.com:3478",
+  "stun:stun.l.google.com:443",
+  "stun:stun.cloudflare.com:443",
+] as const;
+const customStun = import.meta.env?.VITE_WEBRTC_STUN_URL;
+export const STUN_ENDPOINTS = [
+  ...DEFAULT_STUN_ENDPOINTS,
+  ...(typeof customStun === "string" && customStun.startsWith("stun:")
+    ? [customStun]
+    : []),
+];
+
+export function isPublicCandidate(ip: string): boolean {
+  return Boolean(normalizePublicIp(ip));
 }
-export async function collectCandidates(
+
+function parseCandidate(candidate: RTCIceCandidate, endpointUrl: string) {
+  const fields = candidate.candidate.trim().split(/\s+/);
+  const ip = candidate.address ?? fields[4];
+  if (!ip || ip.endsWith(".local")) return null;
+  const type = candidate.type ?? fields[7];
+  if (!["host", "srflx", "prflx", "relay"].includes(type ?? "")) return null;
+  const normalized = normalizePublicIp(ip);
+  const canonicalIp = normalized?.ip ?? ip;
+  const port = candidate.port ?? Number(fields[5]);
+  const protocol = candidate.protocol ?? fields[2];
+  const relatedAddress = candidate.relatedAddress ?? fields[9];
+  return {
+    ip: canonicalIp,
+    candidateType: type as RtcResult["candidateType"],
+    type:
+      type === "srflx" || type === "prflx"
+        ? t("公网 (STUN)")
+        : type === "relay"
+          ? t("中继 (TURN)")
+          : t("本地"),
+    public: Boolean(normalized),
+    endpoint: endpointUrl,
+    port: Number.isFinite(port) ? port : undefined,
+    protocol,
+    relatedAddress,
+    raw: candidate.candidate,
+  } satisfies RtcResult;
+}
+
+async function collectEndpoint(
+  stunUrl: string,
   signal: AbortSignal,
 ): Promise<RtcResult[]> {
-  if (typeof RTCPeerConnection === "undefined")
-    throw new Error(t("当前浏览器不支持 WebRTC，无法完成检测。"));
-  const pc = new RTCPeerConnection({
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun.cloudflare.com:3478" },
-      { urls: "stun:stun1.l.google.com:19302" },
-    ],
-  });
+  const pc = new RTCPeerConnection({ iceServers: [{ urls: stunUrl }] });
   const found = new Map<string, RtcResult>();
   let timer: ReturnType<typeof setTimeout> | undefined;
-  let abort: () => void = () => {};
+  let abort: (() => void) | undefined;
   try {
     const gathered = new Promise<void>((resolve, reject) => {
       abort = () => {
@@ -66,29 +65,18 @@ export async function collectCandidates(
         reject(new DOMException(t("已取消"), "AbortError"));
       };
       signal.addEventListener("abort", abort, { once: true });
-      timer = setTimeout(resolve, 7000);
+      timer = setTimeout(resolve, 3000);
       pc.onicecandidate = ({ candidate }) => {
-        if (!candidate) {
-          resolve();
-          return;
-        }
-        const ip = candidate.address ?? candidate.candidate.split(" ")[4];
-        if (!ip || ip.endsWith(".local")) return;
-        const type = candidate.type ?? candidate.candidate.split(" ")[7];
-        found.set(ip, {
-          ip,
-          type:
-            type === "srflx"
-              ? t("公网 (STUN)")
-              : type === "relay"
-                ? t("中继 (TURN)")
-                : t("本地"),
-          public: isPublicCandidate(ip),
-        });
+        if (!candidate) return resolve();
+        const parsed = parseCandidate(candidate, stunUrl);
+        if (parsed)
+          found.set(
+            `${parsed.ip}|${parsed.candidateType}|${parsed.port}|${parsed.protocol}`,
+            parsed,
+          );
       };
     });
     pc.createDataChannel("ip-diagnostic");
-    // Keep offer errors attached to the same promise chain as abort events.
     await Promise.all([
       gathered,
       (async () => {
@@ -100,14 +88,35 @@ export async function collectCandidates(
     return [...found.values()];
   } finally {
     clearTimeout(timer);
-    signal.removeEventListener("abort", abort);
+    if (abort) signal.removeEventListener("abort", abort);
     pc.onicecandidate = null;
     pc.close();
   }
 }
+
+export async function collectCandidates(
+  signal: AbortSignal,
+  stunUrls: readonly string[] = STUN_ENDPOINTS,
+): Promise<RtcResult[]> {
+  if (typeof RTCPeerConnection === "undefined")
+    throw new Error(t("当前浏览器不支持 WebRTC，无法完成检测。"));
+  const batches = await Promise.all(
+    stunUrls.map((url) =>
+      collectEndpoint(url, signal).catch((error) => {
+        if (signal.aborted) throw error;
+        return [];
+      }),
+    ),
+  );
+  return batches.flat();
+}
+
 export async function runWebRtc(_: void, signal: AbortSignal) {
+  const probeId = crypto.randomUUID();
   const [baseline, candidates] = await Promise.all([
-    trace("1.1.1.1", signal).catch(() => null),
+    endpoint<Geo>("/me", { signal }).catch(() =>
+      trace("1.1.1.1", signal).catch(() => null),
+    ),
     collectCandidates(signal),
   ]);
   const results = await Promise.all(
@@ -126,19 +135,70 @@ export async function runWebRtc(_: void, signal: AbortSignal) {
     }),
   );
   signal.throwIfAborted();
-  const different = results.some(
-    (row) => row.public && baseline && row.ip !== baseline.ip,
+  const publicResults = results.filter(
+    (row) =>
+      row.public &&
+      (row.candidateType === "srflx" || row.candidateType === "prflx"),
   );
-  const verdict = !results.some((row) => row.public)
-    ? t(
-        "未采集到公网候选地址。可能被浏览器限制、UDP 阻断或 WebRTC 禁用，不能据此判定安全。",
-      )
-    : !baseline
-      ? t("已采集到 UDP 出口，但 HTTP 基准获取失败，无法判断是否一致。")
+  const publicIps = new Set(publicResults.map((row) => row.ip));
+  const byEndpoint = new Map<string, Set<string>>();
+  for (const row of publicResults) {
+    const set = byEndpoint.get(row.endpoint ?? "unknown") ?? new Set<string>();
+    set.add(row.ip);
+    byEndpoint.set(row.endpoint ?? "unknown", set);
+  }
+  const endpointSets = [...byEndpoint.values()].map((set) =>
+    [...set].sort().join(","),
+  );
+  const splitTunnel = new Set(endpointSets).size > 1;
+  const report = await endpoint<{ httpIp?: string }>("/webrtc/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      probeId,
+      baselineIp: baseline?.ip,
+      candidates: results
+        .filter(
+          ({ candidateType }) =>
+            candidateType === "srflx" || candidateType === "prflx",
+        )
+        .map(({ ip, candidateType, endpoint, port, protocol }) => ({
+          ip,
+          type: candidateType,
+          endpoint,
+          port,
+          protocol,
+        })),
+    }),
+    signal,
+  }).catch(() => undefined);
+  const effectiveBaseline = report?.httpIp ?? baseline?.ip;
+  const effectiveLeakIps = [...publicIps].filter(
+    (ip) => ip !== effectiveBaseline,
+  );
+  const udpBlocked = Boolean(
+    effectiveBaseline && candidates.length > 0 && publicResults.length === 0,
+  );
+  const different = effectiveLeakIps.length > 0;
+  const verdict = !effectiveBaseline
+    ? t("已采集到 UDP 出口，但 HTTP 基准获取失败，无法判断是否一致。")
+    : splitTunnel
+      ? t("UDP 与 HTTPS 走了不同出口，可能存在分流或 WebRTC 泄漏。")
       : different
-        ? t(
-            "发现与 HTTP 出口不同的 UDP 地址，请对照代理分流规则确认；不同出口不一定是泄露。",
-          )
-        : t("本次采样的公网 UDP 出口与 HTTP 出口一致。");
-  return { baseline, results, verdict, different };
+        ? t("发现与 HTTP 出口不同的 UDP 地址，请检查代理和 VPN 分流规则。")
+        : udpBlocked
+          ? t("HTTPS 正常但未发现公网 STUN 地址，UDP 可能已被阻断。")
+          : publicResults.length === 0
+            ? t("未采集到公网候选地址，不能据此判定安全。")
+            : t("本次采样的公网 UDP 出口与 HTTP 出口一致。");
+  return {
+    baseline: report?.httpIp ? { ...baseline, ip: report.httpIp } : baseline,
+    results,
+    verdict,
+    different,
+    leakIps: effectiveLeakIps,
+    splitTunnel,
+    udpBlocked,
+    probeId,
+  };
 }

@@ -138,6 +138,51 @@ test("Tencent fetches current product state for flagged regions and rejects inco
   await assert.rejects(getCloudStatus(service));
 });
 
+test("Tencent shares a concurrency budget across regional detail requests", async (t) => {
+  const regions = Array.from({ length: 10 }, (_, index) => ({
+    RegionId: `region-${index}`,
+    RegionName: `Region ${index}`,
+    EventsIn: true,
+  }));
+  let active = 0;
+  let peak = 0;
+  let detailCalls = 0;
+  t.mock.method(globalThis, "fetch", async (url) => {
+    if (url.includes("DescribeRegions"))
+      return Response.json(tx({ AreaDetailList: [{ RegionList: regions }] }));
+    if (url.includes("DescribeHappening"))
+      return Response.json(tx({ IsShow: false, Status: "NORMAL" }));
+    assert.match(url, /DescribeProductEventForRegionInPeriod/);
+    active += 1;
+    peak = Math.max(peak, active);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    active -= 1;
+    detailCalls += 1;
+    return Response.json(
+      tx({
+        CategoryList: [
+          {
+            ProductList: [
+              {
+                ProductId: "cvm",
+                ProductName: "CVM",
+                CurrentStatus: "NORMAL",
+              },
+            ],
+          },
+        ],
+      }),
+    );
+  });
+  const service = {
+    id: "tencent-cloud",
+    url: "https://status.tencentcloud.com/v1/api/status/DescribeRegions?BelongSite=1",
+  };
+  await Promise.all([getCloudStatus(service), getCloudStatus(service)]);
+  assert.equal(detailCalls, regions.length * 2);
+  assert.ok(peak <= 4, `peak concurrency was ${peak}`);
+});
+
 test("Azure scopes current impact and never interprets empty or changed HTML as healthy", () => {
   assert.equal(
     parseAzure(azure(healthyAzure) + "<h2>Historical outage</h2>").status

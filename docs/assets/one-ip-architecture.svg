@@ -1,0 +1,76 @@
+<svg viewBox="0 0 1080 500" width="1080" xmlns="http://www.w3.org/2000/svg">
+  <title>One IP 工作原理</title>
+  <desc>来源注册表和有界调度器连接浏览器观察、终端本地导入、Cloudflare Worker 固定 API 与第三方来源。</desc>
+  <style>
+    text { font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+    .label { font-size: 12px; font-weight: 600; }
+    .sub { font-size: 10px; }
+    .boundary { fill: #f8fafc; stroke: #94a3b8; stroke-dasharray: 7 5; }
+    .node { rx: 6; }
+    .arrow { fill: none; stroke-width: 2; }
+    .dash { stroke-dasharray: 7 5; }
+  </style>
+  <defs>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#2563eb"/></marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#16a34a"/></marker>
+    <marker id="arrow-purple" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#9333ea"/></marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="2" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L8,4 L0,8 L2,4 z" fill="#e11d48"/></marker>
+  </defs>
+
+  <rect width="1080" height="500" fill="#ffffff"/>
+  <text x="540" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#1e293b">One IP 工作原理</text>
+  <text x="540" y="48" text-anchor="middle" font-size="11" fill="#64748b">浏览器观察 + 终端导入 + Cloudflare Worker 固定 API</text>
+
+  <rect class="boundary" x="20" y="65" width="700" height="410" rx="10"/>
+  <text x="35" y="84" font-size="11" fill="#64748b">浏览器与用户运行时</text>
+  <rect class="boundary" x="740" y="65" width="320" height="205" rx="10"/>
+  <text x="755" y="84" font-size="11" fill="#64748b">Cloudflare Worker：同源固定 API</text>
+  <rect class="boundary" x="740" y="290" width="320" height="180" rx="10"/>
+  <text x="755" y="309" font-size="11" fill="#64748b">外部网络与供应商</text>
+
+  <path class="arrow" d="M170 122 L200 122" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path class="arrow" d="M330 122 L360 122" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path class="arrow" d="M510 122 L540 122" stroke="#9333ea" marker-end="url(#arrow-purple)"/>
+  <path class="arrow" d="M690 122 L760 122" stroke="#e11d48" marker-end="url(#arrow-red)"/>
+  <path class="arrow" d="M885 122 L900 122" stroke="#e11d48" marker-end="url(#arrow-red)"/>
+  <path class="arrow" d="M962 144 L962 180" stroke="#e11d48" marker-end="url(#arrow-red)"/>
+  <path class="arrow" d="M822 144 L822 170" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path class="arrow" d="M962 144 L1010 144 L1010 330 L962 330" stroke="#16a34a" marker-end="url(#arrow-green)"/>
+  <path class="arrow" d="M962 144 L962 260 L822 260 L822 335" stroke="#16a34a" marker-end="url(#arrow-green)"/>
+  <path class="arrow dash" d="M615 144 L700 144 L700 300 L180 300 L180 330" stroke="#9333ea" marker-end="url(#arrow-purple)"/>
+  <path class="arrow dash" d="M180 352 L220 352" stroke="#9333ea" marker-end="url(#arrow-purple)"/>
+  <path class="arrow" d="M370 352 L390 352 L390 242 L520 242" stroke="#2563eb" marker-end="url(#arrow-blue)"/>
+  <path class="arrow dash" d="M550 352 L580 352" stroke="#9333ea" marker-end="url(#arrow-purple)"/>
+
+  <rect class="node" x="40" y="100" width="130" height="44" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="105" y="119" text-anchor="middle" fill="#1e40af">访客与设备</text><text class="sub" x="105" y="135" text-anchor="middle" fill="#1e40af">浏览器 · 终端 · App</text>
+  <rect class="node" x="200" y="100" width="130" height="44" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="265" y="126" text-anchor="middle" fill="#1e40af">React SPA</text>
+  <rect class="node" x="360" y="100" width="150" height="44" fill="#d1fae5" stroke="#16a34a"/>
+  <text class="label" x="435" y="119" text-anchor="middle" fill="#166534">诊断调度器</text><text class="sub" x="435" y="135" text-anchor="middle" fill="#166534">队列 · 4 并发 · 取消</text>
+  <rect class="node" x="540" y="100" width="150" height="44" fill="#fce7f3" stroke="#9333ea"/>
+  <text class="label" x="615" y="119" text-anchor="middle" fill="#7e22ce">来源注册表</text><text class="sub" x="615" y="135" text-anchor="middle" fill="#7e22ce">验证 endpoint · family</text>
+  <rect class="node" x="760" y="100" width="125" height="44" fill="#fce7f3" stroke="#e11d48"/>
+  <text class="label" x="822" y="126" text-anchor="middle" fill="#9f1239">Worker</text>
+  <rect class="node" x="900" y="100" width="125" height="44" fill="#fce7f3" stroke="#e11d48"/>
+  <text class="label" x="962" y="119" text-anchor="middle" fill="#9f1239">固定 API 路由</text><text class="sub" x="962" y="135" text-anchor="middle" fill="#9f1239">me · geo · health</text>
+  <rect class="node" x="760" y="170" width="125" height="44" fill="#dbeafe" stroke="#2563eb"/>
+  <text class="label" x="822" y="189" text-anchor="middle" fill="#1e40af">Static Assets</text><text class="sub" x="822" y="205" text-anchor="middle" fill="#1e40af">SPA fallback</text>
+  <rect class="node" x="520" y="220" width="170" height="44" fill="#d1fae5" stroke="#16a34a"/>
+  <text class="label" x="605" y="239" text-anchor="middle" fill="#166534">统一结果与聚合</text><text class="sub" x="605" y="255" text-anchor="middle" fill="#166534">IP · provenance · conflicts</text>
+
+  <rect class="node" x="40" y="330" width="140" height="44" fill="#f3e8ff" stroke="#9333ea"/>
+  <text class="label" x="110" y="349" text-anchor="middle" fill="#6b21a8">终端脚本</text><text class="sub" x="110" y="365" text-anchor="middle" fill="#6b21a8">POSIX / PowerShell</text>
+  <rect class="node" x="220" y="330" width="150" height="44" fill="#f3e8ff" stroke="#9333ea"/>
+  <text class="label" x="295" y="349" text-anchor="middle" fill="#6b21a8">本地导入解析</text><text class="sub" x="295" y="365" text-anchor="middle" fill="#6b21a8">JSON · 未验证 · 不上传</text>
+  <rect class="node" x="400" y="330" width="150" height="44" fill="#ede9fe" stroke="#7c3aed"/>
+  <text class="label" x="475" y="349" text-anchor="middle" fill="#5b21b6">浏览器来源观察</text><text class="sub" x="475" y="365" text-anchor="middle" fill="#5b21b6">client-request · ipify / Trace</text>
+  <rect class="node" x="580" y="330" width="120" height="44" fill="#ede9fe" stroke="#7c3aed"/>
+  <text class="label" x="640" y="349" text-anchor="middle" fill="#5b21b6">目标站点</text><text class="sub" x="640" y="365" text-anchor="middle" fill="#5b21b6">分流 · 连通性</text>
+  <rect class="node" x="760" y="330" width="125" height="44" fill="#dcfce7" stroke="#16a34a"/>
+  <text class="label" x="822" y="349" text-anchor="middle" fill="#166534">第三方来源</text><text class="sub" x="822" y="365" text-anchor="middle" fill="#166534">按需 endpoint</text>
+  <rect class="node" x="900" y="330" width="125" height="44" fill="#fee2e2" stroke="#e11d48"/>
+  <text class="label" x="962" y="349" text-anchor="middle" fill="#9f1239">详情来源</text><text class="sub" x="962" y="365" text-anchor="middle" fill="#9f1239">Net.Coffee · geo / risk</text>
+
+  <text x="35" y="450" font-size="10" fill="#64748b">实线：页面与固定 API 链路　虚线：浏览器直连、终端脚本和本地导入</text>
+</svg>

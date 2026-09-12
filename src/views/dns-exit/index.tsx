@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { DataTable } from "@/components/data-table";
 import { NumberTicker } from "@/components/number-ticker";
 import { OverflowDetailText } from "@/components/overflow-detail-text";
 import {
   PageHeading,
-  DataTable,
   IpText,
   ActionButton,
   ErrorNotice,

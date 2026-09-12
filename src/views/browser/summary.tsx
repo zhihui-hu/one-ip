@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CompactText } from "@/components/compact-text";
 import { Pending } from "@/components/toolkit";
@@ -8,15 +9,36 @@ import { useQuery } from "@tanstack/react-query";
 import { fingerprint } from "./collect";
 
 export function BrowserSummary() {
+  const container = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(
+    () => typeof window === "undefined" || !("IntersectionObserver" in window),
+  );
+  useEffect(() => {
+    if (visible) return;
+    const element = container.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "160px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [visible]);
   const query = useQuery({
     queryKey: ["home-browser-fingerprint"],
     queryFn: () => fingerprint(),
+    enabled: visible,
     staleTime: Infinity,
     retry: false,
     refetchOnWindowFocus: false,
   });
   return (
-    <Card className="mb-3">
+    <Card ref={container} className="mb-3">
       <CardHeader>
         <div className="row-between">
           <CardTitle>{t("浏览器环境")}</CardTitle>
@@ -33,7 +55,7 @@ export function BrowserSummary() {
         <p className="small muted mt-2">
           <CompactText text={navigator.userAgent} />
         </p>
-        {(query.isPending || query.data) && (
+        {((visible && query.isPending) || query.data) && (
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border/50 pt-2 text-sm">
             <span className="grow text-muted-foreground">
               {t("浏览器指纹 · Visitor ID")}

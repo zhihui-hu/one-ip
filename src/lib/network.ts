@@ -1,6 +1,89 @@
 import { t } from "@/i18n";
+import { normalizePublicIp } from "@/lib/diagnostics";
 
 export type ResponseMode = "json" | "text" | "opaque" | "headers";
+
+type QueueEntry<T> = {
+  signal?: AbortSignal;
+  task: () => Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+  cancelled: boolean;
+  priority: number;
+  onAbort?: () => void;
+};
+
+/**
+ * Limits whole diagnostic operations, including requests made by an adapter.
+ * React Query limits cache state but does not limit how many query functions
+ * are in flight, so this queue is shared by source and detail probes.
+ */
+export function createConcurrencyLimiter(limit: number) {
+  if (!Number.isInteger(limit) || limit < 1)
+    throw new Error("并发上限必须是正整数");
+  let active = 0;
+  const queue: QueueEntry<unknown>[] = [];
+  const drain = () => {
+    while (active < limit && queue.length) {
+      const entry = queue.shift()!;
+      if (entry.cancelled || entry.signal?.aborted) {
+        entry.onAbort?.();
+        entry.reject(
+          entry.signal?.reason ?? new DOMException("已取消", "AbortError"),
+        );
+        continue;
+      }
+      active += 1;
+      entry.onAbort?.();
+      void Promise.resolve()
+        .then(entry.task)
+        .then(entry.resolve, entry.reject)
+        .finally(() => {
+          active -= 1;
+          drain();
+        });
+    }
+  };
+  return {
+    run<T>(
+      signal: AbortSignal | undefined,
+      task: () => Promise<T>,
+      priority = 0,
+    ) {
+      if (signal?.aborted)
+        return Promise.reject(
+          signal.reason ?? new DOMException("已取消", "AbortError"),
+        );
+      return new Promise<T>((resolve, reject) => {
+        const entry: QueueEntry<T> = {
+          signal,
+          task,
+          resolve,
+          reject,
+          cancelled: false,
+          priority,
+        };
+        if (signal) {
+          const onAbort = () => {
+            entry.cancelled = true;
+            reject(signal.reason ?? new DOMException("已取消", "AbortError"));
+          };
+          signal.addEventListener("abort", onAbort, { once: true });
+          entry.onAbort = () => signal.removeEventListener("abort", onAbort);
+        }
+        queue.push(entry as QueueEntry<unknown>);
+        queue.sort((left, right) => right.priority - left.priority);
+        drain();
+      });
+    },
+    get pending() {
+      return queue.length;
+    },
+    get active() {
+      return active;
+    },
+  };
+}
 
 /** Only HTTP transport for browser probes and API calls. Never proxy browser probes. */
 export async function request<T>(
@@ -31,7 +114,9 @@ export async function request<T>(
           } catch {
             /* Non-JSON upstream. */
           }
-          throw new Error(message);
+          const error = new Error(message) as Error & { httpStatus?: number };
+          error.httpStatus = response.status;
+          throw error;
         }
         if (mode === "headers") return response.headers as T;
         return (
@@ -62,10 +147,10 @@ export function parseTrace(text: string) {
         return [line.slice(0, i), line.slice(i + 1)];
       }),
   );
-  if (!fields.ip || !/^[\da-fA-F:.]+$/.test(fields.ip))
-    throw new Error(t("目标站点未返回可读取的出口 IP"));
+  const normalized = normalizePublicIp(fields.ip);
+  if (!normalized) throw new Error(t("目标站点未返回可读取的出口 IP"));
   return {
-    ip: fields.ip,
+    ip: normalized.ip,
     country_code: fields.loc,
     colo: fields.colo,
     source: "Cloudflare Trace",

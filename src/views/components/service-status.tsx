@@ -7,6 +7,7 @@ import {
 } from "@/components/toolkit";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t, locale } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { getStatus } from "@/views/status/api";
 import services from "@/views/status/services.json";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +19,7 @@ export function ServiceStatusPage({
 }) {
   const service = services.find((s) => s.name === name)!;
   const query = useQuery({
-    queryKey: ["service-status", service.id],
+    queryKey: queryKeys.status.service(service.id),
     queryFn: ({ signal }) => getStatus(service.id, signal),
     retry: false,
     refetchInterval: 120_000,

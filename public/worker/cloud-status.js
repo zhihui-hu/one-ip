@@ -220,6 +220,34 @@ export function parseTencentBanner(data) {
   ];
 }
 
+const TENCENT_DETAIL_CONCURRENCY = 4;
+const tencentDetailQueue = [];
+let activeTencentDetails = 0;
+
+function drainTencentDetails() {
+  while (
+    activeTencentDetails < TENCENT_DETAIL_CONCURRENCY &&
+    tencentDetailQueue.length
+  ) {
+    const request = tencentDetailQueue.shift();
+    activeTencentDetails += 1;
+    Promise.resolve()
+      .then(request.task)
+      .then(request.resolve, request.reject)
+      .finally(() => {
+        activeTencentDetails -= 1;
+        drainTencentDetails();
+      });
+  }
+}
+
+function withTencentDetailLimit(task) {
+  return new Promise((resolve, reject) => {
+    tencentDetailQueue.push({ task, resolve, reject });
+    drainTencentDetails();
+  });
+}
+
 async function tencentStatus(url) {
   const [regionData, bannerData] = await Promise.all([
     upstream(url),
@@ -231,20 +259,22 @@ async function tencentStatus(url) {
   const date = new Date().toISOString().slice(0, 10);
   const affected = regions.filter((region) => region.EventsIn);
   const details = await Promise.all(
-    affected.map(async (region) => {
-      const query = new URLSearchParams({
-        BelongSite: "1",
-        RegionId: region.RegionId,
-        NumOfDay: "1",
-        EndDate: date,
-      });
-      return parseTencentProducts(
-        await upstream(
-          `https://status.tencentcloud.com/v1/api/status/DescribeProductEventForRegionInPeriod?${query}`,
-        ),
-        region,
-      );
-    }),
+    affected.map((region) =>
+      withTencentDetailLimit(async () => {
+        const query = new URLSearchParams({
+          BelongSite: "1",
+          RegionId: region.RegionId,
+          NumOfDay: "1",
+          EndDate: date,
+        });
+        return parseTencentProducts(
+          await upstream(
+            `https://status.tencentcloud.com/v1/api/status/DescribeProductEventForRegionInPeriod?${query}`,
+          ),
+          region,
+        );
+      }),
+    ),
   );
   const incidents = [...parseTencentBanner(bannerData), ...details.flat()];
   return {

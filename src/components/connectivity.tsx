@@ -3,6 +3,7 @@ import { LatencyBadge } from "@/components/latency-badge";
 import { SiteLogo } from "@/components/site-logo";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { t } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { testConnectivity, type ProbeResult } from "@/views/link/api";
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -21,14 +22,14 @@ export function ConnectivityTile({
   table?: boolean;
 }) {
   const client = useQueryClient();
-  const progressKey = ["connectivity-progress", target.url, round];
+  const progressKey = queryKeys.home.connectivityProgress(target.url, round);
   const progress = useQuery<ProbeResult>({
     queryKey: progressKey,
     enabled: false,
     queryFn: skipToken,
   });
   const query = useQuery({
-    queryKey: ["connectivity", target.url, round],
+    queryKey: queryKeys.home.connectivity(target.url, round),
     queryFn: ({ signal }) =>
       testConnectivity(target.url, signal, (result) =>
         client.setQueryData(progressKey, result),

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content="bybit-exchange/svg-diagram skill" />
+    <title>One IP 工作原理</title>
+    <style>
+      :root {
+        color: #1e293b;
+        background: #f8fafc;
+        font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', system-ui, sans-serif;
+        line-height: 1.65;
+      }
+      body { margin: 0; }
+      main { width: min(980px, calc(100% - 40px)); margin: 0 auto; padding: 28px 0 48px; }
+      header { border-bottom: 1px solid #cbd5e1; padding-bottom: 18px; }
+      h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 0; }
+      .lede { margin: 8px 0 0; color: #64748b; font-size: 14px; }
+      figure { margin: 24px 0 28px; padding: 18px; border: 1px solid #cbd5e1; background: #fff; }
+      figure img { display: block; width: 100%; height: auto; }
+      figcaption { margin-top: 12px; color: #64748b; font-size: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+      section { border-top: 3px solid #3b82f6; padding-top: 10px; }
+      section:nth-child(2) { border-color: #f59e0b; }
+      section:nth-child(3) { border-color: #22c55e; }
+      section:nth-child(4) { border-color: #a855f7; }
+      h2 { margin: 0 0 7px; font-size: 15px; }
+      p { margin: 0; color: #475569; font-size: 13px; }
+      ul { margin: 8px 0 0; padding-left: 20px; color: #475569; font-size: 13px; }
+      li + li { margin-top: 4px; }
+      code { color: #1e40af; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+      footer { margin-top: 26px; border-top: 1px solid #cbd5e1; padding-top: 12px; color: #64748b; font-size: 12px; }
+      @media (max-width: 720px) {
+        main { width: min(100% - 24px, 980px); padding-top: 18px; }
+        figure { margin-inline: -6px; padding: 8px; }
+        .grid { grid-template-columns: 1fr; gap: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>One IP 工作原理</h1>
+        <p class="lede">页面选择已验证来源，经过有界调度执行浏览器观察或固定 API 查询，再把带来源和失败语义的结果交回页面。</p>
+      </header>
+
+      <figure>
+        <img src="assets/one-ip-architecture.svg" alt="One IP 工作原理架构图" />
+        <figcaption>实线表示页面与固定 API 的主链路，虚线表示浏览器直连观察、终端脚本和本地导入。</figcaption>
+      </figure>
+
+      <div class="grid">
+        <section>
+          <h2>主请求链路</h2>
+          <p><code>src/main.tsx</code> 挂载 React、路由、主题和 Query Provider。页面选择来源后由调度器排队执行，页面组件通过 <code>endpoint()</code> 调用同源 <code>/api/*</code>。</p>
+          <ul>
+            <li>来源注册表提供稳定 ID、适配器、地址族、供应商家族和隐私说明。</li>
+            <li>共享调度器限制 4 个在途任务，支持取消；单来源约 3 秒、单轮有整体时限。</li>
+            <li><code>request()</code> 统一处理 fetch、AbortSignal、响应模式和 <code>no-store</code> 请求。</li>
+            <li>Worker 先检查 Origin、HTTP 方法和 Cloudflare Rate Limiter，再按固定路径分发。</li>
+            <li>处理器只访问固定上游，限制公网 IP、域名、请求体、响应大小和超时，返回 <code>no-store</code> JSON。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>浏览器直连观察</h2>
+          <p>首页出口、网站分流、AI 连通性、DNS 和 CDN 等功能会从浏览器直接访问目标站点或已验证公共探测源。</p>
+          <ul>
+            <li>记录的是目标看到的 caller egress、HTTP 响应或 DNS 观察，不是所有 App 出口的证明。</li>
+            <li>浏览器通用 <code>TypeError</code> 无法可靠区分 DNS、TLS、CORS 和内容拦截，只提示可能原因。</li>
+            <li>默认只运行少量来源；未启用、风控和手动来源不会产生自动请求。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>终端与 App 对照</h2>
+          <p>终端脚本从带版本的已验证清单生成，结果以 JSON 信封导入浏览器；App 只允许用户提供手动记录。</p>
+          <ul>
+            <li>导入默认只在本地解析，不上传、不自动补充地理查询，输入有大小和字段限制。</li>
+            <li>只有来源 ID、地址族、清单版本和 5 分钟时间窗口匹配时才显示运行时差异。</li>
+            <li>导入结果始终标记为用户提供、未验证，不进入浏览器来源一致性统计。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>源码索引</h2>
+          <ul>
+            <li>入口与路由：<code>src/main.tsx</code>、<code>src/App.tsx</code>、<code>src/layout/routes.ts</code></li>
+            <li>查询与来源：<code>src/lib/network.ts</code>、<code>src/views/home/api.ts</code>、<code>src/views/home/source-registry.ts</code></li>
+            <li>Worker：<code>public/worker/index.js</code>、<code>public/worker/http.js</code>、<code>public/worker/geo.js</code>、<code>public/worker/ip-health.js</code></li>
+            <li>部署：<code>wrangler.toml</code>、<code>dist</code> Static Assets</li>
+          </ul>
+        </section>
+      </div>
+
+      <footer>图表遵循 bybit-exchange/svg-diagram：独立 SVG、CJK 字体栈、固定语义色、曲线连接和可审计的静态输出。</footer>
+    </main>
+  </body>
+</html>

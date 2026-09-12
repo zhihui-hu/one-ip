@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { AnimatedValue } from "@/components/animated-value";
 import { CountryFlag } from "@/components/country-flag";
+import { DataTable } from "@/components/data-table";
 import { LookupFaq } from "@/components/lookup-faq";
 import {
   ActionButton,
   ErrorNotice,
-  DataTable,
   IpText,
   Pending,
 } from "@/components/toolkit";
@@ -24,6 +24,11 @@ const columns: ColumnDef<RtcResult>[] = [
     header: t("IP 地址"),
     cell: ({ row }) => <IpText ip={row.original.ip} />,
   },
+  {
+    accessorKey: "endpoint",
+    header: t("STUN 端点"),
+    cell: ({ row }) => row.original.endpoint ?? t("本地"),
+  },
   { accessorKey: "type", header: t("类型") },
   {
     id: "geo",
@@ -41,7 +46,12 @@ const columns: ColumnDef<RtcResult>[] = [
   {
     id: "state",
     header: t("状态"),
-    cell: ({ row }) => (row.original.public ? t("请核对出口") : t("本地地址")),
+    cell: ({ row }) =>
+      row.original.public &&
+      (row.original.candidateType === "srflx" ||
+        row.original.candidateType === "prflx")
+        ? t("请核对出口")
+        : t("本地地址"),
   },
 ];
 export default function WebRtcPage() {
@@ -91,6 +101,12 @@ export default function WebRtcPage() {
               {query.data?.results.length ?? 0}
               {t("个地址")}
             </Badge>
+            {query.data?.splitTunnel && (
+              <Badge variant="destructive">{t("检测到 STUN 分流")}</Badge>
+            )}
+            {query.data?.udpBlocked && (
+              <Badge variant="outline">{t("UDP 可能被阻断")}</Badge>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -101,7 +117,9 @@ export default function WebRtcPage() {
             <DataTable
               data={query.data?.results ?? []}
               columns={columns}
-              getRowId={(row) => row.ip}
+              getRowId={(row) =>
+                `${row.endpoint ?? "local"}:${row.ip}:${row.port ?? ""}:${row.protocol ?? ""}`
+              }
               animateChanges={false}
               animateEntries
             />

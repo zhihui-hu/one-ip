@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { t } from "@/i18n";
+import type { SourceDefinition } from "@/lib/diagnostic-source";
 import type { Geo } from "@/lib/types";
-import type { Site } from "./api";
 import { categoryStatusClass } from "./category-status";
 
 const ExitMap = lazy(() => import("./exit-map"));
@@ -26,7 +26,8 @@ const categories = [
   ["static", "静态资源"],
   ["speed", "测速服务"],
 ];
-type Row = Site & {
+type Row = SourceDefinition & {
+  id: string;
   geo?: Geo;
   visible: boolean;
   pending: boolean;
@@ -38,7 +39,7 @@ export function ExitGroups({
   onSelect,
 }: {
   rows: Row[];
-  onSelect: (name: string) => void;
+  onSelect: (id: string) => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [category, setCategory] = useState("all");
@@ -52,12 +53,15 @@ export function ExitGroups({
   );
   const groups = new Map<string, Row[]>();
   for (const row of filtered) {
-    const key =
-      !row.visible || row.pending ? "pending" : (row.geo?.ip ?? "blocked");
+    const key = !row.visible
+      ? "idle"
+      : row.pending
+        ? "pending"
+        : (row.geo?.ip ?? "blocked");
     groups.set(key, [...(groups.get(key) ?? []), row]);
   }
   const priority = (key: string) =>
-    key === "blocked" ? 0 : key === "pending" ? 1 : 2;
+    key === "blocked" ? 0 : key === "pending" ? 1 : key === "idle" ? 3 : 2;
   return (
     <>
       <Card className="mb-3 gap-0 rounded-lg py-0 shadow-none">
@@ -121,7 +125,8 @@ export function ExitGroups({
               .map(([key, items]) => {
                 const geo =
                   items.find((row) => row.geo?.country)?.geo ?? items[0].geo;
-                const special = key === "blocked" || key === "pending";
+                const special =
+                  key === "blocked" || key === "pending" || key === "idle";
                 return (
                   <Card
                     key={key}
@@ -138,7 +143,13 @@ export function ExitGroups({
                                   : "text-muted-foreground"
                               }
                             >
-                              {t(key === "blocked" ? "检测受阻" : "检测中…")}
+                              {t(
+                                key === "blocked"
+                                  ? "检测受阻"
+                                  : key === "idle"
+                                    ? "待检测"
+                                    : "检测中…",
+                              )}
                             </span>
                           ) : (
                             <IpText ip={key} />
@@ -190,9 +201,10 @@ export function ExitGroups({
         title={t("出口站点")}
         description=""
       >
-        {selected && selected !== "blocked" && selected !== "pending" && (
-          <IpText ip={selected} />
-        )}
+        {selected &&
+          selected !== "blocked" &&
+          selected !== "pending" &&
+          selected !== "idle" && <IpText ip={selected} />}
         <div className="flex flex-wrap gap-2">
           {(groups.get(selected ?? "") ?? []).map((row) => {
             const host =
@@ -202,7 +214,7 @@ export function ExitGroups({
               : (row.url ?? `https://${host ?? row.name}`);
             return (
               <Badge
-                key={row.name}
+                key={row.id}
                 asChild
                 variant="secondary"
                 className={`h-8 max-w-full gap-1.5 px-2.5 [&_.site-icon]:size-4 ${selected === "blocked" ? "bg-destructive/10 text-destructive" : ""}`}

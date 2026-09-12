@@ -1,5 +1,6 @@
 [
   {
+    "id": "legacy-703995bb",
     "name": "Telegram",
     "type": "international",
     "method": "unsupported",
@@ -9,6 +10,7 @@
     "note": "暂未接入可读取 Telegram 出口 IP 的接口；网页连通性请使用网站连通检测。"
   },
   {
+    "id": "legacy-02289ad2",
     "name": "IP.cn",
     "type": "domestic",
     "method": "ip-text",
@@ -16,6 +18,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/ip.cn.ico"
   },
   {
+    "id": "legacy-c8ff1d5c",
     "name": "IP.SB",
     "type": "international",
     "method": "ip-json",
@@ -23,12 +26,14 @@
     "icon": "https://icons.duckduckgo.com/ip3/ip.sb.ico"
   },
   {
+    "id": "legacy-a549be08",
     "name": "网易",
     "type": "domestic",
     "method": "netease",
     "icon": "https://icons.duckduckgo.com/ip3/163.com.ico"
   },
   {
+    "id": "legacy-fdd3d5c4",
     "name": "字节跳动",
     "type": "domestic",
     "method": "bytedance",
@@ -36,6 +41,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/bytedance.com.ico"
   },
   {
+    "id": "legacy-da515b5c",
     "name": "Cloudflare中国",
     "type": "domestic",
     "method": "cftrace",
@@ -43,6 +49,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/cloudflare.com.ico"
   },
   {
+    "id": "legacy-aab92af6",
     "name": "高通中国",
     "type": "domestic",
     "method": "cftrace",
@@ -50,6 +57,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/qualcomm.com.ico"
   },
   {
+    "id": "legacy-11c00a03",
     "name": "discord.com",
     "type": "international",
     "method": "cftrace",
@@ -58,6 +66,7 @@
     "extra": ["social"]
   },
   {
+    "id": "legacy-488ec5aa",
     "name": "x.com",
     "type": "international",
     "method": "cftrace",
@@ -66,6 +75,7 @@
     "extra": ["social"]
   },
   {
+    "id": "legacy-184babdf",
     "name": "medium.com",
     "type": "international",
     "method": "cftrace",
@@ -74,6 +84,7 @@
     "extra": ["social"]
   },
   {
+    "id": "legacy-90e9ac66",
     "name": "anthropic.com",
     "type": "international",
     "method": "cftrace",
@@ -82,6 +93,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-ec0d74c9",
     "name": "claude.ai",
     "type": "international",
     "method": "cftrace",
@@ -90,6 +102,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-c3a46af3",
     "name": "chatgpt.com",
     "type": "international",
     "method": "cftrace",
@@ -98,6 +111,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-7c10c9b0",
     "name": "openai.com",
     "type": "international",
     "method": "cftrace",
@@ -106,6 +120,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-56aeb757",
     "name": "sora.com",
     "type": "international",
     "method": "cftrace",
@@ -114,6 +129,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-be6bec5f",
     "name": "grok.com",
     "type": "international",
     "method": "cftrace",
@@ -122,6 +138,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-2a161824",
     "name": "pixpix.com",
     "type": "international",
     "method": "cftrace",
@@ -130,6 +147,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-63f3a38a",
     "name": "perplexity.ai",
     "type": "international",
     "method": "cftrace",
@@ -138,6 +156,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-05e210fc",
     "name": "midjourney.com",
     "type": "international",
     "method": "cftrace",
@@ -146,6 +165,7 @@
     "extra": ["ai"]
   },
   {
+    "id": "legacy-84711cf2",
     "name": "coinbase.com",
     "type": "international",
     "method": "cftrace",
@@ -154,6 +174,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-e3a67aef",
     "name": "www.okx.com",
     "type": "international",
     "method": "cftrace",
@@ -162,6 +183,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-743a8163",
     "name": "binance.com",
     "type": "international",
     "method": "cftrace",
@@ -170,6 +192,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-6867a899",
     "name": "crypto.com",
     "type": "international",
     "method": "cftrace",
@@ -178,6 +201,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-d9b7a116",
     "name": "zoom.us",
     "type": "international",
     "method": "cftrace",
@@ -186,6 +210,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-4742bf7c",
     "name": "1password.com",
     "type": "international",
     "method": "cftrace",
@@ -194,6 +219,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-cce3275e",
     "name": "wise.com",
     "type": "international",
     "method": "cftrace",
@@ -202,6 +228,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-0a7d852e",
     "name": "notion.so",
     "type": "international",
     "method": "cftrace",
@@ -210,6 +237,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-ae3e6218",
     "name": "shopify.com",
     "type": "international",
     "method": "cftrace",
@@ -218,6 +246,7 @@
     "extra": ["tools", "ecommerce"]
   },
   {
+    "id": "legacy-a32bdf36",
     "name": "godaddy.com",
     "type": "international",
     "method": "cftrace",
@@ -226,6 +255,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-da2104b8",
     "name": "producthunt.com",
     "type": "international",
     "method": "cftrace",
@@ -234,6 +264,7 @@
     "extra": ["tools"]
   },
   {
+    "id": "legacy-fac5194e",
     "name": "cloudflare.com",
     "type": "international",
     "method": "cftrace",
@@ -242,6 +273,7 @@
     "extra": ["speed"]
   },
   {
+    "id": "legacy-10d81dcd",
     "name": "cloudflare cdnjs",
     "type": "international",
     "method": "cftrace",
@@ -250,6 +282,7 @@
     "extra": ["static"]
   },
   {
+    "id": "legacy-f52cda2e",
     "name": "npm registry",
     "type": "international",
     "method": "cftrace",
@@ -258,6 +291,7 @@
     "extra": ["static"]
   },
   {
+    "id": "legacy-58a20182",
     "name": "kali.download",
     "type": "international",
     "method": "cftrace",
@@ -266,6 +300,7 @@
     "extra": ["static"]
   },
   {
+    "id": "legacy-89db5f4b",
     "name": "unpkg.com",
     "type": "international",
     "method": "cftrace",
@@ -274,6 +309,7 @@
     "extra": ["static"]
   },
   {
+    "id": "legacy-7d268d6a",
     "name": "nodejs.org",
     "type": "international",
     "method": "cftrace",
@@ -282,6 +318,7 @@
     "extra": ["dev"]
   },
   {
+    "id": "legacy-f4d1de07",
     "name": "gitlab.com",
     "type": "international",
     "method": "cftrace",
@@ -290,6 +327,7 @@
     "extra": ["dev"]
   },
   {
+    "id": "legacy-fd9565a3",
     "name": "crunchyroll.com",
     "type": "international",
     "method": "cftrace",
@@ -298,6 +336,7 @@
     "extra": ["media"]
   },
   {
+    "id": "legacy-a53a6331",
     "name": "kraken.com",
     "type": "international",
     "method": "cftrace",
@@ -306,6 +345,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-e88bdfa5",
     "name": "bybit.com",
     "type": "international",
     "method": "cftrace",
@@ -314,6 +354,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-60b0ceb0",
     "name": "bitget.com",
     "type": "international",
     "method": "cftrace",
@@ -322,6 +363,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-90e3b2c8",
     "name": "kucoin.com",
     "type": "international",
     "method": "cftrace",
@@ -330,6 +372,7 @@
     "extra": ["crypto"]
   },
   {
+    "id": "legacy-f319bef7",
     "name": "amazon.com",
     "type": "international",
     "method": "cftrace",
@@ -338,6 +381,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-46873888",
     "name": "ebay.com",
     "type": "international",
     "method": "cftrace",
@@ -346,6 +390,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-ab5571bf",
     "name": "aliexpress.com",
     "type": "international",
     "method": "cftrace",
@@ -354,6 +399,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-88a18d04",
     "name": "temu.com",
     "type": "international",
     "method": "cftrace",
@@ -362,6 +408,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-a4ad32da",
     "name": "shein.com",
     "type": "international",
     "method": "cftrace",
@@ -370,6 +417,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-ce40b690",
     "name": "etsy.com",
     "type": "international",
     "method": "cftrace",
@@ -378,6 +426,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-9c0b239c",
     "name": "shopee.com",
     "type": "international",
     "method": "cftrace",
@@ -386,6 +435,7 @@
     "extra": ["ecommerce"]
   },
   {
+    "id": "legacy-0a63fc64",
     "name": "lazada.com",
     "type": "international",
     "method": "cftrace",

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/input-group";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { sampleDnsExit } from "@/views/dns-exit/api";
 import { runWebRtc } from "@/views/webrtc/api";
 import { useQuery } from "@tanstack/react-query";
@@ -20,14 +21,14 @@ export function QuickChecks() {
   const navigate = useNavigate();
   const [target, setTarget] = useState("");
   const dns = useQuery({
-    queryKey: ["home-dns"],
+    queryKey: queryKeys.home.dns(),
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
     queryFn: ({ signal }) => sampleDnsExit(signal),
   });
   const rtc = useQuery({
-    queryKey: ["home-webrtc"],
+    queryKey: queryKeys.home.webrtc(),
     retry: false,
     staleTime: 60_000,
     refetchOnWindowFocus: false,

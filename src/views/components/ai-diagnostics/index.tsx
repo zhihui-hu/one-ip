@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { t, locale } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { AiNetworkCheck } from "@/views/ai/network-check";
 import { AiPlatformLinks } from "@/views/ai/platform-links";
 import { aiPlatforms } from "@/views/ai/platforms";
@@ -33,25 +34,24 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
     kind === "claude" ? claudeHistoryAtom : gptHistoryAtom,
   );
   const domestic = useQuery({
-    queryKey: ["domestic-ip"],
+    queryKey: queryKeys.egress.domestic(),
     queryFn: ({ signal }) => api.domestic(signal),
     retry: false,
   });
   const cf = useQuery({
-    queryKey: ["cf-exit"],
+    queryKey: queryKeys.egress.cloudflare(),
     queryFn: ({ signal }) => api.cloudflare(signal),
     retry: false,
   });
   const exit = useQuery({
-    queryKey:
-      kind === "claude" ? ["claude-domain-exit", "claude.ai"] : [kind, "exit"],
+    queryKey: queryKeys.ai.exit(kind),
     staleTime: 60_000,
     queryFn: ({ signal }) => api.exit(signal),
     retry: false,
   });
   const ip = exit.data?.ip;
   const geo = useQuery({
-    queryKey: ["geo", ip],
+    queryKey: queryKeys.geo.byIp(ip),
     enabled: !!ip,
     queryFn: ({ signal }) => api.geo(ip!, signal),
     retry: false,

@@ -14,6 +14,7 @@ import {
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
 import { trace } from "@/lib/network";
+import { queryKeys } from "@/lib/query-keys";
 import { withDetectionAnimation } from "@/views/browser/with-feedback";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ export function AiNetworkCheck({
 }) {
   const [refreshing, setRefreshing] = useState(false);
   const query = useQuery({
-    queryKey: ["ai-network", "v3", ...domains],
+    queryKey: queryKeys.ai.network(domains),
     queryFn: ({ signal }) =>
       Promise.all(domains.map((domain) => probeAiDomain(domain, signal))),
     staleTime: 60_000,
@@ -41,7 +42,7 @@ export function AiNetworkCheck({
   );
   const exits = useQueries({
     queries: platforms.map((platform, index) => ({
-      queryKey: [platform?.id ?? domains[index], "exit"],
+      queryKey: queryKeys.ai.exit(platform?.id ?? domains[index]),
       enabled: Boolean(platform?.traceDomain),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         trace(platform!.traceDomain!, signal),

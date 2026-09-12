@@ -33,5 +33,11 @@ export interface RtcResult {
   ip: string;
   type: string;
   public: boolean;
+  candidateType?: "host" | "srflx" | "prflx" | "relay";
+  endpoint?: string;
+  port?: number;
+  protocol?: string;
+  relatedAddress?: string;
+  raw?: string;
   geo?: Geo;
 }

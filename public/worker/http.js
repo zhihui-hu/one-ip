@@ -6,12 +6,13 @@ export class HttpError extends Error {
     this.status = status;
   }
 }
-export function json(data, status = 200) {
+export function json(data, status = 200, headers = {}) {
   return Response.json(data, {
     status,
     headers: {
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
+      ...headers,
     },
   });
 }
@@ -126,10 +127,10 @@ export async function upstream(url, init = {}, maxBytes = 2_000_000) {
   }
   return boundedJson(response, maxBytes);
 }
-export async function inputJson(request) {
+export async function inputJson(request, maxBytes = 4096) {
   if (!request.headers.get("Content-Type")?.includes("application/json"))
     throw new HttpError(415, "需要 application/json");
-  const value = await boundedJson(request, 4096, 400);
+  const value = await boundedJson(request, maxBytes, 400);
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new HttpError(400, "需要 JSON 对象");
   return value;

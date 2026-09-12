@@ -1,7 +1,8 @@
 import { CompactText } from "@/components/compact-text";
 import { CountryFlag } from "@/components/country-flag";
+import { DataTable } from "@/components/data-table";
 import { NumberTicker } from "@/components/number-ticker";
-import { DataTable, Pending } from "@/components/toolkit";
+import { Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";

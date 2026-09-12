@@ -1,12 +1,8 @@
 import { useState } from "react";
+import { DataTable } from "@/components/data-table";
 import { OverflowDetailText } from "@/components/overflow-detail-text";
 import { SiteLogo } from "@/components/site-logo";
-import {
-  PageHeading,
-  Pending,
-  ActionButton,
-  DataTable,
-} from "@/components/toolkit";
+import { PageHeading, Pending, ActionButton } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { request } from "@/lib/network";

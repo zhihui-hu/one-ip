@@ -15,6 +15,7 @@ export default function ExitMap({
   mapOnly = false,
 }: {
   rows: {
+    id: string;
     name: string;
     icon: string;
     extra?: string[];
@@ -25,7 +26,7 @@ export default function ExitMap({
     pending: boolean;
     geoPending: boolean;
   }[];
-  onSelect: (name: string) => void;
+  onSelect: (id: string) => void;
   mapOnly?: boolean;
 }) {
   const [category, setCategory] = useState("all");
@@ -37,12 +38,13 @@ export default function ExitMap({
   const markers = useRef(new Map<string, L.Marker>());
   const fitted = useRef(false);
   const scope = rows
-    .map((row) => row.name)
+    .filter((row) => row.visible)
+    .map((row) => row.id)
     .sort()
     .join("|");
   const finished =
-    rows.length > 0 &&
-    rows.every((row) => row.visible && !row.pending && !row.geoPending);
+    rows.some((row) => row.visible) &&
+    rows.every((row) => !row.visible || (!row.pending && !row.geoPending));
   const bounds = useRef<L.LatLngBounds | null>(null);
   const [tileError, setTileError] = useState(false);
   useEffect(() => {
@@ -113,7 +115,7 @@ export default function ExitMap({
         button.style.cssText =
           "display:block;text-align:left;padding:6px 0;width:100%";
         button.textContent = `${site.domain ?? site.name} · ${site.geo?.ip} · ${t("已读取出口")}`;
-        button.onclick = () => onSelect(site.name);
+        button.onclick = () => onSelect(site.id);
         content.append(button);
       }
       const label = document.createElement("div");
@@ -297,7 +299,7 @@ export default function ExitMap({
                   : (row.url ?? `https://${hostname ?? row.name}`);
                 return (
                   <Badge
-                    key={row.name}
+                    key={row.id}
                     asChild
                     variant="outline"
                     className={`h-8 max-w-full gap-1.5 border-transparent px-2.5 transition-colors hover:brightness-95 motion-reduce:transition-none [&_.site-icon]:size-4 ${color}`}

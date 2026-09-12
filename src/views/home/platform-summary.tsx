@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { aiPlatforms } from "@/views/ai/platforms";
 import { probeAiDomain } from "@/views/ai/probe";
 import { getStatus } from "@/views/status/api";
@@ -45,7 +46,7 @@ export function PlatformSummary() {
   }, []);
   const connectivity = useQueries({
     queries: aiPlatforms.map((platform) => ({
-      queryKey: ["ai-preview", "v3", platform.id],
+      queryKey: queryKeys.ai.preview(platform.id),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         probeAiDomain(platform.domain, signal),
       enabled: visible,
@@ -56,7 +57,7 @@ export function PlatformSummary() {
   });
   const statuses = useQueries({
     queries: featured.map((service) => ({
-      queryKey: ["service-status", service.id],
+      queryKey: queryKeys.status.service(service.id),
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         getStatus(service.id, signal),
       enabled: visible,

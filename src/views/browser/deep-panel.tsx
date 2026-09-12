@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  DataTable,
-  ErrorNotice,
-  Facts,
-  Pending,
-  ToolCard,
-} from "@/components/toolkit";
+import { DataTable } from "@/components/data-table";
+import { ErrorNotice, Facts, Pending, ToolCard } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";

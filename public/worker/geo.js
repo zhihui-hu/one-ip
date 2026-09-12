@@ -1,5 +1,16 @@
 import { publicIp, upstream } from "./http.js";
 
+function normalizeReturnedIp(target, value) {
+  const normalized = typeof value === "string" ? value.trim() : value;
+  try {
+    const returned = publicIp(normalized);
+    if (returned === target) return returned;
+  } catch {
+    /* Treat malformed upstream data as a failed source response. */
+  }
+  throw new Error("归属地数据源返回了不匹配的 IP");
+}
+
 export function cfGeo(request) {
   const cf = request.cf ?? {};
   return {
@@ -17,11 +28,12 @@ export function cfGeo(request) {
   };
 }
 export async function geoIp(ip) {
-  publicIp(ip);
-  const data = await upstream(`https://ipwho.is/${encodeURIComponent(ip)}`);
+  const target = publicIp(ip);
+  const data = await upstream(`https://ipwho.is/${encodeURIComponent(target)}`);
   if (!data.success) throw new Error("IP 归属地数据源未返回有效结果");
+  const returnedIp = normalizeReturnedIp(target, data.ip);
   return {
-    ip: data.ip,
+    ip: returnedIp,
     country: data.country,
     country_code: data.country_code,
     region: data.region,
@@ -35,13 +47,14 @@ export async function geoIp(ip) {
   };
 }
 export async function secondaryGeo(ip) {
-  publicIp(ip);
+  const target = publicIp(ip);
   const data = await upstream(
-    `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
+    `https://api.ip.sb/geoip/${encodeURIComponent(target)}`,
   );
   if (!data.ip) throw new Error("第二归属地数据源未返回结果");
+  const returnedIp = normalizeReturnedIp(target, data.ip);
   return {
-    ip: data.ip,
+    ip: returnedIp,
     country: data.country,
     country_code: data.country_code,
     city: data.city,

@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { CountryFlag } from "@/components/country-flag";
+import { DataTable } from "@/components/data-table";
 import { LatencyBadge } from "@/components/latency-badge";
 import { NumberTicker } from "@/components/number-ticker";
 import { SiteLogo } from "@/components/site-logo";
-import { ActionButton, DataTable } from "@/components/toolkit";
+import { ActionButton } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { skipToken, useQueries, useQueryClient } from "@tanstack/react-query";

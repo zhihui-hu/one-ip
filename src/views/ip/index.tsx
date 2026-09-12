@@ -5,6 +5,7 @@ import { IpText, ErrorNotice, Pending } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
 import { useLookupHistory } from "@/hooks/use-lookup-history";
 import { t } from "@/i18n";
+import { queryKeys } from "@/lib/query-keys";
 import { useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
 import { Search, X } from "lucide-react";
@@ -18,7 +19,7 @@ export default function IpPage() {
   const history = useLookupHistory<CoffeeLookup>("ip-tools:coffee-history:v1");
   const cached = history.find(ip);
   const query = useQuery({
-    queryKey: ["lookup-ip-coffee", ip],
+    queryKey: queryKeys.ip.classification(ip),
     enabled: !!ip,
     initialData: cached?.data,
     initialDataUpdatedAt: cached?.savedAt,

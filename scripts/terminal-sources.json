@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": "terminal-v1",
+  "sources": [
+    {
+      "id": "legacy-02289ad2",
+      "method": "ip-text",
+      "url": "https://my.ip.cn/"
+    },
+    {
+      "id": "legacy-c8ff1d5c",
+      "method": "ip-json",
+      "url": "https://api.ip.sb/jsonip"
+    }
+  ]
+}
