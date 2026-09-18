@@ -41,6 +41,28 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 Workers Builds 会在 `main` 收到提交时构建和部署。上方按钮使用原项目地址；需要保留 Fork 关系和更新工作流时，请按教程导入你的 Fork。
 
+## Docker 部署
+
+镜像为多阶段构建：`pnpm build` 产物由自带的 Node 适配层（`server.mjs`）同时提供 `dist/` 静态与 `/api/*`，复用 `public/worker` 的同一份业务逻辑，无需 Cloudflare 账号。
+
+```bash
+# 方式一：docker compose（推荐）
+cp docker.env.example .env  # 仅需验证体验时填写，否则可跳过
+docker compose up -d --build
+# 打开 http://127.0.0.1:8787 ，端口由 PORT 环境变量控制
+
+# 方式二：单容器
+docker build -t one-ip:latest .
+docker run -d --name one-ip -p 8787:8787 --restart unless-stopped one-ip:latest
+
+# 本地不进容器直接跑（需先 pnpm build）
+pnpm start
+```
+
+环境变量：`PORT`（默认 `8787`）、`HOST`（默认 `0.0.0.0`），以及与 Worker 一致的 `TURNSTILE_*`、`RECAPTCHA_*`（含 `TURNSTILE_NONINTERACTIVE_*`，见 `docker.env.example`）。更新时 `git pull` 后重新 `docker compose up -d --build`。
+
+注意：Docker 镜像不含 Workers 内置限流（`API_LIMITER`/`ACTION_LIMITER` 缺省即不限流），请在反代层限流；没有 `request.cf` 地理信息，`/api/me` 会降级，`ip/health` 未传 `ip` 时按连接 IP 处理，私网 IP 返回 400 属正常，公网查询请显式传 `?ip=`。
+
 ## 功能
 
 | 模块             | 支持的功能                                                                                                |

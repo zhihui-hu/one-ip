@@ -110,6 +110,28 @@ The workflow supports forks created from `zhihui-hu/one-ip` and requires no pers
 
 References: [Syncing a fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/syncing-a-fork), [GITHUB_TOKEN triggering behavior](https://docs.github.com/en/actions/concepts/security/github_token), [Workflow disabling rules](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows).
 
+## Docker deployment
+
+Multi-stage image: the bundled Node adapter (`server.mjs`) serves `dist/` and `/api/*` from the same `public/worker` logic, no Cloudflare account needed.
+
+```bash
+# Option 1: docker compose (recommended)
+cp docker.env.example .env  # only needed for verification widgets
+docker compose up -d --build
+# Open http://127.0.0.1:8787 (controlled by PORT)
+
+# Option 2: single container
+docker build -t one-ip:latest .
+docker run -d --name one-ip -p 8787:8787 --restart unless-stopped one-ip:latest
+
+# Without containers (after pnpm build)
+pnpm start
+```
+
+Env vars: `PORT` (default `8787`), `HOST` (default `0.0.0.0`), plus the same `TURNSTILE_*` / `RECAPTCHA_*` (incl. `TURNSTILE_NONINTERACTIVE_*`, see `docker.env.example`). After `git pull`, rerun `docker compose up -d --build`.
+
+Notes: no built-in Workers rate limits in Docker (missing limiters mean no limiting — rate-limit at your reverse proxy); no `request.cf` geo, so `/api/me` degrades and `ip/health` without `?ip=` uses the connection IP (private IPs return 400; pass a public `?ip=` explicitly).
+
 ## GitHub Actions deployment (optional)
 
 Choose Workers Builds or GitHub Actions to avoid duplicate deployments. Actions runs builds and tests by default. To enable deployment, add these settings to your repository's Actions configuration:
