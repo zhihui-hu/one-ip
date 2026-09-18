@@ -59,6 +59,36 @@ For map access from mainland China, configure `TIANDITU_TOKEN` under Worker → 
 
 Workers Builds builds and deploys when `main` receives a commit. The button above points to the original repository. To preserve the fork relationship and update workflow, follow the steps to import your fork.
 
+### Cloudflare Pages deployment (optional, isolated from Workers)
+
+The assigned `xxx.pages.dev` domain is directly reachable from networks in China, which suits deployments mainly serving users there. Pick either Workers or Pages; their configs are fully isolated:
+
+| Mode   | Config file           | Commands                                 |
+| ------ | --------------------- | ---------------------------------------- |
+| Worker | `wrangler.toml`       | `pnpm build` + `pnpm deploy`             |
+| Pages  | `wrangler.pages.toml` | `pnpm build:pages` + `pnpm deploy:pages` |
+
+**Option A: Git integration with automatic deploys (recommended)**
+
+1. [Fork this project](https://github.com/zhihui-hu/one-ip/fork) into your GitHub account.
+2. Open the [Cloudflare dashboard](https://dash.cloudflare.com/), go to **Workers & Pages** and choose **Create → Pages → Connect to Git**.
+3. Select your `one-ip` fork and set the production branch to `main`.
+4. Build settings: framework preset `React (Vite)`, build command `pnpm build:pages`, output directory `dist`; use Node.js 24 and pnpm 10.32.1.
+5. Deploy and open the `xxx.pages.dev` address. The `functions/` directory is picked up as Pages Functions automatically with no extra setup; connect a custom domain in the Pages settings.
+
+**Option B: direct upload from the CLI**
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build:pages
+pnpm exec wrangler login
+pnpm deploy:pages
+```
+
+Preview locally with `pnpm pages:dev` (port 8788, avoiding the Worker's 8787). `functions/api/[[path]].js` is a thin adapter; all `/api/*` logic stays in `public/worker/`, so API changes only touch one place. See [docs/pages.md](docs/pages.md) for isolation details.
+
+Note: rate-limit bindings are not provisioned for Pages yet; the backend tolerates missing limiters, so the API keeps working.
+
 ## Features
 
 | Module                   | Features                                                                                                                                                      |
@@ -114,13 +144,14 @@ References: [Syncing a fork](https://docs.github.com/en/pull-requests/how-tos/wo
 
 Choose Workers Builds or GitHub Actions to avoid duplicate deployments. Actions runs builds and tests by default. To enable deployment, add these settings to your repository's Actions configuration:
 
-| Kind     | Name                    | Purpose                                              |
-| -------- | ----------------------- | ---------------------------------------------------- |
-| Variable | `ENABLE_CF_DEPLOY=true` | Enable deployment                                    |
-| Secret   | `CLOUDFLARE_API_TOKEN`  | Worker deployment credentials for the target account |
-| Secret   | `CLOUDFLARE_ACCOUNT_ID` | Target Cloudflare account ID                         |
+| Kind     | Name                    | Purpose                                                                                    |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| Variable | `ENABLE_CF_DEPLOY=true` | Enable deployment                                                                          |
+| Variable | `DEPLOY_PAGE=true`      | Deploy to Pages instead (Worker by default, either-or)                                     |
+| Secret   | `CLOUDFLARE_API_TOKEN`  | Deployment credentials for the target account (needs Pages write access for Pages deploys) |
+| Secret   | `CLOUDFLARE_ACCOUNT_ID` | Target Cloudflare account ID                                                               |
 
-Push to `main` or run `Build and deploy one-ip`. Deployment starts after builds and tests pass. External PRs run tests without deployment credentials. These credentials are used by CI.
+Push to `main` or run `Build and deploy one-ip`. After builds and tests pass, Worker deploys by default; set `DEPLOY_PAGE=true` to deploy Pages instead (upstream syncs trigger the same flow). External PRs run tests without deployment credentials. These credentials are used by CI.
 
 ## Local development and deployment
 
