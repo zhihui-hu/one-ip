@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { t } from "@/i18n";
 import { hideIpAtom } from "@/store/privacy";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
 import { useAtomValue } from "jotai";
+import { claudeExitRegion } from "./api";
 import { detectSignal, summarizeSignals } from "./score";
 import { SIGNALS } from "../../../vendor/claude-environment/signals";
 
@@ -38,11 +39,19 @@ export function EnvironmentScore() {
       refetchOnWindowFocus: false,
     })),
   });
-  const busy = queries.some((query) => query.isFetching);
+  const region = useQuery({
+    queryKey: ["claude-exit-region"],
+    queryFn: ({ signal }) => claudeExitRegion(signal),
+    retry: false,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const busy = region.isFetching || queries.some((query) => query.isFetching);
   const result = summarizeSignals(
     queries.map((query) =>
       query.isFetching || query.isError ? undefined : query.data,
     ),
+    region.isFetching ? undefined : region.data?.country,
   );
   const completed = queries.filter(
     (query) => !query.isFetching && !query.isPending,
@@ -92,6 +101,13 @@ export function EnvironmentScore() {
     high: "text-destructive",
   }[result.band];
   const recommendations = [
+    ...(result.blocked
+      ? [
+          t(
+            "出口 IP 位于中国大陆、香港或澳门，属于 Claude 不提供服务的地区，直接判定为最高风险；浏览器环境信号不能抵消 IP 地区。",
+          ),
+        ]
+      : []),
     ...(hits.some(
       ({ definition }) =>
         definition.id === "timezone" ||
@@ -202,7 +218,10 @@ export function EnvironmentScore() {
             size="sm"
             variant="ghost"
             busy={busy}
-            onClick={() => queries.forEach((query) => void query.refetch())}
+            onClick={() => {
+              void region.refetch();
+              queries.forEach((query) => void query.refetch());
+            }}
           >
             {busy ? t("检测中…") : t("重新检测")}
           </ActionButton>
@@ -237,6 +256,17 @@ export function EnvironmentScore() {
             data-scan-enter
             className="grid content-center gap-x-8 gap-y-2 sm:grid-cols-2"
           >
+            {result.blocked && (
+              <div className="col-span-full flex min-w-0 items-center justify-between gap-3 border-b border-border/50 py-2 text-sm">
+                <span className="text-muted-foreground">
+                  {t("出口 IP 地区")} · {region.data?.country} (
+                  {region.data?.source})
+                </span>
+                <span className="shrink-0 font-medium text-destructive">
+                  {t("直接判定")}
+                </span>
+              </div>
+            )}
             {hits.map(({ definition, i, points }) => (
               <div
                 key={definition.id}
@@ -248,7 +278,7 @@ export function EnvironmentScore() {
                 </span>
               </div>
             ))}
-            {!busy && !hits.length && (
+            {!busy && !hits.length && !result.blocked && (
               <span className="text-sm text-muted-foreground">
                 {t("本次无命中信号")}
               </span>

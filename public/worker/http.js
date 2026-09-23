@@ -46,7 +46,10 @@ export function publicIp(value) {
       a >= 224 ||
       (a === 169 && b === 254) ||
       (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && (b === 168 || b === 0 || (b === 88 && c === 99))) ||
+      (a === 192 &&
+        (b === 168 ||
+          (b === 0 && (c === 0 || c === 2)) ||
+          (b === 88 && c === 99))) ||
       (a === 100 && b >= 64 && b <= 127) ||
       (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
       (a === 203 && b === 0 && c === 113)
@@ -61,7 +64,7 @@ export function target(value) {
   const normalized = value.trim().replace(/\.$/, "").toLowerCase();
   if (isIP(normalized)) return publicIp(normalized);
   if (
-    !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(
+    !/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/.test(
       normalized,
     ) ||
     /\.(localhost|local|internal|test|invalid|example)$/.test(normalized)

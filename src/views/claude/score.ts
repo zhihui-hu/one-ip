@@ -24,7 +24,19 @@ export async function detectSignal(
   }
 }
 
-export function summarizeSignals(outcomes: (DetectOutcome | undefined)[]) {
+/** Exit regions where Claude is not offered: the IP decides before any browser signal. */
+export const BLOCKED_EXIT_REGIONS = ["CN", "HK", "MO"];
+
+export function isBlockedExit(country?: string) {
+  return BLOCKED_EXIT_REGIONS.includes(country?.toUpperCase() ?? "");
+}
+
+export function summarizeSignals(
+  outcomes: (DetectOutcome | undefined)[],
+  exitCountry?: string,
+) {
+  if (isBlockedExit(exitCountry))
+    return { total: 100, band: riskBand(100), complete: true, blocked: true };
   const total = Math.round(
     SIGNALS.reduce(
       (sum, definition, i) =>
@@ -40,5 +52,6 @@ export function summarizeSignals(outcomes: (DetectOutcome | undefined)[]) {
       outcomes.every(
         (outcome) => outcome && !/unknown|unavailable/i.test(outcome.raw),
       ),
+    blocked: false,
   };
 }
