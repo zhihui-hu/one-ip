@@ -17,6 +17,7 @@
     "test": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
+    "start": "node server.mjs",
     "format": "prettier --write .",
     "prepare": "husky",
     "browser:build": "node scripts/build-browser-diagnostics.mjs"

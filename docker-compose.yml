@@ -1,0 +1,26 @@
+services:
+  one-ip:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: one-ip:latest
+    pull_policy: build
+    container_name: one-ip
+    ports:
+      - "${PORT:-8787}:8787"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8787
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TURNSTILE_HOSTNAMES: ${TURNSTILE_HOSTNAMES:-}
+      TURNSTILE_NONINTERACTIVE_SITE_KEY: ${TURNSTILE_NONINTERACTIVE_SITE_KEY:-}
+      TURNSTILE_NONINTERACTIVE_SECRET: ${TURNSTILE_NONINTERACTIVE_SECRET:-}
+      TURNSTILE_NONINTERACTIVE_HOSTNAMES: ${TURNSTILE_NONINTERACTIVE_HOSTNAMES:-}
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:-}
+      RECAPTCHA_SECRET: ${RECAPTCHA_SECRET:-}
+      RECAPTCHA_HOSTNAMES: ${RECAPTCHA_HOSTNAMES:-}
+    restart: unless-stopped
