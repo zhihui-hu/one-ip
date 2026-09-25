@@ -1,0 +1,11 @@
+# Pages 专用配置，仅供 `wrangler pages deploy --config wrangler.pages.toml` 使用。
+# 与 Worker 专用 wrangler.toml 完全隔离：不要在此文件加 `main`，
+# 也不要在 wrangler.toml 加 `pages_build_output_dir`。
+"$schema" = "./node_modules/wrangler/config-schema.json"
+name = "one-ip-pages"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-09-09"
+compatibility_flags = ["nodejs_compat"]
+
+# Ratelimit 绑定暂不下发到 Pages（Pages Functions schema 未明确支持 [[ratelimits]]）。
+# 后端 public/worker/index.js 已做 `if (limiter)` 兼容：缺失时跳过限流，接口仍可用。

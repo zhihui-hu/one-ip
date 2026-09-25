@@ -17,6 +17,10 @@
     "test": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
+    "build:pages": "node scripts/build-pages.mjs",
+    "deploy:pages": "wrangler pages deploy ./dist --config wrangler.pages.toml",
+    "pages:dev": "wrangler pages dev ./dist --config wrangler.pages.toml",
+    "preview:pages": "wrangler pages dev ./dist --config wrangler.pages.toml --port 8788",
     "format": "prettier --write .",
     "prepare": "husky",
     "browser:build": "node scripts/build-browser-diagnostics.mjs"

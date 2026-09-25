@@ -41,6 +41,36 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 Workers Builds 会在 `main` 收到提交时构建和部署。上方按钮使用原项目地址；需要保留 Fork 关系和更新工作流时，请按教程导入你的 Fork。
 
+### Cloudflare Pages 部署（可选，与 Worker 隔离）
+
+Pages 分配的 `xxx.pages.dev` 域名在国内网络可直接访问，适合主要面向国内用户的部署。Worker 与 Pages 二选一即可，配置文件完全隔离：
+
+| 方式   | 配置文件              | 命令                                     |
+| ------ | --------------------- | ---------------------------------------- |
+| Worker | `wrangler.toml`       | `pnpm build` + `pnpm deploy`             |
+| Pages  | `wrangler.pages.toml` | `pnpm build:pages` + `pnpm deploy:pages` |
+
+**方式一：连接 Git 仓库自动部署（推荐）**
+
+1. [Fork 本项目](https://github.com/zhihui-hu/one-ip/fork)到你的 GitHub 账号。
+2. 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)，进入 **Workers & Pages**，选择 **Create → Pages → Connect to Git**。
+3. 选择你的 `one-ip` Fork，生产分支填 `main`。
+4. 构建设置：框架预设选 `React (Vite)`，构建命令填 `pnpm build:pages`，输出目录填 `dist`；Node.js 版本选 24，包管理器选 pnpm 10.32.1。
+5. 点击部署，完成后打开 `xxx.pages.dev` 地址。`functions/` 目录会被自动识别为 Pages Functions，无需额外配置；自定义域名在 Pages 设置中绑定。
+
+**方式二：命令行直接上传**
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build:pages
+pnpm exec wrangler login
+pnpm deploy:pages
+```
+
+本地预览用 `pnpm pages:dev`（8788 端口，避免占用 Worker 的 8787）。`functions/api/[[path]].js` 只是薄适配层，所有 `/api/*` 逻辑仍在 `public/worker/`，改接口只改一处。详细隔离说明见 [docs/pages.md](docs/pages.md)。
+
+注意：Pages 暂不下发限流绑定，后端已兼容缺失限流器，接口仍可用。
+
 ## 功能
 
 | 模块             | 支持的功能                                                                                                |
@@ -135,13 +165,14 @@ One IP 面向企业提供闭源商业版本及配套服务，适合网络与浏�
 
 Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布。Actions 默认执行构建和测试；开启部署需要在仓库的 Actions 设置中添加：
 
-| 类型     | 名称                    | 用途                       |
-| -------- | ----------------------- | -------------------------- |
-| Variable | `ENABLE_CF_DEPLOY=true` | 开启部署                   |
-| Secret   | `CLOUDFLARE_API_TOKEN`  | 目标账户的 Worker 部署凭证 |
-| Secret   | `CLOUDFLARE_ACCOUNT_ID` | 目标 Cloudflare 账户 ID    |
+| 类型     | 名称                    | 用途                                                 |
+| -------- | ----------------------- | ---------------------------------------------------- |
+| Variable | `ENABLE_CF_DEPLOY=true` | 开启部署                                             |
+| Variable | `DEPLOY_PAGE=true`      | 改发 Pages（缺省部署 Worker，二选一）                |
+| Secret   | `CLOUDFLARE_API_TOKEN`  | 目标账户的部署凭证（部署 Pages 需包含 Pages 写权限） |
+| Secret   | `CLOUDFLARE_ACCOUNT_ID` | 目标 Cloudflare 账户 ID                              |
 
-推送到 `main`，或运行 `Build and deploy one-ip`。构建和测试通过后进入部署。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
+推送到 `main`，或运行 `Build and deploy one-ip`。构建和测试通过后缺省部署 Worker，设置 `DEPLOY_PAGE=true` 则改发 Pages（上游同步产生更新时同样触发）。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
 
 ## 本地开发与部署
 
