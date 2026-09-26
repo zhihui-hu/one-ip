@@ -30,7 +30,7 @@ export default function IpPage() {
       return result;
     },
   });
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(true);
   const searchPanel = useRef<HTMLDivElement>(null);
   const searchButton = useRef<HTMLButtonElement>(null);
   const searchId = useId();

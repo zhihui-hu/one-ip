@@ -9,11 +9,11 @@ test('Net.Coffee score and residential flag are preserved, null coordinates are 
  assert.equal(result.geo.latitude,39.911);assert.equal(result.geo.isp,'China Telecom');
  assert.equal(result.risk.vpn,undefined);
 });
-test('frontend requests Net.Coffee without cookies and rejects mismatched results', async () => {
+test('frontend requests the same-origin Rust API and rejects mismatched results', async () => {
  const original=globalThis.fetch;
  globalThis.fetch=async(url, options)=>{
-  assert.equal(url,'https://ip.net.coffee/api/ip/lookup/1.1.1.1');
-  assert.equal(options.credentials,'omit');assert.equal(options.mode,'cors');
+  assert.equal(url,'/api/ip/coffee/1.1.1.1');
+  assert.equal(options.cache,'no-store');
   return Response.json({ip:'8.8.8.8'});
  };
  try {await assert.rejects(lookupIp('1.1.1.1'));} finally {globalThis.fetch=original;}

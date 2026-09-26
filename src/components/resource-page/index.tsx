@@ -340,7 +340,7 @@ export function ResourcePage({
             <p className="text-destructive">{query.error.message}</p>
             {query.error instanceof ApiError && query.error.status === 401 ? (
               <Button asChild>
-                <a href="/api/auth/oidc/start">重新登录</a>
+                <a href="/login">重新登录</a>
               </Button>
             ) : (
               <Button variant="outline" onClick={() => void query.refetch()}>

@@ -1,12 +1,15 @@
 import { t } from "@/i18n";
-import { endpoint, request } from "@/lib/network";
+import { endpoint } from "@/lib/network";
 import type { Geo } from "@/lib/types";
 import { adaptCoffee, type CoffeeIp } from "./coffee.ts";
 
 export async function lookupIp(ip: string, signal?: AbortSignal) {
-  const data = await request<CoffeeIp>(
-    `https://ip.net.coffee/api/ip/lookup/${encodeURIComponent(ip)}`,
-    { signal, mode: "cors", credentials: "omit", cache: "no-store" },
+  const data = await endpoint<CoffeeIp>(
+    `/ip/coffee/${encodeURIComponent(ip)}`,
+    {
+      signal,
+      cache: "no-store",
+    },
   );
   const normalize = (value: string) =>
     value.includes(":") ? new URL(`https://[${value}]/`).hostname : value;

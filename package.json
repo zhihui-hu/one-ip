@@ -14,7 +14,8 @@
     "build": "tsc -b && vite build",
     "worker:dev": "node scripts/worker-dev.mjs",
     "worker:types": "wrangler types",
-    "test": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",
+    "test": "node scripts/test-commercial.mjs",
+    "test:worker": "wrangler deploy --dry-run --env='' --outdir .worker-test && node --import ./tests/register-paths.mjs --test tests/*.test.mjs",
     "lint": "oxlint",
     "preview": "vite preview",
     "format": "prettier --write .",
@@ -22,8 +23,7 @@
     "browser:build": "node scripts/build-browser-diagnostics.mjs",
     "typecheck": "tsc -b --pretty false",
     "build:stage": "tsc -b && vite build --mode stage",
-    "format:check": "prettier --check src/views/dashboard src/views/login src/lib/http.ts",
-    "worker:commercial": "wrangler dev --env local --var LOCAL_DEV:true --assets ./public --ip 127.0.0.1 --port 8787"
+    "format:check": "prettier --check src/views/dashboard src/views/login src/lib/http.ts"
   },
   "dependencies": {
     "@cloudflare/speedtest": "1.13.0",
@@ -69,6 +69,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "esbuild": "0.28.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^17.5.1",

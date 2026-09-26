@@ -1,17 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import ts from "typescript";
-
-const moduleUrl = (source) =>
-  `data:text/javascript;base64,${Buffer.from(
-    ts.transpileModule(source, {
-      compilerOptions: {
-        target: ts.ScriptTarget.ES2022,
-        module: ts.ModuleKind.ESNext,
-      },
-    }).outputText,
-  ).toString("base64")}`;
+import { moduleUrl } from "./compile.mjs";
 const i18n = moduleUrl("export const t = (text) => text;");
 const network = moduleUrl(
   readFileSync("src/lib/network.ts", "utf8").replace(

@@ -273,6 +273,8 @@ export function ResourceEditor({
                           valueAsNumber: field.type === "number",
                         })}
                         type={field.type ?? "text"}
+                        minLength={field.type === "password" ? 12 : undefined}
+                        maxLength={field.type === "password" ? 128 : undefined}
                         required={field.required}
                         readOnly={!creating && field.readOnly?.(row)}
                         autoComplete={

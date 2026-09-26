@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
-import ts from "typescript";
 import { resolveLocale, t } from "../src/i18n/index.ts";
 
 const en = JSON.parse(readFileSync("src/i18n/en.json", "utf8"));
@@ -23,16 +22,13 @@ test("all literal translation calls have English entries and matching placeholde
       const file = join(dir, entry.name);
       if (entry.isDirectory()) { scan(file); continue; }
       if (!/\.tsx?$/.test(file)) continue;
-      const source = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
-      function visit(node) {
-        if (ts.isCallExpression(node) && node.expression.getText(source) === "t" && ts.isStringLiteral(node.arguments[0])) {
-          const key = node.arguments[0].text;
-          assert.ok(en[key], `${file}: missing ${key}`);
-          assert.deepEqual(en[key].match(/\{\d+\}/g)?.sort() ?? [], key.match(/\{\d+\}/g)?.sort() ?? [], key);
-        }
-        ts.forEachChild(node, visit);
+      const source = readFileSync(file, "utf8");
+      const calls = /\bt\(\s*"((?:\\.|[^"\\])*)"/g;
+      for (const match of source.matchAll(calls)) {
+        const key = JSON.parse(`"${match[1]}"`);
+        assert.ok(en[key], `${file}: missing ${key}`);
+        assert.deepEqual(en[key].match(/\{\d+\}/g)?.sort() ?? [], key.match(/\{\d+\}/g)?.sort() ?? [], key);
       }
-      visit(source);
     }
   }
   scan("src");

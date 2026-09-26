@@ -7,4 +7,4 @@ include make/deploy.mk
 
 .PHONY: help
 help:
-	@printf '%s\n' 'make dev             启动 SPA 开发环境' 'make worker-dev      启动 Vite 27529 + Worker 27528（统一入口）' 'make build           类型检查与生产构建' 'make test            运行接口和内容边界测试' 'make deploy          更新版本并部署生产环境' 'make update-version  按上海时间更新版本'
+	@printf '%s\n' 'make dev             启动 Vite 27529（API 代理到 Rust 27528）' 'make worker-dev      启动开源版 Vite + Worker' 'make build           类型检查与生产构建' 'make test            运行商业版测试（无需 Wrangler）' 'make deploy          通过 Rust 后端部署商业版' 'make update-version  按上海时间更新版本'

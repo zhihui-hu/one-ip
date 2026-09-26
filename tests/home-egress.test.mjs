@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import ts from "typescript";
+import { compile } from "./compile.mjs";
 import * as jsx from "react/jsx-runtime";
 
-const { outputText } = ts.transpileModule(readFileSync("src/views/home/index.tsx", "utf8"), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+const outputText = compile(readFileSync("src/views/home/index.tsx", "utf8"), {
+  format: "cjs",
+  loader: "tsx",
 });
 function render(primary, split, client = {}, capture = () => {}) {
   const batches = [[], primary];
@@ -25,9 +26,9 @@ function render(primary, split, client = {}, capture = () => {}) {
     };
     return new Proxy({}, { get: (_, key) => key });
   };
-  const exports = {};
-  new Function("require", "exports", outputText)(require, exports);
-  const tree = exports.HomePage();
+  const module = { exports: {} };
+  new Function("require", "module", outputText)(require, module);
+  const tree = module.exports.HomePage();
   capture(tree);
   return JSON.stringify(tree);
 }
@@ -72,9 +73,18 @@ test("home retest cancels previous runs before resetting only home query familie
     },
     resetQueries: async () => { calls.push("reset"); },
   };
+  const findClick = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (typeof node.props?.onClick === "function") return node.props.onClick;
+    const children = node.props?.children;
+    for (const child of Array.isArray(children) ? children : [children]) {
+      const onClick = findClick(child);
+      if (onClick) return onClick;
+    }
+  };
   let refresh;
   render([failed, failed, failed], [], client, (tree) => {
-    refresh = tree.props.children[0].props.children[1].props.onClick;
+    refresh = findClick(tree);
   });
   await refresh();
   assert.deepEqual(calls, ["cancel", "reset"]);

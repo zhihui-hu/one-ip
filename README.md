@@ -21,27 +21,30 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 **中文** · [English](README.en.md)
 
-[在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
+[开源版在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
-点击下方按钮，一键部署到 Cloudflare。
+以下 Cloudflare 一键部署入口适用于开源版 `main` 分支。
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
 
 ## 商业版本（commercial）
 
-当前商业版保留原有 IP 工具，增加 `/login` 和 `/dashboard/admin`，管理功能包括用户、角色、权限、登录日志与操作日志。Rust 后端基于 [one-template 模块结构](../backend/README.md)，通过 One User 登录。
+`commercial` 分支保留原有 IP 工具，增加 `/login` 和 `/dashboard/admin`。Rust [后端](../backend/README.md)提供静态页面与全部 `/api/*`，负责诊断数据、本地登录及 Turnstile 人机验证、权限和审计；浏览器出口、站点连通性及浏览器特征仍由访问者的浏览器直接检测。
 
 ```sh
 cd ../backend
-# 填写 .env.dev 中 One IP 的 One User 客户端凭据
-make dev  # Rust 27528 + Vite 27529 + 本地诊断 Worker 8787
+# 新库先 make init；已有库先按后端 README 执行迁移
+make bootstrap-admin
+make dev  # Rust 27528 + Vite 27529
 ```
 
-商业版使用后端 Make 入口；原有 `make worker-dev` 是开源版 Worker 统一入口，会占用 27528，不要与商业后端同时运行。开发期仍由现有 Worker 执行诊断，未把诊断算法搬到 Rust。商业 API 上线需要在 One Action 与 Cloudflare 注册生产路由，不能直接按下文开源部署流程发布商业版。
+Vite 将 `/api/*` 代理到 Rust。商业版运行、测试与部署不需要 Wrangler；`pnpm test` 运行无需 Worker 构建的测试。`pnpm test:worker` 保留开源版 Worker 测试。下文 Cloudflare 部署教程仅适用于 `main` 分支，不适用于商业版。
 
-本分支暂未实现套餐、计费、API Key 和额度。One User 授权回调及公网诊断结果需要真实客户端/生产路由验证。
+本分支暂未实现套餐、计费、API Key 和额度。本地登录和公网诊断结果需要在目标环境验证。
 
 ## Cloudflare 部署教程
+
+本节仅适用于开源版 `main` 分支。商业版请使用上方 Rust 后端入口。
 
 1. [Fork 本项目](https://github.com/zhihui-hu/one-ip/fork)到你的 GitHub 账号。
 2. 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)，进入 **Workers & Pages**，创建 Worker，选择导入 Git 仓库。
@@ -72,6 +75,12 @@ Workers Builds 会在 `main` 收到提交时构建和部署。上方按钮使用
 | 可选验证体验     | Cloudflare Turnstile、Google reCAPTCHA v3；入口需要配置和域名匹配                                         |
 
 第三方服务的限流和跨域限制会影响查询结果。HTTP 耗时与 ICMP Ping 的测量方式不同。IP 类型和信誉分供参考，不代表 AI 平台的官方判断。
+
+### WebMCP
+
+支持浏览器原生 WebMCP：在提供 `document.modelContext` 的浏览器中，页面会注册结构化工具，覆盖 IP / WHOIS / 子域名查询、网络与 AI 检测、服务状态及浏览器诊断。`one_ip_catalog` 可列出支持的站点、平台和页面；`one_ip_open_page` 可导航到需要用户操作的权限与人机校验页面。工具使用现有数据源和请求限制，支持取消；不支持 WebMCP 的浏览器仍可正常使用网页。
+
+WebMCP 仍处于实验阶段。本地可在 Chrome 开启 `chrome://flags/#enable-webmcp-testing` 后检查 `await document.modelContext.getTools()`；线上 Chrome 访问需要参与 [WebMCP Origin Trial](https://developer.chrome.com/docs/ai/webmcp/) 或等待浏览器正式支持。本站没有内置试验令牌。工具只在当前页面同源暴露，不向跨源 iframe 授权。查询结果可能包含第三方数据；浏览器指纹、出口 IP 和 WebRTC 结果可能涉及隐私，调用前应由用户决定是否交给代理处理。
 
 ## 终端与 API
 
@@ -109,6 +118,17 @@ curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=2606:4700:4700::1111&format=
   </tr>
 </table>
 
+## 商务合作
+
+One IP 面向企业提供闭源商业版本及配套服务，适合网络与浏览器环境检测、AI 服务连通性诊断、批量验收和持续监测等场景。可合作内容包括：
+
+- 企业版授权与团队协作
+- 私有化部署与数据隔离
+- 定制开发、系统集成与 API 接入
+- 技术咨询、部署实施与持续支持
+
+如需了解商业版本、私有化部署或定制方案，请发送邮件至 [ip@huzhihui.com](mailto:ip@huzhihui.com)，并说明使用场景、部署方式和预计规模；项目详情可参阅 [GitHub 仓库](https://github.com/zhihui-hu/one-ip)。具体服务范围、数据权限与交付方式以双方约定为准。
+
 ## Fork 更新
 
 在 GitHub 仓库页面点击 **Sync fork → Update branch**。有代码改动时检查差异，通过合并处理冲突。
@@ -141,6 +161,8 @@ Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布�
 推送到 `main`，或运行 `Build and deploy one-ip`。构建和测试通过后进入部署。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
 
 ## 本地开发与部署
+
+以下命令适用于开源版 `main` 分支。商业版从 `../backend` 运行 `make dev`。
 
 ```bash
 pnpm install --frozen-lockfile
@@ -185,6 +207,8 @@ reCAPTCHA 使用 v3 评分型密钥。服务端校验 hostname、`browser_check`
 
 ## 项目结构与数据来源
 
+数据来源按版本区分：开源版本使用互联网公开可访问的数据和第三方公开接口；闭源商业版本支持私有化部署，使用私有部署环境中的数据。具体数据范围、留存方式和使用权限以商业方案及合同约定为准。
+
 - `src/app.css`：界面样式；`src/components/ui`：shadcn/ui 组件。
 - `src/views`：网络、浏览器、AI 与状态页面；`public/worker`：Worker API。
 - Net.Coffee：IP 详情，展示字段取决于接口返回。
@@ -195,12 +219,12 @@ reCAPTCHA 使用 v3 评分型密钥。服务端校验 hostname、`browser_check`
 
 ### 人机校验与 Claude 环境对照
 
-人机校验在页面打开后自动运行，展示校验阶段、Turnstile 是否出现交互、reCAPTCHA v3 分数及本站阈值（0.50）。单轮最多等待 45 秒，可重新开始；结果仅代表本站本次校验。
+人机校验打开页面后自动运行，展示 Turnstile 状态和 reCAPTCHA v3 分数（通过阈值 0.50）；单轮最长等待 45 秒，可重试。
 
-可选的第二个 Turnstile 组件使用 `TURNSTILE_NONINTERACTIVE_SITE_KEY`、`TURNSTILE_NONINTERACTIVE_SECRET`、`TURNSTILE_NONINTERACTIVE_HOSTNAMES`。需在 Cloudflare 为该独立组件选择 **Non-interactive** 模式，域名须匹配；未配置时不显示。原有 `TURNSTILE_*` 组件保持其控制台配置。前端参数不能把同一个 Key 切换成另一种组件模式。
+可选的第二个 Turnstile 组件使用 `TURNSTILE_NONINTERACTIVE_SITE_KEY`、`TURNSTILE_NONINTERACTIVE_SECRET` 和 `TURNSTILE_NONINTERACTIVE_HOSTNAMES`，并须在 Cloudflare 中选择 **Non-interactive** 模式；未配置时不显示。
 
-Claude 页面自动比较 `claude.ai` 与 `claude.com` 出口，并展示 DNS、WebRTC 和语言、时区等浏览器信息。检测失败、不同出口或中文偏好均不直接代表账号风险。未接入 Cloudflare 企业版 Bot Management；不展示推算的企业版分数。
+Claude 页面比较 `claude.ai` 与 `claude.com` 出口，并检查 DNS、WebRTC、语言、时区及浏览器特征。检测字典参考 [FuckClaude](https://github.com/LinXiaoTao/FuckClaude)，许可证和来源说明见 `vendor/claude-environment/`。
 
-Claude 页面还内嵌自动人机校验，并本地检测简繁中文字体、厂商字体、UA / Client Hints、Intl 区域及 Canvas 国旗渲染。检测字典参考 LinXiaoTao/FuckClaude，来源摘要与 MIT 许可证位于 `vendor/claude-environment/`。不使用其风险分数；不把字体、厂商或中文偏好解释为国籍或封禁概率。页面仅展示简洁人机状态和逐项更新的检测日志，不提供评分卡或文本输入。
+以上结果仅用于环境排查，不代表 Claude 官方判定、账号风险或封禁概率；页面不读取本机 Claude Code 配置，也不展示 Cloudflare 企业版 Bot Management 分数。
 
 社区友链：[LINUX DO](https://linux.do/) · 真诚、友善、团结、专业。

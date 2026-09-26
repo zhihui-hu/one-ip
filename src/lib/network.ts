@@ -57,7 +57,7 @@ export async function request<T>(
 
 export function endpoint<T>(path: string, init?: RequestInit) {
   return request<T>(
-    `${import.meta.env.VITE_API_BASE_URL ?? "/api"}${path}`,
+    `${import.meta.env?.VITE_API_BASE_URL ?? "/api"}${path}`,
     init,
   );
 }

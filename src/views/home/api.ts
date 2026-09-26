@@ -11,43 +11,12 @@ export async function getGeo(
 ): Promise<Geo> {
   const timeout = AbortSignal.timeout(timeoutMs);
   signal = signal ? AbortSignal.any([signal, timeout]) : timeout;
-  const options = () => ({ signal });
-  try {
-    const data = await request<Geo>(
-      `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
-      options(),
-    );
-    if (!data.ip || (!data.country && !data.isp))
-      throw new Error(t("归属信息不完整"));
-    return { ...data, ip, source: "ip.sb" };
-  } catch {
-    signal?.throwIfAborted();
-    const data = await request<{
-      success: boolean;
-      country?: string;
-      country_code?: string;
-      region?: string;
-      city?: string;
-      connection?: { isp?: string; asn?: number };
-      latitude?: number;
-      longitude?: number;
-      timezone?: { id?: string };
-    }>(`https://ipwho.is/${encodeURIComponent(ip)}`, options());
-    if (!data.success) throw new Error(t("归属信息暂不可用，请稍后重试"));
-    return {
-      ip,
-      country: data.country,
-      country_code: data.country_code,
-      region: data.region,
-      city: data.city,
-      isp: data.connection?.isp,
-      asn: data.connection?.asn,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      timezone: data.timezone?.id,
-      source: "ipwho.is",
-    };
-  }
+  const data = await endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, {
+    signal,
+  });
+  if (!data.ip || (!data.country && !data.isp))
+    throw new Error(t("归属信息不完整"));
+  return data;
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   const timeout = AbortSignal.timeout(3000);

@@ -10,7 +10,7 @@ export const config: ResourceConfig = {
     { key: "name", label: "用户" },
     {
       key: "subject",
-      label: "统一账号",
+      label: "用户名",
     },
     {
       key: "status",

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { createRequire } from "node:module";
-import ts from "typescript";
+import { compile } from "./compile.mjs";
 import { challengeConfig, verifyChallenge } from "../public/worker/challenges.js";
 import { compareExits } from "../src/views/claude/api.ts";
 
@@ -36,7 +36,7 @@ test("exit comparisons preserve unknown and normalize equivalent IPv6 addresses"
 
 test("configured challenge starts on mount, reports interaction, verifies token and cleans up", async () => {
   const source = readFileSync("src/views/browser/challenges.tsx", "utf8").replace("function Challenge(", "export function Challenge(");
-  const output = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+  const output = compile(source, { format: "cjs", loader: "tsx" });
   const previousDocument = globalThis.document;
   const previousWindow = globalThis.window;
   const states = [];
@@ -48,7 +48,7 @@ test("configured challenge starts on mount, reports interaction, verifies token 
     createElement: () => ({ style: {}, remove() {} }),
     head: { append(script) { queueMicrotask(() => script.onload()); } },
   };
-  const exports = {};
+  const module = { exports: {} };
   const mockRequire = name => {
     if (name === "react") return {
       useRef: () => ({ current: host }),
@@ -62,8 +62,8 @@ test("configured challenge starts on mount, reports interaction, verifies token 
   };
   let cleanup;
   try {
-    new Function("require", "exports", output)(mockRequire, exports);
-    exports.Challenge({ provider: { id: "turnstile", sitekey: "key", configured: true, name: "Turnstile" } });
+    new Function("require", "module", output)(mockRequire, module);
+    module.exports.Challenge({ provider: { id: "turnstile", sitekey: "key", configured: true, name: "Turnstile" } });
     cleanup = effect();
     await new Promise(resolve => setImmediate(resolve));
     assert.ok(options, "render must run without clicking a start button");

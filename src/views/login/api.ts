@@ -10,8 +10,22 @@ export type User = {
   status: string;
   permissions: string[];
   role_ids: number[];
-  identity_roles: string[];
 };
+export const getTurnstileConfig = () =>
+  request<{ sitekey: string }>("/api/auth/turnstile");
+export const login = (
+  username: string,
+  password: string,
+  turnstileToken: string,
+) =>
+  request<{ user: User }>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({
+      username,
+      password,
+      turnstile_token: turnstileToken,
+    }),
+  });
 export async function getSession(): Promise<User | null> {
   try {
     return (await request<{ user: User }>("/api/auth/me")).user;

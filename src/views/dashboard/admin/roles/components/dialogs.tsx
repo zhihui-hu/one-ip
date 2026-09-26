@@ -249,7 +249,7 @@ export function RolePermissions({
           <ResponsiveDialogTitle>{role.name} · 配置权限</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
             {role.is_system
-              ? "平台超级管理员的全部权限由 One User 角色确定，无需逐项分配。"
+              ? "系统角色不可在此修改；超级管理员拥有 One IP 的全部权限。"
               : "使用权限树分配目录、菜单和按钮权限，支持父子联动。"}
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>

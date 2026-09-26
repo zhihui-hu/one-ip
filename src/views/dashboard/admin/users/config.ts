@@ -4,7 +4,7 @@ import type { ResourceConfig } from "../types";
 export const config: ResourceConfig = {
   key: "users",
   title: "用户管理",
-  description: "管理 One User 账号在当前应用中的访问权限。",
+  description: "管理 One IP 本地账号和访问权限。",
   permission: "users:read",
   columns: [
     {
@@ -32,10 +32,25 @@ export const config: ResourceConfig = {
   fields: [
     {
       name: "subject",
-      label: "One User Subject",
+      label: "用户名",
       required: true,
       createOnly: true,
-      hint: "填写统一身份平台的用户 Subject。",
+      hint: "3–64 位英文字母、数字、点、下划线或连字符。",
+    },
+    {
+      name: "password",
+      label: "密码",
+      type: "password",
+      required: true,
+      createOnly: true,
+      hint: "至少 12 个字符。",
+    },
+    {
+      name: "password",
+      label: "重设密码",
+      type: "password",
+      editOnly: true,
+      hint: "留空则保持原密码；填写后会使该账号的现有会话失效。",
     },
     {
       name: "name",

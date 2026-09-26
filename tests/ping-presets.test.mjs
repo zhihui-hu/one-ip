@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import ts from "typescript";
-const code = ts.transpileModule(readFileSync("src/views/ping/presets.ts", "utf8"), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+import { compile } from "./compile.mjs";
+const code = compile(readFileSync("src/views/ping/presets.ts", "utf8"));
 const { selectPingPresets } = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
 const nodes = [
   { id: "CN:Shanghai", cc: "cn", continent: "AS", probes: 5 },

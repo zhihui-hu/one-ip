@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { BuildInfo } from "@/components/build-info";
+import { HomePageSkeleton } from "@/components/home-page-skeleton";
 import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
 import { ShareSite } from "@/components/share-site";
@@ -143,9 +144,13 @@ export function AppLayout() {
               <RouteErrorBoundary key={activeRoute}>
                 <Suspense
                   fallback={
-                    <p className="status-line">
-                      <Pending>{t("正在加载页面…")}</Pending>
-                    </p>
+                    activeRoute === "/" ? (
+                      <HomePageSkeleton />
+                    ) : (
+                      <p className="status-line">
+                        <Pending>{t("正在加载页面…")}</Pending>
+                      </p>
+                    )
                   }
                 >
                   <Outlet />

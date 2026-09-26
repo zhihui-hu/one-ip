@@ -71,7 +71,6 @@ export default defineConfig(() => {
       headers,
       allowedHosts: ["one-ip-web.marseo.eu.org"],
       proxy: {
-        "/callback": { target: "http://127.0.0.1:27528", changeOrigin: false },
         "/api": {
           target: "http://127.0.0.1:27528",
           changeOrigin: false,

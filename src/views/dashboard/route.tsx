@@ -33,7 +33,7 @@ export function CommercialLayout() {
           重试
         </Button>
         <Button asChild variant="outline">
-          <a href="/api/auth/oidc/start">重新登录</a>
+          <a href="/login">重新登录</a>
         </Button>
       </main>
     );

@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { SIGNALS, scoreLanguages, scoreTimezone, riskBand } from '../vendor/claude-environment/signals.ts';
 import { readFileSync } from 'node:fs';
-import ts from 'typescript';
+import { moduleUrl } from './compile.mjs';
 const source = readFileSync('src/views/claude/score.ts','utf8').replace('"../../../vendor/claude-environment/signals"', JSON.stringify(new URL('../vendor/claude-environment/signals.ts', import.meta.url).href));
-const { summarizeSignals, detectSignal } = await import(`data:text/javascript;base64,${Buffer.from(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText).toString('base64')}`);
+const { summarizeSignals, detectSignal } = await import(moduleUrl(source));
 test('upstream weights, region exceptions and risk boundaries stay intact', () => {
  assert.equal(SIGNALS.reduce((n,s)=>n+s.weight,0),100);
  assert.equal(scoreTimezone('Asia/Shanghai'),1);
