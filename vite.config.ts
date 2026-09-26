@@ -31,6 +31,7 @@ function excludeBackendSource(): Plugin {
 const headers = {
   "Content-Security-Policy": "frame-ancestors 'none'",
   "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
 };
 
 export default defineConfig(() => {

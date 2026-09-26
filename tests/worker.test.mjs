@@ -47,12 +47,25 @@ test("public IP validation rejects private, fake-IP, expanded IPv6, mapped loopb
     "fe80::1",
     "fd00::1",
     "2001:db8::1",
+    "192.0.0.1",
+    "192.0.2.1",
     "not-an-ip",
   ])
     assert.throws(() => publicIp(ip), HttpError, ip);
-  for (const ip of ["1.1.1.1", "172.32.0.1", "8.8.8.8", "2606:4700:4700::1111"])
+  for (const ip of [
+    "1.1.1.1",
+    "172.32.0.1",
+    "8.8.8.8",
+    "192.0.78.9",
+    "192.76.177.54",
+    "2606:4700:4700::1111",
+  ])
     assert.equal(publicIp(ip), ip);
   assert.equal(publicIp("::ffff:8.8.8.8"), "8.8.8.8");
+});
+test("target validation accepts punycode IDN top-level domains", () => {
+  assert.equal(target("nic.xn--fiqs8s"), "nic.xn--fiqs8s");
+  assert.equal(target("Example.XN--P1AI."), "example.xn--p1ai");
 });
 test("target validation does not accept URLs, private hosts or ports", () => {
   for (const host of [

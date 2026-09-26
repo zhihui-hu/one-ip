@@ -28,7 +28,16 @@ export async function request<T>(
   try {
     return await Promise.race([
       (async () => {
-        const response = await fetch(url, { ...init, signal });
+        // Cross-site probes never carry cookies or reveal this site as Referer.
+        const origin = globalThis.location?.origin;
+        const crossSite = !origin || new URL(url, origin).origin !== origin;
+        const response = await fetch(url, {
+          ...(crossSite
+            ? { credentials: "omit", referrerPolicy: "no-referrer" }
+            : {}),
+          ...init,
+          signal,
+        });
         if (mode === "opaque") return undefined as T;
         if (!response.ok) {
           let message = t("请求失败 ({0})", [response.status]);

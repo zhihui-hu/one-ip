@@ -10,6 +10,18 @@ export const claudeApi = {
     endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, { signal }),
 };
 
+/** Exit region as seen by claude.ai; falls back to this Worker when claude.ai is unreachable. */
+export async function claudeExitRegion(signal: AbortSignal) {
+  try {
+    const exit = await claudeExit("claude.ai", signal);
+    return { country: exit.country_code, source: "claude.ai" };
+  } catch (error) {
+    if (signal.aborted) throw error;
+    const geo = await endpoint<Geo>("/me", { signal });
+    return { country: geo.country_code, source: "Cloudflare" };
+  }
+}
+
 export const claudeDomains = ["claude.ai", "claude.com"] as const;
 
 export function claudeExit(

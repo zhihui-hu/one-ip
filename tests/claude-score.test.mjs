@@ -16,7 +16,7 @@ test('upstream weights, region exceptions and risk boundaries stay intact', () =
 test('weighted totals preserve fractional contributions and incomplete outcomes', () => {
  const outcomes=SIGNALS.map(()=>({raw:'test',score:0}));
  outcomes[0].score=1; outcomes[1].score=0.7;
- assert.deepEqual(summarizeSignals(outcomes),{total:37,band:'medium',complete:true});
+ assert.deepEqual(summarizeSignals(outcomes),{total:37,band:'medium',complete:true,blocked:false});
  outcomes[2]={raw:'canvas unavailable',score:0};
  assert.equal(summarizeSignals(outcomes).complete,false);
  outcomes[2]=undefined;
@@ -24,4 +24,10 @@ test('weighted totals preserve fractional contributions and incomplete outcomes'
 });
 test('detector errors remain failures rather than zero scores',async()=>{
  await assert.rejects(detectSignal({...SIGNALS[0],detect(){throw new Error('blocked')}}),/blocked/);
+});
+test('mainland China, Hong Kong and Macau exits override browser signals', () => {
+ const clean=SIGNALS.map(()=>({raw:'test',score:0}));
+ for (const cc of ['CN','hk','MO']) assert.deepEqual(summarizeSignals(clean,cc),{total:100,band:'high',complete:true,blocked:true});
+ assert.equal(summarizeSignals(clean,'TW').blocked,false);
+ assert.equal(summarizeSignals(clean,'US').total,0);
 });

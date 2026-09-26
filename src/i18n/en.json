@@ -1709,5 +1709,8 @@
   "分享当前页面": "Share this page",
   "扫码或复制链接，打开当前页面。": "Scan or copy the link to open this page.",
   "扫码打开当前页面": "Scan to open this page",
-  "当前页面链接": "Current page link"
+  "当前页面链接": "Current page link",
+  "出口 IP 位于中国大陆、香港或澳门，属于 Claude 不提供服务的地区，直接判定为最高风险；浏览器环境信号不能抵消 IP 地区。": "The exit IP is in mainland China, Hong Kong or Macau, where Claude is not offered, so it is rated highest risk outright; browser signals cannot offset the IP region.",
+  "出口 IP 地区": "Exit IP region",
+  "直接判定": "Decisive"
 }
