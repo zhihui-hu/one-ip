@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { AuthorContact } from "@/components/author-contact";
 import { HomePageSkeleton } from "@/components/home-page-skeleton";
 import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
@@ -240,7 +241,7 @@ export function AppLayout() {
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <a href="mailto:ip@huzhihui.com">{t("policy.contactAuthor")}</a>
+            <AuthorContact />
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ConnectivityTile, homeTargets } from "@/components/connectivity";
+import { SponsorLinks } from "@/components/sponsor-links";
 import { PrivacyToggle } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -142,6 +143,7 @@ export function HomePage() {
   const typeByIp = new Map(ips.map((ip, index) => [ip, typeQueries[index]]));
   return (
     <div className="home-page">
+      <SponsorLinks />
       <div className="home-toolbar">
         <div className="home-toolbar-heading">
           <h1>{t("home.networkOverview")}</h1>

@@ -21,6 +21,10 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 
 [Live demo](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
+<!-- sponsors:start -->
+[Advertise here](mailto:ip@huzhihui.com) · [<img src="public/contact/wechat.svg" alt="" width="14" height="14" /> WeChat](public/contact/wechat.jpg)
+<!-- sponsors:end -->
+
 Click the button below for one-click deployment to Cloudflare.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
@@ -167,7 +171,13 @@ One IP offers a closed-source commercial edition and related services for organi
 - Custom development, integrations and API access
 - Technical consulting, deployment and ongoing support
 
-To discuss the commercial edition, private deployment or a custom solution, email [ip@huzhihui.com](mailto:ip@huzhihui.com) with your use case, deployment model and expected scale. See the [GitHub repository](https://github.com/zhihui-hu/one-ip) for project details. The final service scope, data permissions and delivery terms are subject to agreement.
+To discuss the commercial edition, private deployment or a custom solution, contact us by email at [ip@huzhihui.com](mailto:ip@huzhihui.com) or scan the WeChat QR code below. Include your use case, deployment model and expected scale. See the [GitHub repository](https://github.com/zhihui-hu/one-ip) for project details. The final service scope, data permissions and delivery terms are subject to agreement.
+
+<details>
+  <summary>Contact on WeChat (show QR code)</summary>
+
+  <img src="public/contact/wechat.jpg" alt="WeChat contact QR code" width="240" />
+</details>
 
 ## Update your fork
 

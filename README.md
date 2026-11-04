@@ -1,6 +1,4 @@
-<img src="public/icon.svg" alt="One IP Logo" width="96" height="96" />
-
-# One IP
+# <img src="public/icon.svg" alt="One IP Logo" width="32" height="32" /> One IP
 
 <p align="left">
   <img src="https://img.shields.io/badge/React-19-282C34?logo=react&amp;logoColor=61DAFB" alt="React 19" />
@@ -22,6 +20,10 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 **中文** · [English](README.en.md)
 
 [在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
+
+<!-- sponsors:start -->
+[广告位招租](mailto:ip@huzhihui.com) · [<img src="public/contact/wechat.svg" alt="" width="14" height="14" /> 微信联系](public/contact/wechat.jpg)
+<!-- sponsors:end -->
 
 点击下方按钮，一键部署到 Cloudflare。
 
@@ -171,7 +173,13 @@ One IP 面向企业提供闭源商业版本及配套服务，适合网络与浏�
 - 定制开发、系统集成与 API 接入
 - 技术咨询、部署实施与持续支持
 
-如需了解商业版本、私有化部署或定制方案，请发送邮件至 [ip@huzhihui.com](mailto:ip@huzhihui.com)，并说明使用场景、部署方式和预计规模；项目详情可参阅 [GitHub 仓库](https://github.com/zhihui-hu/one-ip)。具体服务范围、数据权限与交付方式以双方约定为准。
+如需了解商业版本、私有化部署或定制方案，请通过邮箱 [ip@huzhihui.com](mailto:ip@huzhihui.com) 或下方微信二维码联系，并说明使用场景、部署方式和预计规模；项目详情可参阅 [GitHub 仓库](https://github.com/zhihui-hu/one-ip)。具体服务范围、数据权限与交付方式以双方约定为准。
+
+<details>
+  <summary>微信联系（展开二维码）</summary>
+
+  <img src="public/contact/wechat.jpg" alt="微信联系二维码" width="240" />
+</details>
 
 ## Fork 更新
 
