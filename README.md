@@ -274,3 +274,12 @@ Claude 页面比较 `claude.ai` 与 `claude.com` 出口，并检查 DNS、WebRTC
 以上结果仅用于环境排查，不代表 Claude 官方判定、账号风险或封禁概率；页面不读取本机 Claude Code 配置，也不展示 Cloudflare 企业版 Bot Management 分数。
 
 社区友链：[LINUX DO](https://linux.do/) · 真诚、友善、团结、专业。
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=zhihui-hu%2Fone-ip&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zhihui-hu/one-ip&amp;type=Date&amp;theme=dark" />
+    <img src="https://api.star-history.com/svg?repos=zhihui-hu/one-ip&amp;type=Date" alt="One IP 的 GitHub Star 历史曲线" width="640" />
+  </picture>
+</a>

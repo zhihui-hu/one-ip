@@ -258,3 +258,12 @@ Data sources differ by edition: the open-source edition uses publicly accessible
 - FingerprintJS and CreepJS: browser checks. See [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md) for module details.
 
 Issues and suggestions are welcome. Redact private information such as IPs, locations and fingerprint identifiers before sharing screenshots.
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=zhihui-hu%2Fone-ip&amp;type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zhihui-hu/one-ip&amp;type=Date&amp;theme=dark" />
+    <img src="https://api.star-history.com/svg?repos=zhihui-hu/one-ip&amp;type=Date" alt="One IP GitHub star history" width="640" />
+  </picture>
+</a>
