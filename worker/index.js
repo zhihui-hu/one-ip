@@ -5,7 +5,6 @@ import { getCloudStatus } from "./cloud-status.js";
 import { cfGeo, geoIp, secondaryGeo } from "./geo.js";
 import { clientIp, HttpError, inputJson, json, publicIp } from "./http.js";
 import { siteIcon } from "./icons.js";
-import { ipHealth } from "./ip-health.js";
 import { ipNetwork } from "./ip-network.js";
 import { ipType } from "./ip-type.js";
 import { mapConfig } from "./map.js";
@@ -102,7 +101,6 @@ export default {
             : data,
         );
       }
-      if (path === "/ip/health") return await ipHealth(request, env);
       if (path.startsWith("/ip-type/"))
         return await ipType(decodeURIComponent(path.slice(9)), url.origin);
       if (path.startsWith("/geoip/")) {

@@ -133,28 +133,6 @@ Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布�
 
 参考：[同步 Fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/syncing-a-fork)、[GITHUB_TOKEN 触发规则](https://docs.github.com/en/actions/concepts/security/github_token)、[定时工作流停用规则](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows)。
 
-## 终端与 API
-
-部署此版本后，可通过 `GET /api/ip/health` 查询 IP 健康度，无需 API Key。
-
-```bash
-# 当前请求的公网出口 IP，终端文本
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'
-
-# 默认返回 JSON，便于脚本处理
-curl -fsS 'https://ip.huzhihui.com/api/ip/health'
-
-# 指定公网 IPv4 或 IPv6
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=2606:4700:4700::1111&format=text'
-```
-
-自部署时替换域名。本地开发使用 `http://127.0.0.1:8787`，必须指定 `ip`。省略 `ip` 时使用 Cloudflare 识别的本次请求出口；经过代理时会查询代理出口。
-
-返回 `ip`、`checked_at`、`score`、`status`、位置、ISP、ASN 和 `flags`（住宅、数据中心、移动网络、VPN、代理、Tor、爬虫、滥用标记）。信誉分范围 0–100，越高越好；与网页相同，75–100 为 `good`、45–74 为 `moderate`、低于 45 为 `poor`。缺失或无效分数返回 `score: null`、`status: "unknown"`；缺失标记返回 `null`，不视为 `false`。
-
-`format` 支持 `json`（默认）和 `text`。错误始终返回 JSON `{ "error": "…" }`：无效参数为 400、限流为 429、无法识别访客 IP 为 503、数据源故障或地址不匹配为 502。接口沿用现有请求限流，响应不缓存。健康度仅表示第三方 IP 信誉，不包含终端网络测速、浏览器检测或 AI 账号可用性判断。
-
 ## WebMCP
 
 支持浏览器原生 WebMCP：在提供 `document.modelContext` 的浏览器中，页面会注册结构化工具，覆盖 IP / WHOIS / 子域名查询、网络与 AI 检测、服务状态及浏览器诊断。`one_ip_catalog` 可列出支持的站点、平台和页面；`one_ip_open_page` 可导航到需要用户操作的权限与人机校验页面。工具使用现有数据源和请求限制，支持取消；不支持 WebMCP 的浏览器仍可正常使用网页。

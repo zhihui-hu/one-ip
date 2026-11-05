@@ -33,7 +33,6 @@ const pages = [
     "/ai",
     "/ai/status/openai",
     "/ai/status/claude",
-    "/docs/api",
     "/terms",
     "/privacy",
     ...Object.values(toolGroups)

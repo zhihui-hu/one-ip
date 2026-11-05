@@ -48,15 +48,6 @@ docker compose up -d --build         # 打开 http://服务器地址:8080
 
 Cloudflare Pages、反向代理、天地图、人机验证、GitHub Actions 与 Fork 同步等配置见 [部署与配置](docs/deploy.md)。
 
-## API
-
-```bash
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'   # 当前出口 IP
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'    # 指定 IP，默认 JSON
-```
-
-返回位置、ISP、ASN、信誉分（0–100，越高越好）和住宅 / 机房 / 代理 / VPN 等标记，无需 API Key。
-
 ## 本地开发
 
 ```bash
