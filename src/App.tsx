@@ -26,6 +26,7 @@ const WebRtcLeakPage = lazy(() => import("@/views/webrtc/leak-page"));
 const SpeedtestPage = lazy(() => import("@/views/network/speedtest"));
 const WhoisPage = lazy(() => import("@/views/whois"));
 const PolicyPage = lazy(() => import("@/views/policy"));
+const AdvertisePage = lazy(() => import("@/views/advertise"));
 
 function Redirect({ to }: { to: string }) {
   const { search, hash } = useLocation();
@@ -70,6 +71,7 @@ export function App() {
           <Route path="speedtest" element={<SpeedtestPage />} />
           <Route path="ping" element={<PingPage />} />
           <Route path="status" element={<StatusPage />} />
+          <Route path="advertise" element={<AdvertisePage />} />
           <Route path="browser">
             <Route
               index

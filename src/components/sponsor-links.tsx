@@ -1,7 +1,7 @@
+import { Link } from "react-router-dom";
 import { t } from "@/i18n";
 import { sponsors, type Sponsor } from "@/lib/sponsors";
 import { cn } from "@/lib/utils";
-import { AuthorContact } from "./author-contact";
 
 const itemClass = "min-w-[100px] flex-[0_0_calc((100%-16px)/3)]";
 const linkClass =
@@ -54,7 +54,8 @@ export function SponsorLinks({
         ))}
         {Array.from({ length: vacantCount }, (_, index) => (
           <li key={`vacant-${index}`} className={itemClass}>
-            <AuthorContact
+            <Link
+              to="/advertise"
               className={cn(
                 linkClass,
                 "border-dashed text-[12px] font-[550] text-foreground",
@@ -63,7 +64,7 @@ export function SponsorLinks({
             >
               <span>{t("common.advertiseHere")}</span>
               <span aria-hidden="true">↗</span>
-            </AuthorContact>
+            </Link>
           </li>
         ))}
       </ul>

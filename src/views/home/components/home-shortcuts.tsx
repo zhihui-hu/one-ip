@@ -19,7 +19,7 @@ const tileClass =
   "flex min-w-0 flex-col items-center gap-2 rounded-[12px] border border-transparent px-1.5 pt-3 pb-2.5 text-center text-[12px] leading-[1.35] text-foreground no-underline transition-[background-color,border-color] duration-150 ease-[ease] hover:border-[color-mix(in_srgb,var(--primary)_24%,transparent)] hover:bg-[color-mix(in_srgb,var(--primary)_14%,var(--card))] hover:text-primary hover:no-underline focus-visible:border-[color-mix(in_srgb,var(--primary)_24%,transparent)] focus-visible:bg-[color-mix(in_srgb,var(--primary)_14%,var(--card))] focus-visible:text-primary focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:border-[color-mix(in_srgb,var(--primary)_24%,transparent)] active:bg-[color-mix(in_srgb,var(--primary)_14%,var(--card))] active:text-primary active:no-underline";
 
 /** Icon tint by tile position (1-based), mirroring the former nth-child rules. */
-function iconTone(position: number) {
+export function iconTone(position: number) {
   if (position === 2 || position === 3) return "bg-muted/70 text-primary";
   if (position % 3 === 0)
     return "bg-[color-mix(in_srgb,#69b49a_12%,var(--card))] text-[#428873]";

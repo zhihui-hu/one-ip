@@ -30,6 +30,7 @@ const descriptions: Record<string, string> = {
   "/unlock/claude": t(
     "pageHelp.checkNetworkEgressConnectivityClaudeServicesTroubleshootAccess",
   ),
+  "/advertise": t("advertise.subtitle"),
   "/status": t("pageHelp.viewOfficialServiceHealthIncidentsSeeWhetherServices"),
 };
 

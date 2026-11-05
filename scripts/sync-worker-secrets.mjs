@@ -22,11 +22,33 @@ const allowed = [
   "TURNSTILE_SECRET",
   "TURNSTILE_HOSTNAMES",
   "TIANDITU_TOKEN",
+  "GITHUB_TRAFFIC_TOKEN",
+  "GITHUB_TRAFFIC_REPOS",
+  "CLOUDFLARE_ANALYTICS_TOKEN",
+  "CLOUDFLARE_ACCOUNT_ID",
+  "CLOUDFLARE_ZONE_ID",
+  "CLOUDFLARE_WEB_ANALYTICS_SITE_TAG",
+  "ADVERTISE_ANALYTICS_HOST",
 ];
-if (Object.keys(values).some((key) => !allowed.includes(key)))
+// Keys for features that were removed; skipped instead of uploaded.
+const retired = [
+  "RECAPTCHA_SITE_KEY",
+  "RECAPTCHA_SECRET",
+  "RECAPTCHA_HOSTNAMES",
+];
+const skipped = Object.keys(values).filter((key) => retired.includes(key));
+if (skipped.length)
+  console.log(`Skipping retired keys (safe to delete): ${skipped.join(", ")}`);
+if (
+  Object.keys(values).some(
+    (key) => !allowed.includes(key) && !retired.includes(key),
+  )
+)
   throw new Error("Secret file contains unsupported configuration keys");
 const secrets = Object.fromEntries(
-  Object.entries(values).filter(([, value]) => value.trim()),
+  Object.entries(values).filter(
+    ([key, value]) => !retired.includes(key) && value.trim(),
+  ),
 );
 if (!Object.keys(secrets).length) {
   console.log("No optional secrets configured; nothing to synchronize.");

@@ -1,0 +1,29 @@
+import { sponsors } from "@/lib/sponsors";
+
+/** Ad placements that exist on One IP. Fill in `price` to publish it. */
+export interface AdSlot {
+  id: "home-top" | "readme";
+  /** Number of placements; omitted when the slot has no fixed count. */
+  total?: number;
+  /** Booked placements, derived from the live sponsor list. */
+  booked?: number;
+  /** Earliest end date (YYYY-MM-DD) among booked placements. */
+  nextFree?: string;
+  /** Shown as written, e.g. "¥1000 / 月"; omitted shows "price on request". */
+  price?: string;
+}
+
+const homeEnds = sponsors
+  .map((sponsor) => sponsor.endsAt)
+  .filter((date): date is string => Boolean(date))
+  .sort();
+
+export const adSlots: readonly AdSlot[] = [
+  {
+    id: "home-top",
+    total: 3,
+    booked: Math.min(3, sponsors.length),
+    nextFree: homeEnds[0],
+  },
+  { id: "readme" },
+];

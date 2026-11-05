@@ -52,6 +52,7 @@ export const secondaryRoutes = [
   "/whois",
   "/ping",
   "/status",
+  "/advertise",
   ...browserChecks.map((page) => `/browser/${page}`),
 ] as const;
 

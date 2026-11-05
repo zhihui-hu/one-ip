@@ -159,6 +159,10 @@ export function AppLayout() {
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
+            <Link to="/advertise">{t("navigation.advertise")}</Link>
+          </UnderlineHover>{" "}
+          ·{" "}
+          <UnderlineHover asChild>
             <AuthorContact />
           </UnderlineHover>{" "}
           ·{" "}

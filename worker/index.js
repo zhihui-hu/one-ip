@@ -1,3 +1,4 @@
+import { advertiseStats } from "./advertise.js";
 import { getAiStatus } from "./ai-status.js";
 import { cachedJson } from "./cache.js";
 import { challengeConfig, verifyChallenge } from "./challenges.js";
@@ -74,6 +75,18 @@ export default {
       if (path.startsWith("/icons/"))
         return await siteIcon(decodeURIComponent(path.slice(7)));
       if (path === "/map/config") return json(mapConfig(env));
+      if (path === "/advertise/stats")
+        return await cachedJson(
+          new URL("/api/advertise/stats", url.origin),
+          300,
+          () => advertiseStats(env),
+          // Never cache errors, so a fixed token shows up right away.
+          (data) =>
+            [data.cloudflare, data.github].every(
+              (source) =>
+                source.available || source.reason === "not-configured",
+            ),
+        );
       if (path === "/me") {
         const data = cfGeo(request);
         if (!data.ip || key === "local" || env.LOCAL_DEV === "true")
