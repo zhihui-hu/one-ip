@@ -1,6 +1,6 @@
 import { t } from "@/i18n";
 import { localizeApiMessage } from "@/i18n/api-message";
-import { normalizeIp } from "./ip-address";
+import { normalizeIp } from "@/lib/ip-address";
 
 export type ResponseMode =
   | "json"

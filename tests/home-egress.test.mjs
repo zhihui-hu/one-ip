@@ -33,34 +33,53 @@ function render(primary, split, client = {}, capture = () => {}) {
   capture(tree);
   return JSON.stringify(tree);
 }
+function findCards(node) {
+  if (!node || typeof node !== "object") return;
+  const children = node.props?.children;
+  if (Array.isArray(children) && children.length && children.every((child) => child?.props && "label" in child.props))
+    return children;
+  for (const child of Array.isArray(children) ? children : [children]) {
+    const cards = findCards(child);
+    if (cards) return cards;
+  }
+}
 const failed = { isPending: false, isError: true };
 const ipv4 = { ip: "192.0.2.1" };
 const ipv6 = { ip: "2001:db8::1" };
 
 test("domestic egress comes first and external IPv4 remains separate", () => {
   const proxy = { ip: "192.0.2.2" };
-  const result = render([{ data: ipv4 }, { data: proxy }, failed], [{ data: ipv6 }, { data: { ip: "192.0.2.3" } }]);
+  const result = render([{ data: ipv4 }, { data: proxy }], [{ data: ipv6 }, { data: { ip: "192.0.2.3" } }]);
   assert.ok(result.indexOf(ipv4.ip) < result.indexOf(proxy.ip));
   assert.ok(result.includes(t("home.ipv4DomesticProbe")));
   assert.ok(result.includes(t("home.ipv4ExternalProbe")));
   assert.ok(!result.includes(ipv6.ip));
   assert.ok(!result.includes("192.0.2.3"));
 });
-test("matching domestic and external IPv4 produces one card", () => {
+test("matching domestic and external IPv4 keeps both probe cards", () => {
   let tree;
-  render([{ data: ipv4 }, { data: ipv4 }, failed], [], {}, (value) => { tree = value; });
-  assert.equal(tree.props.children[1].props.children[0].length, 1);
+  render([{ data: ipv4 }, { data: ipv4 }], [], {}, (value) => { tree = value; });
+  const cards = findCards(tree);
+  assert.equal(cards.length, 2);
+  assert.deepEqual(cards.map((card) => card.props.label), [
+    t("home.ipv4DomesticProbe"),
+    t("home.ipv4ExternalProbe"),
+  ]);
 });
 test("failed domestic probe never promotes a proxy or routed IPv6 to local egress", () => {
-  const result = render([failed, { data: ipv4 }, failed], [{ data: ipv6 }]);
+  const result = render([failed, { data: ipv4 }], [{ data: ipv6 }]);
   assert.ok(!result.includes(t("home.couldNotDetectIpv")));
   assert.ok(result.includes(t("home.ipv4ExternalProbe")));
   assert.ok(!result.includes(ipv6.ip));
 });
-test("IPv6 and failed probes do not create overview cards", () => {
-  const result = render([{ data: ipv4 }, failed, { data: ipv6 }], []);
-  assert.ok(!result.includes("IPv6 · 外部探测"));
-  assert.ok(!result.includes(ipv6.ip));
+test("failed external probe keeps its card without inventing an address", () => {
+  let tree;
+  render([{ data: ipv4 }, failed], [], {}, (value) => { tree = value; });
+  const cards = findCards(tree);
+  assert.equal(cards.length, 2);
+  assert.equal(cards[0].props.data, ipv4);
+  assert.equal(cards[1].props.data, undefined);
+  assert.equal(cards[1].props.pending, false);
 });
 
 test("home retest cancels previous runs before resetting only home query families", async () => {
@@ -84,7 +103,7 @@ test("home retest cancels previous runs before resetting only home query familie
     }
   };
   let refresh;
-  render([failed, failed, failed], [], client, (tree) => {
+  render([failed, failed], [], client, (tree) => {
     refresh = findClick(tree);
   });
   await refresh();
