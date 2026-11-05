@@ -31,7 +31,6 @@ const ClaudeStatusPage = lazy(() => import("@/views/claude/status"));
 const GptStatusPage = lazy(() => import("@/views/gpt/status"));
 const CdnPage = lazy(() => import("@/views/cdn"));
 const DnsExitPage = lazy(() => import("@/views/dns-exit"));
-const ApiUsagePage = lazy(() => import("@/views/api-usage"));
 const PolicyPage = lazy(() => import("@/views/policy"));
 function Redirect({ to }: { to: string }) {
   const { search, hash } = useLocation();
@@ -53,7 +52,6 @@ export function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="docs/api" element={<ApiUsagePage />} />
         <Route path="terms" element={<PolicyPage page="terms" />} />
         <Route path="privacy" element={<PolicyPage page="privacy" />} />
         <Route path="lookup" element={<ToolLayout />}>

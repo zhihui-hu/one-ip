@@ -13,7 +13,6 @@ import { testConnectivity } from "@/views/link/api";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { getGeo, getBrowserIp, getDomesticIp } from "./api";
-import { ApiResponse } from "./api-response";
 import { HomeShortcuts } from "./components/home-shortcuts";
 import { IpOverviewCard } from "./components/ip-overview-card";
 import { PagePortrait } from "./page-portrait";
@@ -222,7 +221,6 @@ export function HomePage() {
       <PlatformSummary />
       <PagePortrait />
       <HomeShortcuts />
-      <ApiResponse />
     </div>
   );
 }

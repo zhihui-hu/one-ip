@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { UnderlineHover } from "@/components/underline-hover";
 import { useAvailableTools } from "@/hooks/use-available-tools";
 import { t } from "@/i18n";
 import { toolGroups } from "@/layout/routes";
@@ -77,14 +76,6 @@ export function ToolDirectory() {
             </ul>
           </section>
         ))}
-        <UnderlineHover asChild>
-          <Link
-            className="mt-2.5 inline-block text-[0.78rem] text-muted-foreground"
-            to="/docs/api"
-          >
-            {t("common.apiDocumentation")} ›
-          </Link>
-        </UnderlineHover>
       </nav>
     </details>
   );

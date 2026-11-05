@@ -43,15 +43,6 @@ docker compose up -d --build         # open http://your-server:8080
 
 See [Deployment and configuration](docs/deploy.en.md) for Cloudflare Pages, reverse proxies, Tianditu maps, human verification, GitHub Actions and fork syncing.
 
-## API
-
-```bash
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'   # current egress IP
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'    # explicit IP, JSON by default
-```
-
-Returns location, ISP, ASN, a reputation score (0–100, higher is better) and residential / datacenter / proxy / VPN flags. No API key required.
-
 ## Local development
 
 ```bash
