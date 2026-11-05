@@ -26,6 +26,8 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 
 Results rely on third-party services and may be affected by rate limits or CORS. IP classifications and scores are for reference only.
 
+Egress IPs come from Cloudflare's `/cdn-cgi/trace`. For sites whose main host is not on Cloudflare, some readings use a Cloudflare subdomain of the same registrable domain (`traceDomain`), which only represents the main site under suffix-based routing rules. Reachable does not mean unlocked: whether a stream plays still depends on the site itself.
+
 ## Deploy
 
 One-click deploy to Cloudflare:

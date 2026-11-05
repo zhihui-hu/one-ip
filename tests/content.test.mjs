@@ -71,6 +71,46 @@ test("site logos use HTTPS icon URLs rather than bundled files", () => {
   assert.match(fallback, /AvatarFallback/);
   assert.match(fallback, /no-referrer/);
 });
+test("connectivity streaming sites all have a readable egress entry", () => {
+  const sites = json("src/views/home/sites.json");
+  const targets = json("src/views/link/targets.json");
+  const categories = readFileSync("src/views/home/site-categories.ts", "utf8");
+  const groups = readFileSync("src/views/link/index.tsx", "utf8");
+  const locales = ["zh-CN", "en"].map((locale) => ({
+    ...json(`src/i18n/${locale}/common.json`),
+    ...json(`src/i18n/${locale}/home.json`),
+  }));
+  const registrable = (host) =>
+    host
+      .split(".")
+      .slice(/\.(co|ne)\.jp$/.test(host) ? -3 : -2)
+      .join(".");
+
+  for (const list of [sites, targets]) {
+    const names = list.map((item) => item.name);
+    assert.equal(new Set(names).size, names.length);
+  }
+  assert.match(categories, /\["media",/);
+  assert.match(groups, /\["media",/);
+  const members = targets.filter((target) => target.cc === "media");
+  assert.ok(members.length >= 5);
+  for (const target of members) {
+    const site = sites.find((item) => item.name === target.name);
+    assert.ok(site, target.name);
+    assert.ok(site.extra?.includes("media"), target.name);
+    assert.equal(site.method, "cftrace", target.name);
+    assert.equal(site.probeUrl, target.url, target.name);
+    if (site.traceDomain)
+      assert.equal(
+        registrable(site.traceDomain),
+        registrable(site.domain),
+        target.name,
+      );
+  }
+  for (const item of [...sites, ...targets])
+    for (const locale of locales)
+      if (item.nameKey) assert.ok(locale[item.nameKey], item.nameKey);
+});
 test("production assets exclude deleted content and backend source", () => {
   assert.ok(existsSync("dist/index.html"));
   assert.ok(existsSync("dist/app-update-checker.worker.js"));

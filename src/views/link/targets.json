@@ -484,5 +484,89 @@
     "host": "www.lazada.com",
     "url": "https://www.lazada.com/favicon.ico",
     "icon": "https://icons.duckduckgo.com/ip3/www.lazada.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "ABEMA",
+    "host": "abema.tv",
+    "url": "https://abema.tv/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/abema.tv.ico"
+  },
+  {
+    "cc": "media",
+    "name": "Hulu Japan",
+    "host": "www.hulu.jp",
+    "url": "https://www.hulu.jp/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.hulu.jp.ico"
+  },
+  {
+    "cc": "media",
+    "name": "DMM TV",
+    "host": "tv.dmm.com",
+    "url": "https://tv.dmm.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/tv.dmm.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "Disney+",
+    "host": "www.disneyplus.com",
+    "url": "https://www.disneyplus.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.disneyplus.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "DAZN",
+    "host": "www.dazn.com",
+    "url": "https://www.dazn.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/www.dazn.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "TVer",
+    "host": "tver.jp",
+    "url": "https://tver.jp/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/tver.jp.ico"
+  },
+  {
+    "cc": "media",
+    "name": "WOWOW",
+    "host": "wod.wowow.co.jp",
+    "url": "https://wod.wowow.co.jp/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/wod.wowow.co.jp.ico"
+  },
+  {
+    "cc": "media",
+    "name": "DMM",
+    "host": "www.dmm.com",
+    "url": "https://www.dmm.com/robots.txt",
+    "icon": "https://icons.duckduckgo.com/ip3/www.dmm.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "J:COM On Demand",
+    "host": "linkvod.myjcom.jp",
+    "url": "https://linkvod.myjcom.jp/robots.txt",
+    "icon": "https://icons.duckduckgo.com/ip3/linkvod.myjcom.jp.ico"
+  },
+  {
+    "cc": "media",
+    "name": "WATCHA",
+    "host": "watcha.com",
+    "url": "https://watcha.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/watcha.com.ico"
+  },
+  {
+    "cc": "media",
+    "name": "radiko",
+    "host": "radiko.jp",
+    "url": "https://radiko.jp/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/radiko.jp.ico"
+  },
+  {
+    "cc": "media",
+    "name": "AWA",
+    "host": "awa.fm",
+    "url": "https://awa.fm/robots.txt",
+    "icon": "https://icons.duckduckgo.com/ip3/awa.fm.ico"
   }
 ]

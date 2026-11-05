@@ -36,6 +36,7 @@ const groups = [
   ["gl", t("link.global")],
   ["crypto", t("categories.crypto")],
   ["ecommerce", t("categories.ecommerce")],
+  ["media", t("categories.media")],
 ];
 type ConnectivityRow = (typeof targets)[number] & {
   result?: ProbeResult;

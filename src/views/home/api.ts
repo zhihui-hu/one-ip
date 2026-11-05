@@ -103,13 +103,21 @@ export interface Site {
   type: string;
   method: string;
   domain?: string;
+  /**
+   * Cloudflare host under the same registrable domain, for sites whose main
+   * host cannot serve /cdn-cgi/trace. Suffix-based routing rules treat both alike.
+   */
+  traceDomain?: string;
+  /** Light resource for reachability, for sites whose home page responds too slowly. */
+  probeUrl?: string;
   url?: string;
   icon: string;
 }
 const fallbackSiteProbeUrl =
   "https://necaptcha.nosdn.127.net/ab7f4275c1744aa28e0a8f3a1c58c532.png";
 
-export function siteProbeUrl(site: Pick<Site, "domain" | "url">) {
+export function siteProbeUrl(site: Pick<Site, "domain" | "probeUrl" | "url">) {
+  if (site.probeUrl) return site.probeUrl;
   return site.domain
     ? `https://${site.domain}/`
     : (site.url ?? fallbackSiteProbeUrl);
@@ -152,7 +160,7 @@ export async function detectSite(
   signal.throwIfAborted();
   let geo: Geo;
   if (site.method === "cftrace" && site.domain)
-    geo = await trace(site.domain, signal);
+    geo = await trace(site.traceDomain ?? site.domain, signal);
   else if (
     (site.method === "ip-text" || site.method === "ip-json") &&
     site.url

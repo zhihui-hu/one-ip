@@ -411,5 +411,125 @@
     "domain": "www.lazada.com",
     "icon": "https://icons.duckduckgo.com/ip3/www.lazada.com.ico",
     "extra": ["ecommerce"]
+  },
+  {
+    "name": "ABEMA",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "abema.tv",
+    "traceDomain": "help.abema.tv",
+    "probeUrl": "https://abema.tv/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/abema.tv.ico"
+  },
+  {
+    "name": "Hulu Japan",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.hulu.jp",
+    "traceDomain": "help.hulu.jp",
+    "probeUrl": "https://www.hulu.jp/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/www.hulu.jp.ico"
+  },
+  {
+    "name": "DMM TV",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "tv.dmm.com",
+    "traceDomain": "status.dmm.com",
+    "probeUrl": "https://tv.dmm.com/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/tv.dmm.com.ico"
+  },
+  {
+    "name": "Disney+",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.disneyplus.com",
+    "traceDomain": "help.disneyplus.com",
+    "probeUrl": "https://www.disneyplus.com/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/www.disneyplus.com.ico"
+  },
+  {
+    "name": "DAZN",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.dazn.com",
+    "traceDomain": "help.dazn.com",
+    "probeUrl": "https://www.dazn.com/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/www.dazn.com.ico"
+  },
+  {
+    "name": "TVer",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "tver.jp",
+    "traceDomain": "help.tver.jp",
+    "probeUrl": "https://tver.jp/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/tver.jp.ico"
+  },
+  {
+    "name": "WOWOW",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "wod.wowow.co.jp",
+    "traceDomain": "news.wowow.co.jp",
+    "probeUrl": "https://wod.wowow.co.jp/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/wod.wowow.co.jp.ico"
+  },
+  {
+    "name": "DMM",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "www.dmm.com",
+    "traceDomain": "status.dmm.com",
+    "probeUrl": "https://www.dmm.com/robots.txt",
+    "icon": "https://icons.duckduckgo.com/ip3/www.dmm.com.ico",
+    "extra": ["media"]
+  },
+  {
+    "name": "J:COM On Demand",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "linkvod.myjcom.jp",
+    "traceDomain": "www.myjcom.jp",
+    "probeUrl": "https://linkvod.myjcom.jp/robots.txt",
+    "icon": "https://icons.duckduckgo.com/ip3/linkvod.myjcom.jp.ico",
+    "extra": ["media"]
+  },
+  {
+    "name": "WATCHA",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "watcha.com",
+    "traceDomain": "help.watcha.com",
+    "probeUrl": "https://watcha.com/favicon.ico",
+    "icon": "https://icons.duckduckgo.com/ip3/watcha.com.ico",
+    "extra": ["media"]
+  },
+  {
+    "name": "radiko",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "radiko.jp",
+    "traceDomain": "help.radiko.jp",
+    "probeUrl": "https://radiko.jp/favicon.ico",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/radiko.jp.ico"
+  },
+  {
+    "name": "AWA",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "awa.fm",
+    "traceDomain": "guide.awa.fm",
+    "probeUrl": "https://awa.fm/robots.txt",
+    "extra": ["media"],
+    "icon": "https://icons.duckduckgo.com/ip3/awa.fm.ico"
   }
 ]

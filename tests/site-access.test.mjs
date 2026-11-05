@@ -92,3 +92,53 @@ test("site inspection reuses a successful egress response as reachability", asyn
     globalThis.fetch = original;
   }
 });
+
+test("site reachability prefers a light probeUrl over the home page", () => {
+  assert.equal(
+    api.siteProbeUrl({
+      domain: "www.example.com",
+      probeUrl: "https://www.example.com/favicon.ico",
+    }),
+    "https://www.example.com/favicon.ico",
+  );
+  assert.equal(
+    api.siteProbeUrl({ domain: "www.example.com" }),
+    "https://www.example.com/",
+  );
+});
+
+test("site inspection reads egress from traceDomain but probes the main host", async () => {
+  const site = {
+    domain: "www.example.com",
+    traceDomain: "help.example.com",
+    icon: "",
+    name: "Example",
+    method: "cftrace",
+  };
+  const original = globalThis.fetch;
+  const calls = [];
+  let traceAvailable = true;
+  globalThis.fetch = async (url) => {
+    calls.push(url);
+    if (String(url).endsWith("/cdn-cgi/trace") && !traceAvailable)
+      return new Response("not found", { status: 404 });
+    return new Response("ip=1.1.1.1\nloc=JP\n", { status: 200 });
+  };
+  try {
+    const readable = await api.inspectSite(site);
+    assert.equal(readable.geo?.ip, "1.1.1.1");
+    assert.deepEqual(calls, ["https://help.example.com/cdn-cgi/trace"]);
+
+    calls.length = 0;
+    traceAvailable = false;
+    const unreadable = await api.inspectSite(site);
+    assert.equal(unreadable.geo, undefined);
+    assert.equal(unreadable.reachable, true);
+    assert.deepEqual(calls, [
+      "https://help.example.com/cdn-cgi/trace",
+      "https://www.example.com/",
+    ]);
+  } finally {
+    globalThis.fetch = original;
+  }
+});
