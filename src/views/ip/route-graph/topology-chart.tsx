@@ -17,6 +17,12 @@ import {
   nodeCenterY,
   shareLabel,
 } from "./layout";
+import {
+  columnLabelClass,
+  edgeClass,
+  graphSvgClass,
+  graphWrapClass,
+} from "./styles";
 import { type RouteTopology } from "./types";
 
 export function RouteTopologyChart({
@@ -54,22 +60,22 @@ export function RouteTopologyChart({
   const current = currentAsn == null ? undefined : String(currentAsn);
 
   return (
-    <div className="ip-route-graph-wrap">
+    <div className={graphWrapClass}>
       <svg
-        className="ip-route-graph-svg"
+        className={graphSvgClass}
         viewBox={`0 0 ${GRAPH_WIDTH} ${height}`}
         role="img"
         aria-label={t("ip.bgpAnnouncementsFor", [
           topology.origins.map((item) => asnLabel(item.asn)).join("、"),
         ])}
       >
-        <text x={ORIGIN_X} y="16" className="ip-route-column-label">
+        <text x={ORIGIN_X} y="16" className={columnLabelClass}>
           {t("ip.originAs")}
         </text>
-        <text x={DIRECT_X} y="16" className="ip-route-column-label">
+        <text x={DIRECT_X} y="16" className={columnLabelClass}>
           {t("ip.directUpstreamPathShare")}
         </text>
-        <text x={SECONDARY_X} y="16" className="ip-route-column-label">
+        <text x={SECONDARY_X} y="16" className={columnLabelClass}>
           {t("ip.secondLevelUpstreamBlueTier1")}
         </text>
 
@@ -84,7 +90,7 @@ export function RouteTopologyChart({
             return (
               <g key={`${edge.origin}-${edge.direct}`}>
                 <path
-                  className={`ip-route-edge${tier1 ? " is-tier1" : ""}`}
+                  className={edgeClass(tier1)}
                   d={curvePath(
                     ORIGIN_X + ORIGIN_WIDTH,
                     sourceY,
@@ -94,7 +100,7 @@ export function RouteTopologyChart({
                   style={{ strokeWidth: edgeWidth(edge.share) }}
                 />
                 <text
-                  className="ip-route-edge-label"
+                  className="fill-muted-foreground font-sans text-[10px] tabular-nums"
                   x={(ORIGIN_X + ORIGIN_WIDTH + DIRECT_X) / 2}
                   y={(sourceY + targetY) / 2 - 6}
                   textAnchor="middle"
@@ -114,7 +120,7 @@ export function RouteTopologyChart({
             return (
               <path
                 key={`${edge.direct}-${edge.secondary}`}
-                className={`ip-route-edge${tier1 ? " is-tier1" : ""}`}
+                className={edgeClass(tier1)}
                 d={curvePath(
                   DIRECT_X + DIRECT_WIDTH,
                   nodeCenterY(directY),
@@ -136,7 +142,8 @@ export function RouteTopologyChart({
               width={ORIGIN_WIDTH}
               eyebrow={asnLabel(item.asn)}
               title={itemName(item, currentAsn, currentAsnName)}
-              className={`is-origin${item.asn === current ? " is-current" : ""}`}
+              origin
+              current={item.asn === current}
             />
           ))}
           {direct.map((item, index) => (
@@ -147,7 +154,8 @@ export function RouteTopologyChart({
               width={DIRECT_WIDTH}
               eyebrow={asnLabel(item.asn)}
               title={itemName(item, currentAsn, currentAsnName)}
-              className={`${item.tier1 ? "is-tier1" : ""}${item.asn === current ? " is-current" : ""}`}
+              tier1={item.tier1}
+              current={item.asn === current}
             />
           ))}
           {secondary.map((item, index) => (
@@ -158,7 +166,8 @@ export function RouteTopologyChart({
               width={SECONDARY_WIDTH}
               eyebrow={asnLabel(item.asn)}
               title={itemName(item, currentAsn, currentAsnName)}
-              className={`${item.tier1 ? "is-tier1" : ""}${item.asn === current ? " is-current" : ""}`}
+              tier1={item.tier1}
+              current={item.asn === current}
             />
           ))}
         </g>

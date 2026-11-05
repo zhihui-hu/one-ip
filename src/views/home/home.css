@@ -1,0 +1,95 @@
+/*
+ * Home-area CSS that utilities cannot express: Leaflet DOM overrides, marker
+ * keyframes and the perfect-score card art. Import this before
+ * "leaflet/dist/leaflet.css" so equal-specificity ties keep resolving to Leaflet.
+ */
+
+@keyframes map-marker-ping {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.7);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+/* Site egress map (exit-map.tsx). */
+.exit-map-tooltip.leaflet-tooltip {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 2px 8px #0001;
+}
+.exit-map .leaflet-tile-pane {
+  filter: grayscale(1) brightness(1.08);
+  opacity: 0.8;
+}
+.exit-map.leaflet-container {
+  background: #edf0f2;
+}
+.dark .exit-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(0.65);
+}
+.dark .exit-map.leaflet-container {
+  background: #20252a;
+}
+.exit-map .leaflet-control-zoom {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px #0001;
+}
+.exit-map .leaflet-control-zoom a {
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  font-size: 17px;
+  background: var(--background);
+  color: var(--foreground);
+}
+.exit-map .leaflet-control-attribution {
+  font-size: 9px;
+}
+
+/* IP overview card background map (ip-card-map.tsx). */
+.home-ip-map .leaflet-tile-pane {
+  filter: saturate(0.45);
+}
+.dark .home-ip-map .leaflet-tile-pane,
+.home-ip-card-perfect .home-ip-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(1.1) contrast(0.78);
+}
+.home-ip-map-attribution .leaflet-control-attribution {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--subtle);
+  font-size: 9px;
+  line-height: 1.2;
+}
+.home-ip-map-attribution a {
+  color: inherit;
+}
+
+/* Perfect-score IP card art (unlayered, so it wins over the card utilities). */
+[data-slot="card"].home-ip-card-perfect {
+  border: 1px solid rgba(190, 157, 94, 0.55);
+  background:
+    radial-gradient(
+      circle at 86% 8%,
+      rgba(226, 185, 106, 0.16),
+      transparent 28%
+    ),
+    linear-gradient(118deg, #0b111c 0%, #181d2a 48%, #332a20 100%);
+  box-shadow:
+    0 0 0 1px rgba(117, 99, 72, 0.85),
+    0 0 0 3px rgba(77, 59, 32, 0.48),
+    inset 0 0 0 1px rgba(244, 218, 157, 0.22),
+    inset 0 0 0 3px #1e2229,
+    0 14px 36px rgba(19, 14, 7, 0.25);
+}

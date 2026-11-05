@@ -49,8 +49,10 @@ export function ServiceStatusPage({
               ]}
             />
           </ToolCard>
-          <section className="reading">
-            <h2>{t("status.serviceComponents")}</h2>
+          <section className="mt-8 max-xs:mt-6">
+            <h2 className="mb-2 text-[1.4rem] font-bold">
+              {t("status.serviceComponents")}
+            </h2>
             <Facts
               rows={(query.data.components ?? []).map((c) => [
                 c.name,
@@ -58,8 +60,10 @@ export function ServiceStatusPage({
               ])}
             />
           </section>
-          <section className="reading">
-            <h2>{t("status.currentIncidents")}</h2>
+          <section className="mt-8 max-xs:mt-6">
+            <h2 className="mb-2 text-[1.4rem] font-bold">
+              {t("status.currentIncidents")}
+            </h2>
             {query.data.incidents?.length ? (
               query.data.incidents.map((i) => (
                 <ToolCard title={i.name} key={i.id}>
@@ -71,14 +75,14 @@ export function ServiceStatusPage({
                 </ToolCard>
               ))
             ) : (
-              <p className="muted">
+              <p className="text-muted-foreground">
                 {t("status.theOfficialApiReportsNoUnresolvedIncidents")}
               </p>
             )}
           </section>
         </>
       ) : null}
-      <p className="principle">
+      <p className="mt-6 rounded-[8px] border border-border bg-muted px-5 py-4 text-[0.84rem] leading-[1.8] text-muted-foreground">
         {t("status.historicalUptimeRequiresContinuousSamplingStoragePageDoes")}
         <UnderlineHover asChild>
           <a href={service.page} target="_blank" rel="noreferrer">

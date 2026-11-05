@@ -8,16 +8,25 @@ import { UnderlineHover } from "@/components/underline-hover";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
-import { BrowserSummary } from "@/views/browser/summary";
 import { lookupIp } from "@/views/ip/api";
 import { testConnectivity } from "@/views/link/api";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { getGeo, getBrowserIp, getDomesticIp } from "./api";
+import { ApiResponse } from "./api-response";
 import { HomeShortcuts } from "./components/home-shortcuts";
 import { IpOverviewCard } from "./components/ip-overview-card";
+import { PagePortrait } from "./page-portrait";
 import { AiAccessSummary, PlatformSummary } from "./platform-summary";
 import { SplitResults } from "./split-results";
+import {
+  homeIpOverviewClass,
+  homeNetworkOverviewClass,
+  homePageClass,
+  homePingGridClass,
+  homeToolbarActionsClass,
+  homeToolbarClass,
+} from "./styles";
 
 export function HomePage() {
   const mobile = useIsMobile();
@@ -131,16 +140,18 @@ export function HomePage() {
   });
   const typeByIp = new Map(ips.map((ip, index) => [ip, typeQueries[index]]));
   return (
-    <div className="home-page">
-      <div className="home-toolbar">
-        <div className="home-toolbar-heading">
-          <h1>{t("home.networkOverview")}</h1>
+    <div className={homePageClass}>
+      <div className={homeToolbarClass}>
+        <div className="flex min-w-0 items-center gap-2">
+          <h1 className="text-[0.875rem] leading-[1.4] font-[650] whitespace-nowrap">
+            {t("home.networkOverview")}
+          </h1>
         </div>
-        <div className="home-toolbar-actions">
+        <div className={homeToolbarActionsClass}>
           <Button
             variant="ghost"
             size="icon"
-            className="home-refresh"
+            className="text-muted-foreground hover:text-primary"
             disabled={refreshing}
             aria-busy={refreshing}
             aria-label={
@@ -156,7 +167,7 @@ export function HomePage() {
           </Button>
         </div>
       </div>
-      <div className="home-overview home-ip-overview">
+      <div className={homeIpOverviewClass}>
         {cards.map(({ query, data, version, label }) => (
           <IpOverviewCard
             key={label}
@@ -169,11 +180,11 @@ export function HomePage() {
           />
         ))}
       </div>
-      <div className="home-network-overview">
+      <div className={homeNetworkOverviewClass}>
         <AiAccessSummary />
-        <Card className="home-connectivity-card">
+        <Card>
           <CardHeader>
-            <div className="row-between flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <CardTitle>{t("common.networkConnectivity")}</CardTitle>
               <div className="flex items-center gap-3">
                 <label className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
@@ -187,7 +198,7 @@ export function HomePage() {
                 </label>
                 <UnderlineHover asChild>
                   <Link
-                    className="small muted whitespace-nowrap"
+                    className="text-[0.78rem] whitespace-nowrap text-muted-foreground"
                     to="/network/connectivity/"
                   >
                     {t("home.viewMore")}
@@ -198,7 +209,7 @@ export function HomePage() {
           </CardHeader>
           <CardContent>
             <div ref={connectivityRef}>
-              <div className="ping-grid">
+              <div className={homePingGridClass}>
                 {orderedTargets.map(({ target }) => (
                   <ConnectivityTile target={target} key={target.name} />
                 ))}
@@ -209,8 +220,9 @@ export function HomePage() {
       </div>
       <SplitResults summary />
       <PlatformSummary />
-      <BrowserSummary />
+      <PagePortrait />
       <HomeShortcuts />
+      <ApiResponse />
     </div>
   );
 }

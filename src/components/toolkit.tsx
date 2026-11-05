@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
 import { maskedIp } from "@/lib/network";
+import { cn } from "@/lib/utils";
 import { hideIpAtom } from "@/store/privacy";
 import { useAtom, useAtomValue } from "jotai";
 import { Eye, EyeOff } from "lucide-react";
@@ -29,7 +30,7 @@ export function PageHeading({
     <>
       <h1 className="sr-only">{title}</h1>
       {privacy && (
-        <div className="page-privacy">
+        <div className="mb-2 flex items-center justify-end">
           <PrivacyToggle />
         </div>
       )}
@@ -58,7 +59,7 @@ export function PrivacyToggle({ iconOnly = false }: { iconOnly?: boolean }) {
     );
   }
   return (
-    <label className="privacy-toggle">
+    <label className="inline-flex shrink-0 items-center gap-[7px] pt-0.5 text-[0.75rem] whitespace-nowrap text-muted-foreground [&_[data-slot=switch]]:h-[18px]! [&_[data-slot=switch]]:w-8! [&_[data-slot=switch-thumb]]:size-3.5!">
       <span>{t("common.hideIp")}</span>
       <Switch
         aria-label={t("common.hideIpAddresses")}
@@ -68,13 +69,27 @@ export function PrivacyToggle({ iconOnly = false }: { iconOnly?: boolean }) {
     </label>
   );
 }
-export function IpText({ ip, link = true }: { ip?: string; link?: boolean }) {
+export function IpText({
+  ip,
+  link = true,
+  className,
+}: {
+  ip?: string;
+  link?: boolean;
+  className?: string;
+}) {
   const hidden = useAtomValue(hideIpAtom);
-  if (!ip) return <span className="muted">{t("common.unknown")}</span>;
+  if (!ip)
+    return <span className="text-muted-foreground">{t("common.unknown")}</span>;
   const text = maskedIp(ip, hidden);
   const content = <CompactText text={text} middle tooltip={false} />;
   return (
-    <span className="ip-text">
+    <span
+      className={cn(
+        "inline-flex max-w-full min-w-0 whitespace-nowrap",
+        className,
+      )}
+    >
       <AnimatedValue value={ip}>
         {link && !hidden ? (
           <UnderlineHover asChild>
@@ -97,7 +112,7 @@ export function ToolCard({
   className?: string;
 }) {
   return (
-    <Card className={`tool-card ${className}`}>
+    <Card className={cn("min-w-0", className)}>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
@@ -105,19 +120,49 @@ export function ToolCard({
     </Card>
   );
 }
+type FactsClass = string | ((label: string) => string | undefined);
 export function Facts({
   rows,
   renderLabel,
+  className,
+  rowClassName,
+  labelClassName,
+  valueClassName,
 }: {
   rows: [string, ReactNode][];
   renderLabel?: (label: string) => ReactNode;
+  className?: string;
+  /** Per-row classes; a function receives the row label. */
+  rowClassName?: FactsClass;
+  labelClassName?: FactsClass;
+  valueClassName?: FactsClass;
 }) {
+  const resolve = (value: FactsClass | undefined, label: string) =>
+    typeof value === "function" ? value(label) : value;
   return (
-    <dl className="facts">
+    <dl className={className}>
       {rows.map(([label, value]) => (
-        <div key={label}>
-          <dt>{renderLabel ? renderLabel(label) : label}</dt>
-          <dd>
+        <div
+          key={label}
+          className={cn(
+            "flex min-h-9 items-center justify-between gap-3 border-b border-border py-1.5 text-[0.85rem] last:border-b-0",
+            resolve(rowClassName, label),
+          )}
+        >
+          <dt
+            className={cn(
+              "shrink-0 text-muted-foreground",
+              resolve(labelClassName, label),
+            )}
+          >
+            {renderLabel ? renderLabel(label) : label}
+          </dt>
+          <dd
+            className={cn(
+              "min-w-0 text-right font-semibold wrap-anywhere",
+              resolve(valueClassName, label),
+            )}
+          >
             <AnimatedValue
               value={
                 typeof value === "string" || typeof value === "number"
@@ -147,7 +192,7 @@ export function Pending({
 export function ErrorNotice({ error }: { error: unknown }) {
   if (!error) return null;
   return (
-    <Alert variant="destructive" className="error-notice">
+    <Alert variant="destructive" className="my-4">
       <AlertDescription>
         <AnimatedValue
           value={error instanceof Error ? error.message : String(error)}
@@ -168,7 +213,10 @@ export function ActionButton({
       {...props}
       disabled={busy || props.disabled}
       aria-busy={busy}
-      className={`action-button ${props.className ?? ""}`}
+      className={cn(
+        "min-w-[90px] [&>[role=status]]:inline-flex [&>[role=status]]:items-center",
+        props.className,
+      )}
     >
       {busy ? (
         <Pending>
@@ -190,9 +238,9 @@ export function ReadingLinks({
   title?: string;
 }) {
   return (
-    <section className="reading">
-      <h2>{title}</h2>
-      <div className="reading-grid">
+    <section className="mt-8 max-xs:mt-6">
+      <h2 className="mb-2 text-[1.4rem] font-bold">{title}</h2>
+      <div className="grid grid-cols-[1fr_1fr] gap-x-6 gap-y-1.5 text-[0.9rem] text-muted-foreground max-xs:grid-cols-1">
         {links.map((item) => (
           <UnderlineHover asChild key={item.path}>
             <Link to={item.path}>{item.title}</Link>

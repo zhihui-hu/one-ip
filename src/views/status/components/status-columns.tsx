@@ -4,9 +4,12 @@ import { Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { UnderlineHover } from "@/components/underline-hover";
 import { locale, t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
 import { serviceGroupLabel } from "../groups";
 import { indicatorLabels, type StatusRow } from "../rows";
+import { serviceColor } from "../service-tone";
+import "../status.css";
 
 export function statusColumns(
   setDetailId: (id: string) => void,
@@ -18,7 +21,7 @@ export function statusColumns(
       cell: ({ row }) => (
         <button
           type="button"
-          className="service-name text-left text-primary focus-visible:outline-ring"
+          className="flex min-w-0 max-w-[220px] items-center gap-2 text-left font-semibold text-primary focus-visible:outline-ring"
           onClick={() => setDetailId(row.original.id)}
           aria-label={t("common.viewDetails", [row.original.name])}
         >
@@ -27,7 +30,7 @@ export function statusColumns(
             {row.original.name}
           </UnderlineHover>
           {!!row.original.data?.incidents?.length && (
-            <Badge variant="secondary" className="shrink-0">
+            <Badge variant="secondary" className="shrink-0 text-ellipsis">
               {row.original.data.incidents.length}
               {t("status.incidents")}
             </Badge>
@@ -56,10 +59,19 @@ export function statusColumns(
             onClick={() => setDetailId(service.id)}
             aria-label={t("status.viewStatusDetails", [service.name])}
             title={service.error}
-            className={`service-table-state service-card service-${service.failed ? "unknown" : (indicator ?? "unknown")}`}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-[6px] bg-[color-mix(in_srgb,var(--service-color)_9%,transparent)] px-[7px] py-[3px] text-[0.75rem] whitespace-nowrap text-(--service-color)",
+              serviceColor(
+                service.failed ? "unknown" : (indicator ?? "unknown"),
+              ),
+            )}
           >
             <i
-              className={`service-dot ${service.fetching ? "service-dot-loading" : ""}`}
+              className={cn(
+                "size-[7px] shrink-0 rounded-[50%] bg-(--service-color) transition-[background-color] duration-250 ease-[ease] motion-reduce:transition-none",
+                service.fetching &&
+                  "animate-[service-probing_1s_ease-in-out_infinite] motion-reduce:animate-none",
+              )}
             />
             <span className="flex flex-col items-start gap-0.5">
               <AnimatedValue
@@ -97,7 +109,7 @@ export function statusColumns(
       cell: ({ row }) =>
         row.original.data?.fetchedAt ? (
           <time
-            className="small muted"
+            className="text-[0.78rem] text-muted-foreground"
             dateTime={row.original.data.fetchedAt}
             title={new Date(row.original.data.fetchedAt).toLocaleString(locale)}
           >
@@ -112,7 +124,7 @@ export function statusColumns(
                 )}
           </time>
         ) : (
-          <span className="small muted">—</span>
+          <span className="text-[0.78rem] text-muted-foreground">—</span>
         ),
     },
     {
@@ -124,7 +136,7 @@ export function statusColumns(
             href={row.original.page}
             target="_blank"
             rel="noreferrer"
-            className="small"
+            className="text-[0.78rem]"
           >
             {row.original.statusSource
               ? t("status.thirdParty", [row.original.statusSource])

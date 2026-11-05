@@ -1,7 +1,9 @@
 import { SiteLogo } from "@/components/site-logo";
 import { Card, CardContent } from "@/components/ui/card";
 import { locale, t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { indicatorLabels, type ServiceWithQuery } from "../rows";
+import { serviceColor, serviceSurface } from "../service-tone";
 
 export function MobileStatusList({
   sections,
@@ -24,6 +26,9 @@ export function MobileStatusList({
                   {items.map((service) => {
                     const indicator = service.query.data?.status?.indicator;
                     const incident = service.query.data?.incidents?.[0];
+                    const tone = service.query.isError
+                      ? "unknown"
+                      : (indicator ?? "unknown");
                     return (
                       <button
                         key={service.id}
@@ -44,7 +49,11 @@ export function MobileStatusList({
                           </span>
                           <span
                             title={service.query.error?.message}
-                            className={`service-card service-${service.query.isError ? "unknown" : (indicator ?? "unknown")} shrink-0 text-xs`}
+                            className={cn(
+                              "shrink-0 text-xs max-md:bg-transparent max-md:text-(--service-color)",
+                              serviceColor(tone),
+                              serviceSurface(tone),
+                            )}
                           >
                             {service.query.isFetching && !service.query.data
                               ? t("common.lookingUpLabel")

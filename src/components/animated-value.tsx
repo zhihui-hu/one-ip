@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { gsap } from "gsap";
 
 export function AnimatedValue({
@@ -23,7 +24,10 @@ export function AnimatedValue({
     return () => media.revert();
   }, [value]);
   return (
-    <span ref={ref} className={`animated-value ${className ?? ""}`}>
+    <span
+      ref={ref}
+      className={cn("inline-block max-w-full min-w-0 align-bottom", className)}
+    >
       {children}
     </span>
   );

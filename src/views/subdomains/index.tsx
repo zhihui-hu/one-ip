@@ -70,8 +70,8 @@ export default function SubdomainsPage() {
     setParams(next);
   };
   return (
-    <div className="lookup-page text-[13px] leading-relaxed">
-      <div className="lookup-search-card">
+    <div className="text-[13px] leading-relaxed">
+      <div className="rounded-xl bg-card p-3">
         <PageHeading title={t("common.subdomainLookup")} />
         <LookupForm
           grouped
@@ -83,7 +83,7 @@ export default function SubdomainsPage() {
       </div>
       <Card className="mt-3">
         <CardContent>
-          <div className="examples lookup-history">
+          <div className="mt-2 flex flex-wrap items-center gap-1 text-[0.8rem] text-subtle">
             <span>
               {history.entries.length
                 ? t("common.recentLookups")
@@ -105,7 +105,7 @@ export default function SubdomainsPage() {
             ))}
           </div>
           {cached && (
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               {t("common.savedResult")}{" "}
               {new Date(cached.savedAt).toLocaleString(locale)}
               {t("common.runTheLookupToUpdate")}
@@ -139,7 +139,7 @@ export default function SubdomainsPage() {
                 </div>
               )}
             </div>
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               {new Date(data.checkedAt).toLocaleString(locale)} ·{" "}
               <UnderlineHover asChild>
                 <a href={data.sourceUrl} target="_blank" rel="noreferrer">

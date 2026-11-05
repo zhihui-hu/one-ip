@@ -155,7 +155,7 @@ export function ExitGroups({
                       <div className="flex min-w-0 items-center justify-between gap-2">
                         <button
                           type="button"
-                          className="min-w-0 flex-1 overflow-hidden text-left whitespace-nowrap text-sm font-medium hover:text-primary [&_.ip-text]:max-w-full [&_.ip-text]:min-w-0"
+                          className="min-w-0 flex-1 overflow-hidden text-left whitespace-nowrap text-sm font-medium hover:text-primary"
                           onClick={() => selectGroup(key)}
                           aria-pressed={
                             activeFilter?.kind === "ip" &&
@@ -260,7 +260,7 @@ export function ExitGroups({
                 key={row.name}
                 asChild
                 variant="secondary"
-                className={`h-8 max-w-full gap-1.5 px-2.5 [&_.site-icon]:size-4 ${selected === "unreachable" ? "bg-destructive/10 text-destructive" : selected === "egress-unreadable" ? "bg-warning/10 text-warning" : ""}`}
+                className={`h-8 max-w-full gap-1.5 px-2.5 ${selected === "unreachable" ? "bg-destructive/10 text-destructive" : selected === "egress-unreadable" ? "bg-warning/10 text-warning" : ""}`}
               >
                 <a
                   href={url}

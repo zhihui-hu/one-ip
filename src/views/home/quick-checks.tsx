@@ -38,7 +38,7 @@ export function QuickChecks() {
     <div className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <div className="row-between">
+          <div className="flex items-center justify-between gap-3">
             <CardTitle>{t("home.dnsWebrtcEgress")}</CardTitle>
             <Button
               size="sm"
@@ -97,11 +97,11 @@ export function QuickChecks() {
             </span>
           </div>
           {dns.data && (
-            <p className="small muted mt-2">
+            <p className="mt-2 text-[0.78rem] text-muted-foreground">
               <CompactText text={dns.data.geo} />
             </p>
           )}
-          <p className="home-note mt-3">
+          <p className="mt-3 text-[11px] leading-[1.65] font-normal text-subtle">
             {t("home.oneDnsSampleAddressCollectedDoesRuleOut")}
           </p>
         </CardContent>
@@ -163,7 +163,7 @@ export function QuickChecks() {
               </Button>
             </div>
           </form>
-          <p className="home-note mt-3">
+          <p className="mt-3 text-[11px] leading-[1.65] font-normal text-subtle">
             {t("home.chooseRegionsStartMeasuringDetailsPageOptimizedMode")}
           </p>
         </CardContent>

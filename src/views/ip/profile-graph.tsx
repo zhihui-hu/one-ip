@@ -29,6 +29,7 @@ import type { CoffeeIp } from "./coffee";
 import type { ipProfile } from "./profile";
 import { ipProfileFields } from "./profile-fields";
 import { ScenarioPanel } from "./scenario-panel";
+import { reputationScaleClass } from "./styles";
 import type { useIpLatency } from "./use-ip-latency";
 
 registerECharts([
@@ -38,6 +39,8 @@ registerECharts([
   GraphicComponent,
   SVGRenderer,
 ]);
+
+const catalogTagClass = "text-[10px] text-primary";
 
 const bands = [
   { size: 45, range: "0–44", label: t("ip.profile.low") },
@@ -157,7 +160,7 @@ export function IpReputationScale({
   return (
     <div
       ref={graph}
-      className="ip-reputation-scale"
+      className={reputationScaleClass}
       role="img"
       aria-label={
         profile.score === null
@@ -209,20 +212,27 @@ export default function IpProfileGraph({
   return (
     <>
       <ToolCard title={t("common.ipProfile")}>
-        <dl ref={fieldsRef} className="ip-profile-fields">
+        <dl
+          ref={fieldsRef}
+          className="max-md:grid max-md:grid-cols-2 max-md:gap-x-3 max-md:gap-y-0"
+        >
           {fields.map((field, index) => (
-            <div key={field.label}>
-              <dt>
+            <div
+              key={field.label}
+              className="flex items-center justify-between gap-3 border-b border-border py-[3px] text-[12px] last:border-b-0 max-md:flex-col max-md:items-start max-md:gap-0 max-md:[&:nth-last-child(-n+2)]:border-b-0"
+            >
+              <dt className="flex items-center gap-1 text-muted-foreground">
                 <span>{field.label}</span>
                 <button
                   type="button"
+                  className="grid size-7 flex-none cursor-pointer place-items-center rounded-[5px] hover:bg-muted hover:text-primary focus-visible:bg-muted focus-visible:text-primary focus-visible:outline-2 focus-visible:outline-ring"
                   aria-label={t("common.explain", [field.label])}
                   onClick={() => setSelected(index)}
                 >
                   <Info size={14} aria-hidden="true" />
                 </button>
               </dt>
-              <dd className="flex flex-wrap items-center gap-1">
+              <dd className="flex min-w-0 flex-wrap items-center gap-1 text-right font-medium wrap-anywhere max-md:text-left max-md:text-[12px]">
                 <Badge variant={field.tone ?? "info"}>{field.value}</Badge>
                 {field.special && (
                   <Badge variant="outline">
@@ -245,28 +255,39 @@ export default function IpProfileGraph({
         >
           {active && (
             <>
-              <div className="ip-profile-current">
-                <span>{t("ip.profile.currentIp")}</span>
-                <strong>{active.value}</strong>
-                {active.detail && <p>{active.detail}</p>}
+              <div className="rounded-[8px] bg-primary/10 p-3 text-[12px]">
+                <span className="mr-2 text-muted-foreground">
+                  {t("ip.profile.currentIp")}
+                </span>
+                <strong className="text-primary">{active.value}</strong>
+                {active.detail && (
+                  <p className="mt-[5px] leading-[1.6] wrap-anywhere">
+                    {active.detail}
+                  </p>
+                )}
               </div>
-              <dl className="ip-profile-catalog">
+              <dl className="grid gap-2">
                 {active.options.map((option) => (
                   <div
                     key={option.label}
                     data-current={option.current || undefined}
+                    className="rounded-[8px] border border-transparent bg-muted p-2.5 data-current:border-primary"
                   >
-                    <dt>
+                    <dt className="flex items-center justify-between gap-2 text-[12px]">
                       <strong>{option.label}</strong>
                       {option.status ? (
-                        <span>{option.status}</span>
+                        <span className={catalogTagClass}>{option.status}</span>
                       ) : (
                         option.current && (
-                          <span>{t("ip.profile.currentCategory")}</span>
+                          <span className={catalogTagClass}>
+                            {t("ip.profile.currentCategory")}
+                          </span>
                         )
                       )}
                     </dt>
-                    <dd>{option.description}</dd>
+                    <dd className="mt-1 text-[12px] leading-[1.7] text-muted-foreground">
+                      {option.description}
+                    </dd>
                   </div>
                 ))}
               </dl>

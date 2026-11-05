@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { t, locale } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { useQueries } from "@tanstack/react-query";
 import { getStatus } from "./api";
 import { MobileStatusList } from "./components/mobile-status-list";
@@ -14,6 +15,9 @@ import { statusColumns } from "./components/status-columns";
 import { serviceGroups } from "./groups";
 import { statusOrder } from "./order";
 import { services, toTableRow } from "./rows";
+
+/** Number color per summary section: issues, healthy, unknown. */
+const summaryNumberClass = ["text-danger", "text-ok", ""] as const;
 
 export default function StatusPage() {
   const mobile = useIsMobile();
@@ -89,14 +93,15 @@ export default function StatusPage() {
   const detailService = allRows.find((service) => service.id === detailId);
   const detail = detailService ? toTableRow(detailService) : undefined;
   return (
-    <div className="service-status-page">
+    <div>
       <PageHeading title={t("navigation.serviceStatus")} />
-      <div className="toolbar">
-        <div className="filter-tabs">
+      <div className="my-5 flex flex-wrap items-center justify-between gap-3 max-md:mb-2.5 max-md:flex-nowrap max-md:gap-1.5 max-md:[&>button]:shrink-0">
+        <div className="flex flex-wrap gap-1 max-md:min-w-0 max-md:flex-1 max-md:flex-nowrap max-md:overflow-x-auto max-md:[scrollbar-width:none]">
           {serviceGroups.map(({ value: group, label }) => (
             <Button
               size="sm"
               variant={group === filter ? "secondary" : "ghost"}
+              className="max-md:shrink-0 max-md:px-2"
               key={group}
               aria-pressed={group === filter}
               onClick={() =>
@@ -132,7 +137,7 @@ export default function StatusPage() {
           )}
         </Button>
       </div>
-      <div className="service-summary">
+      <div className="mb-5 grid grid-cols-3 gap-3 max-md:mb-2.5 max-md:gap-1.5">
         {sections.map(([label, items], index) => (
           <ToolCard
             key={label}
@@ -143,11 +148,18 @@ export default function StatusPage() {
                   : label}
               </span>
             }
-            className={`service-summary-card summary-${index}`}
+            className="max-md:gap-1 max-md:**:data-[slot=card-title]:text-[11px]"
           >
-            <div className="service-summary-number">
+            <div
+              className={cn(
+                "flex items-baseline gap-2 text-[1.6rem] font-bold max-md:text-[24px] max-md:leading-[1.2]",
+                summaryNumberClass[index],
+              )}
+            >
               <NumberTicker value={items.length} />
-              <span>{t("status.services")}</span>
+              <span className="text-[0.75rem] font-normal text-muted-foreground max-md:hidden">
+                {t("status.services")}
+              </span>
             </div>
           </ToolCard>
         ))}
@@ -155,7 +167,7 @@ export default function StatusPage() {
       {mobile ? (
         <MobileStatusList sections={sections} setDetailId={setDetailId} />
       ) : (
-        <div className="service-table">
+        <div className="mb-3 overflow-hidden rounded-[12px] bg-card [&_table]:min-w-[720px] [&_td]:px-3 [&_td]:py-2 [&_th]:px-3 [&_th]:py-2">
           <Card>
             <CardContent>
               <DataTable
@@ -169,7 +181,7 @@ export default function StatusPage() {
           </Card>
         </div>
       )}
-      <p className="small muted">
+      <p className="text-[0.78rem] text-muted-foreground">
         {t("status.checksAutomaticallyEvery2MinutesUnknownFailedQueries")}
       </p>
       <ServiceDetailDialog

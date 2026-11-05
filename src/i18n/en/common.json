@@ -1,4 +1,10 @@
 {
+  "contact.email": "Email",
+  "contact.emailOrWeChat": "Contact us on WeChat or by email.",
+  "contact.contactMethod": "Contact method",
+  "contact.emailHint": "Click the email address to compose a message.",
+  "contact.weChatQrCode": "WeChat contact QR code",
+  "contact.scanWeChatHint": "Scan with WeChat, or save and recognize the image on your phone.",
   "navigation.documentation": "Documentation",
   "navigation.commercialProjectExample": "Commercial project example",
   "navigation.fullGuide": "Full user guide",

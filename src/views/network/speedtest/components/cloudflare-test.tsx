@@ -40,7 +40,7 @@ export function CloudflareTest() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <ActionButton busy={busy} onClick={start} className="min-w-32">
+          <ActionButton busy={busy} onClick={start}>
             <Play data-icon="inline-start" />
             {t("speedtest.start")}
           </ActionButton>

@@ -1,0 +1,11 @@
+/* Keyframes referenced from Tailwind `animate-[…]` utilities in shared components. */
+
+/* CountryFlag loading shimmer (src/components/country-flag.tsx). */
+@keyframes flag-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}

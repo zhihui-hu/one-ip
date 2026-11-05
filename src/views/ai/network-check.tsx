@@ -14,11 +14,15 @@ import {
 import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t } from "@/i18n";
 import { trace } from "@/lib/network";
+import { cn } from "@/lib/utils";
 import { withDetectionAnimation } from "@/views/browser/with-feedback";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { aiPlatforms } from "./platforms";
 import { probeAiDomain } from "./probe";
+
+/** Below 640px each row collapses into a stacked card. */
+const mobileCellClass = "max-sm:min-w-0 max-sm:p-0";
 
 export function AiNetworkCheck({
   domains,
@@ -65,7 +69,10 @@ export function AiNetworkCheck({
     orderedDomains.map(({ domain }) => domain).join("|"),
   );
   return (
-    <Card className="ai-network-check">
+    <Card
+      // `.sweep-shine` (index.css) is unlayered, so the faster cycle needs `!`.
+      className="max-sm:min-w-0 [&_.sweep-shine]:[animation-duration:1s]!"
+    >
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <CardTitle>{t("common.networkConnectivity")}</CardTitle>
@@ -102,10 +109,10 @@ export function AiNetworkCheck({
           </button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-sm:min-w-0">
         <div ref={sortRef}>
-          <Table className="ai-connectivity-table">
-            <TableHeader>
+          <Table className="max-sm:block max-sm:w-full">
+            <TableHeader className="max-sm:hidden">
               <TableRow>
                 <TableHead>{t("ai.domain")}</TableHead>
                 <TableHead>{t("ai.egress")} IP</TableHead>
@@ -114,16 +121,30 @@ export function AiNetworkCheck({
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="max-sm:grid max-sm:w-full max-sm:gap-2">
               {orderedDomains.map(({ domain, result, exit }) => (
-                <TableRow key={domain} data-sort-id={domain}>
-                  <TableCell className="ai-connectivity-site">
+                <TableRow
+                  key={domain}
+                  data-sort-id={domain}
+                  className="max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:gap-2 max-sm:rounded-[10px] max-sm:border-0 max-sm:bg-muted max-sm:p-3 max-sm:hover:bg-muted"
+                >
+                  <TableCell
+                    className={cn(
+                      mobileCellClass,
+                      "max-sm:col-[1] max-sm:row-[1] max-sm:whitespace-normal max-sm:wrap-anywhere",
+                    )}
+                  >
                     <span className="flex min-w-0 items-center gap-2">
                       <SiteLogo website={`https://${domain}`} />
                       <span>{domain}</span>
                     </span>
                   </TableCell>
-                  <TableCell className="ai-connectivity-exit text-muted-foreground">
+                  <TableCell
+                    className={cn(
+                      mobileCellClass,
+                      "text-muted-foreground max-sm:col-[1/-1] max-sm:row-[2] max-sm:text-[12px] max-sm:whitespace-normal max-sm:wrap-anywhere",
+                    )}
+                  >
                     <span className="sm:hidden">{t("common.egressIp")} </span>
                     {exit.isFetching ? (
                       <Pending>{t("common.checking")}</Pending>
@@ -139,7 +160,12 @@ export function AiNetworkCheck({
                       </span>
                     )}
                   </TableCell>
-                  <TableCell className="ai-connectivity-latency text-right">
+                  <TableCell
+                    className={cn(
+                      mobileCellClass,
+                      "text-right max-sm:col-[2] max-sm:row-[1] max-sm:self-center",
+                    )}
+                  >
                     {query.isFetching ? (
                       <Pending>{t("common.checking")}</Pending>
                     ) : result?.median != null ? (
@@ -162,11 +188,11 @@ export function AiNetworkCheck({
             </TableBody>
           </Table>
         </div>
-        <p className="small muted mt-2">
+        <p className="mt-2 text-[0.78rem] text-muted-foreground">
           {t("ai.testsSiteResourceResponsesLoginChatAvailabilityCross")}
         </p>
         {query.error && (
-          <p className="small text-destructive">
+          <p className="text-[0.78rem] text-destructive">
             {t("ai.networkCheckFailedPleaseRetryLabel")}
           </p>
         )}

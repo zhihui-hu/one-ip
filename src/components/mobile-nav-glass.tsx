@@ -17,7 +17,7 @@ export default function MobileNavGlass({ light }: { light: boolean }) {
   if (reduced) return null;
   return (
     <LiquidGlass
-      className="mobile-nav-glass"
+      data-mobile-nav-glass=""
       aria-hidden="true"
       backdropBlur={20}
       tintColor={light ? "rgba(255,255,255,0.72)" : "rgba(22,27,34,0.78)"}

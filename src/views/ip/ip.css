@@ -1,0 +1,130 @@
+/* Colocated, unlayered styles for the IP lookup page that utilities cannot express. */
+
+/* Perfect-score starfield (multi-stop decoration on ::before). */
+.ip-perfect-starfield::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  opacity: 0.5;
+  background-image:
+    radial-gradient(
+      circle at 7% 20%,
+      rgba(255, 234, 178, 0.9) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 15% 68%,
+      rgba(244, 211, 139, 0.62) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 23% 36%,
+      rgba(255, 240, 191, 0.8) 0 1.5px,
+      transparent 2.3px
+    ),
+    radial-gradient(
+      circle at 31% 77%,
+      rgba(226, 185, 106, 0.58) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 39% 18%,
+      rgba(255, 235, 178, 0.72) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 47% 57%,
+      rgba(255, 246, 212, 0.88) 0 1.5px,
+      transparent 2.4px
+    ),
+    radial-gradient(
+      circle at 56% 30%,
+      rgba(226, 185, 106, 0.64) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 64% 82%,
+      rgba(255, 234, 178, 0.72) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 72% 45%,
+      rgba(255, 246, 212, 0.82) 0 1.5px,
+      transparent 2.3px
+    ),
+    radial-gradient(
+      circle at 79% 17%,
+      rgba(226, 185, 106, 0.62) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 86% 64%,
+      rgba(255, 234, 178, 0.84) 0 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle at 94% 31%,
+      rgba(255, 246, 212, 0.68) 0 1px,
+      transparent 1.8px
+    );
+  animation: ip-perfect-starfield 7s ease-in-out infinite alternate;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+@keyframes ip-perfect-starfield {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: translate3d(-0.5%, 0, 0) scale(0.99);
+  }
+  50% {
+    opacity: 0.76;
+    transform: translate3d(0.5%, -0.5%, 0) scale(1.01);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ip-perfect-starfield::before {
+    animation: none;
+    opacity: 0.5;
+    transform: none;
+  }
+}
+
+/* Leaflet-owned DOM inside the location map. */
+.ip-location-map.exit-map .leaflet-tile-pane {
+  filter: grayscale(0.5);
+  opacity: 1;
+}
+.dark .ip-location-map.exit-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(1.1) contrast(0.78);
+}
+.ip-location-map .ip-location-ping {
+  fill: none;
+  stroke: #1976d266;
+  stroke-width: 2;
+  stroke-opacity: 1;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ip-map-marker-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+@keyframes ip-map-marker-ping {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.7);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ip-location-map .ip-location-ping {
+    animation: none;
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}

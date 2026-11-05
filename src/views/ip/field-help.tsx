@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 
 const definitions = new Map([
@@ -73,15 +74,15 @@ export function FieldHelp({ label }: { label: string }) {
   const trigger = (
     <button
       type="button"
-      className="ip-help-trigger"
+      className="inline-flex shrink-0 cursor-pointer items-center justify-center rounded-[4px] p-0.5 leading-none text-muted-foreground hover:bg-muted hover:text-primary hover:outline-2 hover:outline-transparent focus-visible:bg-muted focus-visible:text-primary focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:min-h-7 pointer-coarse:min-w-7"
       aria-label={t("common.explain", [label])}
       onClick={mobile ? () => setOpen(true) : undefined}
     >
-      <Info aria-hidden="true" size={14} />
+      <Info aria-hidden="true" size={14} className="block shrink-0" />
     </button>
   );
   return (
-    <span className="ip-field-label">
+    <span className="inline-flex items-center gap-[5px] align-middle leading-[20px]">
       {label}
       {mobile ? (
         <>
@@ -152,12 +153,36 @@ export function IpFacts({ rows }: { rows: [string, ReactNode][] }) {
     t("ip.ipOrigin"),
     t("ip.threatFlags"),
   ]);
+  const isCompact = (label: string) => compact.has(label);
   return (
     <Facts
+      // Mobile: a two-column grid where short neighbouring facts share a line.
+      className="max-md:grid max-md:grid-cols-2 max-md:gap-x-3.5"
+      rowClassName={(label) =>
+        cn(
+          "min-h-[30px] min-w-0 gap-2.5 border-0 border-current border-b border-b-[color-mix(in_srgb,var(--border)_75%,transparent)] py-1 text-[12px] leading-[20px] max-md:col-span-full max-md:leading-[1.5]",
+          isCompact(label) &&
+            "max-md:col-span-1 max-md:flex-wrap max-md:gap-x-1 max-md:gap-y-px",
+        )
+      }
+      labelClassName={(label) =>
+        cn(
+          "max-md:max-w-[42%] max-md:wrap-anywhere",
+          isCompact(label) &&
+            "max-md:max-w-full max-md:text-left max-md:text-[11px]",
+        )
+      }
+      valueClassName={(label) =>
+        cn(
+          "overflow-x-auto font-normal wrap-normal whitespace-nowrap [scrollbar-width:thin] *:max-w-full max-md:flex-1 max-md:overflow-x-visible max-md:text-[12px] max-md:leading-[1.6] max-md:wrap-anywhere max-md:whitespace-normal",
+          isCompact(label) &&
+            "max-md:max-w-full max-md:flex-[0_1_auto] max-md:text-right max-md:[&_[data-ip-chip]]:px-[5px] max-md:[&_[data-ip-chip]]:py-0.5 max-md:[&_[data-ip-chip]]:text-[12px]",
+        )
+      }
       rows={rows.map(([label, value]) => [
         label,
         important.has(label) ? (
-          <span key={label} className="ip-key-value">
+          <span key={label} className="font-semibold text-foreground">
             {value}
           </span>
         ) : (
@@ -165,7 +190,7 @@ export function IpFacts({ rows }: { rows: [string, ReactNode][] }) {
         ),
       ])}
       renderLabel={(label) => (
-        <span className={compact.has(label) ? "ip-compact-field" : undefined}>
+        <span>
           <FieldHelp label={label} />
         </span>
       )}

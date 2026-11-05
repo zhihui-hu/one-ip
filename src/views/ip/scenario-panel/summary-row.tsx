@@ -1,8 +1,11 @@
 import { memo } from "react";
+import { dataTableRowClass } from "@/components/data-table";
+import { pingDotClass } from "@/components/ping-dot";
 import { Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import {
   Info,
   BrainCircuit,
@@ -19,6 +22,12 @@ import {
   Mail,
 } from "lucide-react";
 import { ScenarioStars } from "./scenario-stars";
+import {
+  pingDotsClass,
+  platformNameClass,
+  platformNameLabelClass,
+  tableCellClass,
+} from "./styles";
 import { scenarioGroups, type ScenarioGroup } from "../scenario-targets";
 
 const scenarioIcons = {
@@ -61,13 +70,13 @@ export const ScenarioSummaryRow = memo(function ScenarioSummaryRow({
   const partial = average !== null && rated < group.targets.length;
   return (
     <TableRow
-      className="ip-scenario-table-row"
+      className={cn(dataTableRowClass, "h-10 cursor-pointer")}
       onClick={() => onSelect(group.id)}
     >
-      <TableCell>
+      <TableCell className={tableCellClass}>
         <button
           type="button"
-          className="site-cell ip-platform-name"
+          className={platformNameClass}
           aria-haspopup="dialog"
           onClick={(event) => {
             event.stopPropagation();
@@ -75,28 +84,34 @@ export const ScenarioSummaryRow = memo(function ScenarioSummaryRow({
           }}
         >
           <Icon className="size-4 shrink-0 text-muted-foreground" />
-          <span>{group.label}</span>
+          <span className={platformNameLabelClass}>{group.label}</span>
         </button>
       </TableCell>
-      <TableCell>
-        <div className="ip-scenario-progress">
+      <TableCell className={tableCellClass}>
+        <div className="flex min-h-[22px] items-center gap-1.5 tabular-nums max-sm:relative max-sm:gap-1 max-sm:pr-3">
           <div
-            className="ping-dots"
+            className={pingDotsClass}
             aria-label={t("ip.scenarios.rated", [rated, group.targets.length])}
           >
             {group.targets.map((target, index) => (
               <span
                 key={target.url}
-                className={`ping-dot ${states[index] === "_" ? "" : states[index] === "!" ? "dot-fail" : "dot-good"}`}
+                className={pingDotClass(
+                  states[index] === "_"
+                    ? undefined
+                    : states[index] === "!"
+                      ? "fail"
+                      : "good",
+                )}
                 title={`${target.name} · ${states[index] === "_" ? t("common.checking") : states[index] === "!" ? t("ip.scenarios.insufficientEvidence") : `${states[index]}/5`}`}
               />
             ))}
           </div>
-          <span className="ip-scenario-count text-[10px] text-muted-foreground">
+          <span className="text-[10px] text-muted-foreground max-sm:hidden">
             {rated}/{group.targets.length}
           </span>
           <span
-            className="ip-scenario-partial"
+            className="invisible inline-flex h-[11px] w-[11px] flex-[0_0_11px] text-warn data-[visible=true]:visible max-sm:absolute max-sm:right-0"
             data-visible={partial}
             title={partial ? t("ip.scenarios.partialResults") : undefined}
             aria-label={partial ? t("ip.scenarios.partialResults") : undefined}
@@ -106,10 +121,10 @@ export const ScenarioSummaryRow = memo(function ScenarioSummaryRow({
           </span>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="ip-scenario-rating">
+      <TableCell className={tableCellClass}>
+        <div className="flex min-h-[22px] items-center">
           {average !== null ? (
-            <ScenarioStars stars={average} />
+            <ScenarioStars stars={average} inTable />
           ) : (
             <Badge variant="secondary">
               {busy ? (

@@ -2,6 +2,7 @@ import { CompactText } from "@/components/compact-text";
 import { CountryFlag } from "@/components/country-flag";
 import { DataTable } from "@/components/data-table";
 import { NumberTicker } from "@/components/number-ticker";
+import { siteCellClass } from "@/components/site-logo";
 import { Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,9 +27,9 @@ const columns: ColumnDef<Row>[] = [
     accessorKey: "name",
     header: t("ping.node"),
     cell: ({ row }) => (
-      <span className="site-cell">
+      <span className={siteCellClass}>
         <CountryFlag code={row.original.country} />
-        <CompactText text={row.original.name} />
+        <CompactText text={row.original.name} className="flex-1" />
       </span>
     ),
   },
@@ -82,6 +83,27 @@ const columns: ColumnDef<Row>[] = [
   },
 ];
 
+// Column widths, cell padding and latency-tinted rows for the shared DataTable markup.
+const pingTableClass = [
+  // Flat (no card radius) inside the ping lookup page.
+  "rounded-none bg-transparent",
+  "[&_table]:min-w-[620px] [&_table]:table-fixed [&_th:first-child]:w-[32%]",
+  "[&_td]:px-3 [&_td]:py-2 [&_th]:px-3 [&_th]:py-2",
+  "[&_td:not(:first-child)]:whitespace-nowrap [&_td:not(:first-child)]:tabular-nums",
+  "max-md:[&_table]:min-w-[520px] max-md:[&_th:first-child]:w-[160px] max-md:[&_td]:px-1.5 max-md:[&_th]:px-1.5",
+  "[&_tbody_tr[data-row-id]]:bg-[color-mix(in_srgb,var(--ping-row-color)_9%,transparent)]",
+  "[&_tbody_tr[data-row-id]]:transition-[background-color] [&_tbody_tr[data-row-id]]:duration-200 [&_tbody_tr[data-row-id]]:ease-[ease]",
+  "[&_tbody_tr[data-row-id]:hover]:bg-[color-mix(in_srgb,var(--ping-row-color)_16%,transparent)]",
+  "motion-reduce:[&_tbody_tr[data-row-id]]:transition-none motion-reduce:[&_tbody_tr[data-row-id]]:duration-0",
+].join(" ");
+
+const pingRowClass = {
+  fast: "[--ping-row-color:var(--success)]",
+  good: "[--ping-row-color:var(--good)]",
+  slow: "[--ping-row-color:var(--warning)]",
+  danger: "[--ping-row-color:var(--danger)]",
+} as const;
+
 export function PingResults({
   data,
   pending,
@@ -116,18 +138,18 @@ export function PingResults({
     <Card>
       <CardContent>
         <DataTable
-          className="ping-table"
+          className={pingTableClass}
           getRowClassName={(row) =>
             row.avg == null ||
             !Number.isFinite(row.avg) ||
             row.avg < 0 ||
             row.status === t("ping.failed")
-              ? "ping-row-danger"
+              ? pingRowClass.danger
               : row.avg < 100
-                ? "ping-row-fast"
+                ? pingRowClass.fast
                 : row.avg < 400
-                  ? "ping-row-good"
-                  : "ping-row-slow"
+                  ? pingRowClass.good
+                  : pingRowClass.slow
           }
           data={rows}
           columns={columns}

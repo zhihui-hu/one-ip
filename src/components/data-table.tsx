@@ -9,6 +9,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { flexRender, type RowData } from "@tanstack/react-table";
 import {
   getCoreRowModel,
@@ -16,6 +17,25 @@ import {
   type LegacyColumnDef as ColumnDef,
 } from "@tanstack/react-table/legacy";
 import { gsap } from "gsap";
+
+// Shared table look, also used by tables that render their own markup.
+// (`border-current` mirrors the old `border: 0` resets on zero-width sides.)
+// Base styles sit on the elements themselves so page wrappers can override
+// them with `[&_td]:` / `[&_th]:` variants (higher specificity).
+export const dataTableClass =
+  "overflow-hidden rounded-[8px] border-0 border-current shadow-none";
+/** For a raw `<table>`; the shadcn `Table` also needs `dataTableLeadingClass`. */
+export const dataTableTableClass =
+  "w-full border-separate border-spacing-0 text-[0.9rem] max-xs:text-[0.78rem]";
+/** Keeps shadcn `text-sm` line-height after the font-size override. */
+export const dataTableLeadingClass = "leading-[calc(1.25/0.875)]";
+export const dataTableHeaderClass = "border-0 border-current [&_tr]:border-0";
+export const dataTableHeadClass =
+  "h-auto border-b-0 border-b-current bg-muted px-4 py-2.5 text-left text-[0.85em] font-semibold text-muted-foreground max-md:px-2.5 max-md:py-[9px]";
+export const dataTableCellClass =
+  "border-b-0 border-b-current px-4 py-2.5 whitespace-normal wrap-anywhere max-md:px-2.5 max-md:py-[9px]";
+export const dataTableRowClass =
+  "border-0 border-current even:bg-muted hover:bg-accent";
 
 export function DataTable<T extends RowData>({
   data,
@@ -103,13 +123,20 @@ export function DataTable<T extends RowData>({
     };
   }, []);
   return (
-    <div className={`data-table ${className}`}>
-      <Table>
-        <TableHeader>
+    <div
+      className={cn(
+        dataTableClass,
+        // Empty-state cell; `[data-empty]` matches the former `.data-table .empty-cell` weight.
+        "[&_[data-empty]]:p-7 [&_[data-empty]]:text-center [&_[data-empty]]:text-subtle",
+        className,
+      )}
+    >
+      <Table className={cn(dataTableTableClass, dataTableLeadingClass)}>
+        <TableHeader className={dataTableHeaderClass}>
           {table.getHeaderGroups().map((group) => (
-            <TableRow key={group.id}>
+            <TableRow key={group.id} className="border-0 border-current">
               {group.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className={dataTableHeadClass}>
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext(),
@@ -124,10 +151,10 @@ export function DataTable<T extends RowData>({
             <TableRow
               key={row.id}
               data-row-id={row.id}
-              className={getRowClassName?.(row.original)}
+              className={cn(dataTableRowClass, getRowClassName?.(row.original))}
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
+                <TableCell key={cell.id} className={dataTableCellClass}>
                   {animateChanges ? (
                     <AnimatedValue value={JSON.stringify(row.original)}>
                       {flexRender(
@@ -143,8 +170,12 @@ export function DataTable<T extends RowData>({
             </TableRow>
           ))}
           {!data.length && (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="empty-cell">
+            <TableRow className={dataTableRowClass}>
+              <TableCell
+                colSpan={columns.length}
+                className={dataTableCellClass}
+                data-empty=""
+              >
                 {empty}
               </TableCell>
             </TableRow>

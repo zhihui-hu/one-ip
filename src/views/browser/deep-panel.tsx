@@ -72,8 +72,8 @@ export function DeepPanel() {
   return (
     <div className="mt-3">
       <ToolCard title={t("browser.deep.deepBrowserDiagnostics")}>
-        <div className="row-between gap-3">
-          <p className="small muted">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[0.78rem] text-muted-foreground">
             {t("browser.deep.basedOn")}{" "}
             <a
               href="https://github.com/abrahamjuliot/creepjs"
@@ -143,6 +143,7 @@ export function DeepPanel() {
               )}
             </div>
             <Facts
+              valueClassName="max-w-[70%]"
               rows={[
                 [t("browser.deep.sourceVersion"), result.commit.slice(0, 12)],
                 [t("browser.deep.duration"), `${result.duration} ms`],
@@ -153,6 +154,7 @@ export function DeepPanel() {
               ]}
             />
             <DataTable
+              className="[&_table]:table-fixed"
               data={reports ?? []}
               columns={[
                 {
@@ -192,7 +194,7 @@ export function DeepPanel() {
             />
           </>
         )}
-        <p className="small muted mt-3">
+        <p className="mt-3 text-[0.78rem] text-muted-foreground">
           {t("browser.deep.resultsComeSeparateSameOriginDiagnosticContextMay")}
         </p>
       </ToolCard>

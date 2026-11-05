@@ -60,10 +60,10 @@ function DismissibleHelp({ page, text }: { page: string; text: string }) {
   if (dismissed) return null;
   return (
     <Alert
-      className="page-help-alert mb-3 flex items-start gap-2 border-0 py-2"
+      className="mb-2 flex items-start gap-2 border-0 bg-transparent py-[3px] text-muted-foreground"
       role="note"
     >
-      <AlertDescription className="min-w-0 flex-1 text-xs leading-5">
+      <AlertDescription className="min-w-0 flex-1 text-xs leading-[1.6] text-wrap text-inherit wrap-anywhere md:text-wrap">
         {text}
       </AlertDescription>
       <Button

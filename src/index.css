@@ -42,6 +42,17 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-subtle: var(--subtle);
+  --color-ok: var(--success);
+  --color-ok-soft: var(--success-soft);
+  --color-ok-text: var(--success-text);
+  --color-good: var(--good);
+  --color-warn: var(--warning);
+  --color-danger: var(--danger);
+  --color-info-soft: var(--info-soft);
+  --color-info-text: var(--info-text);
+  --shadow-tool: var(--tool-shadow);
+  --breakpoint-xs: 36rem;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -120,6 +131,82 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Product palette: overrides the shadcn defaults above. */
+@media (max-width: 767px) {
+  html,
+  body {
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Keep iOS from zooming the viewport when a small input gains focus. */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Shared brand color for both light and dark appearance. */
+:root {
+  --primary: oklch(0.5645 0.163 253.27);
+  --primary-foreground: #fff;
+  --ring: var(--primary);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: #fff;
+  --sidebar-ring: var(--primary);
+}
+
+/* Reference geometry: 1000px shell, system typography, compact tools. */
+:root {
+  --background: #fafafa;
+  --foreground: #1a1a1a;
+  --card: #fff;
+  --card-foreground: #1a1a1a;
+  --muted: #f8f9fb;
+  --muted-foreground: #57606a;
+  --border: #e1e4e8;
+  --input: #d8dce0;
+  --accent: #eef1f5;
+  --secondary: #eef1f5;
+  --subtle: #8b949e;
+  --success: #1b8a2d;
+  --success-soft: #d1fae5;
+  --success-text: #065f46;
+  --good: #6fcf7c;
+  --warning: #f0c040;
+  --danger: #cf222e;
+  --info-soft: #dbeafe;
+  --info-text: #1d4ed8;
+  --status-success: #047857;
+  --status-warning: #b45309;
+  --tool-shadow: 0 1px 4px rgb(0 0 0 / 6%), 0 4px 12px rgb(0 0 0 / 4%);
+}
+.dark {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --card: #161b22;
+  --card-foreground: #e6edf3;
+  --muted: #161b22;
+  --muted-foreground: #c9d1d9;
+  --border: #30363d;
+  --input: #444c56;
+  --accent: #21262d;
+  --secondary: #21262d;
+  --subtle: #8b949e;
+  --success-soft: #123e31;
+  --success-text: #a7f3d0;
+  --info-soft: #162d4e;
+  --info-text: #93c5fd;
+  --status-success: #6ee7b7;
+  --status-warning: #fcd34d;
+  --tool-shadow: 0 1px 4px rgb(0 0 0 / 40%), 0 4px 12px rgb(0 0 0 / 30%);
+}
+body {
+  line-height: 1.6;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -137,95 +224,6 @@
   --radius: 0.5rem;
 }
 
-:root[data-color] {
-  --primary-foreground: white;
-}
-:root[data-color="yellow"],
-:root[data-color="green"],
-:root[data-color="rose"],
-:root[data-color="orange"] {
-  --primary-foreground: black;
-}
-
-:root[data-color="zinc"] {
-  --primary: hsl(240 5% 26%);
-}
-
-:root[data-color="red"] {
-  --primary: hsl(0 84% 60%);
-}
-
-:root[data-color="rose"] {
-  --primary: hsl(340 82% 65%);
-}
-
-:root[data-color="orange"] {
-  --primary: hsl(24 94% 53%);
-}
-
-:root[data-color="green"] {
-  --primary: hsl(142 71% 45%);
-}
-
-:root[data-color="blue"] {
-  --primary: hsl(221 83% 53%);
-}
-
-:root[data-color="yellow"] {
-  --primary: hsl(47 95% 53%);
-}
-
-:root[data-color="violet"] {
-  --primary: hsl(262 83% 58%);
-}
-
-/* 圆角（shadcn 默认用 --radius 作基准） */
-:root[data-radius="0"] {
-  --radius: 0rem;
-}
-
-:root[data-radius="0.25"] {
-  --radius: 0.25rem;
-}
-
-:root[data-radius="0.5"] {
-  --radius: 0.5rem;
-}
-
-:root[data-radius="0.75"] {
-  --radius: 0.75rem;
-}
-
-:root[data-radius="1"] {
-  --radius: 1rem;
-}
-
-/* 布局示例：你可以自己按需求调整 */
-:root[data-layout="full"] .app-container {
-  max-width: 100%;
-}
-
-:root[data-layout="centered"] .app-container {
-  max-width: 960px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-:root[data-font-size="sm"] {
-  --app-font-size: 14px;
-}
-
-:root[data-font-size="md"] {
-  --app-font-size: 16px;
-}
-
-:root[data-font-size="lg"] {
-  --app-font-size: 18px;
-}
-
-html {
-  font-size: var(--app-font-size, 16px);
-}
 body {
   margin: 0;
   min-width: 320px;

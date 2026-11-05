@@ -65,7 +65,7 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
       );
   }, [ip, setHistory]);
   return (
-    <div className="ai-diagnostics">
+    <div>
       <PageHeading
         title={
           kind === "claude"
@@ -73,7 +73,7 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
             : t("ai.chatgptCodexNetworkCheck")
         }
       />
-      <div className="ai-overview">
+      <div className="mb-3 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-3 max-sm:grid-cols-1">
         <ToolCard
           title={
             <div className="flex items-center justify-between gap-3">
@@ -85,7 +85,7 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
             </div>
           }
         >
-          <div className="ip-value text-primary">
+          <div className="mb-1 text-[1.5rem] leading-[1.45] font-bold wrap-anywhere text-primary max-sm:text-[1.2rem]">
             {exit.isPending ? (
               <Pending>{t("ai.checkingEgress")}</Pending>
             ) : (
@@ -93,19 +93,19 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
             )}
           </div>
           {exit.isError ? (
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               {t("ai.egressAddressObtainedPossiblyDueConnectionCrossOrigin")}
             </p>
           ) : geo.isFetching ? (
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               <Pending>{t("common.lookingUpLocationDetails")}</Pending>
             </p>
           ) : geo.isError ? (
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               {t("ai.locationDetailsAreUnavailable")}
             </p>
           ) : (
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               <CountryFlag
                 code={geo.data?.country_code ?? exit.data?.country_code}
               />{" "}
@@ -115,24 +115,34 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
             </p>
           )}
           <Facts
+            className="mt-3"
+            rowClassName="min-h-[30px] border-0 py-1 max-sm:items-baseline"
+            valueClassName="max-w-[70%] font-medium"
             rows={[
               [t("ai.isp"), geo.data?.isp],
               ["ASN", geo.data?.asn],
             ]}
           />
-          <div className="ai-exit-comparison">
-            <span className="small muted">{t("ai.otherEgressAddresses")}</span>
+          <div className="mt-4 border-t border-border pt-3">
+            <span className="text-[0.78rem] text-muted-foreground">
+              {t("ai.otherEgressAddresses")}
+            </span>
             {[
               { query: domestic, title: t("ai.chinaIpv4") },
               { query: cf, title: "Cloudflare" },
             ].map(({ query, title }) => (
-              <div className="ai-exit-row" key={title}>
-                <span className="muted">{title}</span>
-                <span>
+              <div
+                className="flex items-baseline justify-between gap-4 pt-2 text-[0.82rem]"
+                key={title}
+              >
+                <span className="shrink-0 text-muted-foreground">{title}</span>
+                <span className="min-w-0 text-right">
                   {query.isPending ? (
                     <Pending>{t("common.checking")}</Pending>
                   ) : query.isError ? (
-                    <span className="muted">{t("common.unavailable")}</span>
+                    <span className="text-muted-foreground">
+                      {t("common.unavailable")}
+                    </span>
                   ) : (
                     <IpText ip={query.data?.ip} />
                   )}
@@ -140,7 +150,7 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
               </div>
             ))}
             {(domestic.isError || cf.isError) && (
-              <p className="small muted">
+              <p className="text-[0.78rem] text-muted-foreground">
                 {t(
                   "ai.referenceEgressMayLimitedConnectivityCrossOriginRestrictions",
                 )}
@@ -155,7 +165,7 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
               : ["chatgpt.com", "api.openai.com"]
           }
         >
-          <p className="small muted mt-3">
+          <p className="mt-3 text-[0.78rem] text-muted-foreground">
             {t("ai.browserHttpProbesDoIndicateAccountAccessModel")}
           </p>
           <AiPlatformLinks
@@ -163,20 +173,22 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
           />
         </AiNetworkCheck>
       </div>
-      <Accordion type="multiple" className="ai-details">
+      <Accordion type="multiple" className="rounded-xl bg-card px-4">
         <AccordionItem value="history">
-          <AccordionTrigger>
+          <AccordionTrigger className="items-center py-3.5">
             <span>
               {t("ai.egressHistory")}{" "}
-              <span className="ai-detail-summary">
+              <span className="ml-2.5 text-[0.75rem] font-normal text-muted-foreground">
                 {history.length}
                 {t("ai.entriesThisBrowser")}
               </span>
             </span>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="row-between">
-              <p className="small muted">{t("ai.storedBrowserUp20Entries")}</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[0.78rem] text-muted-foreground">
+                {t("ai.storedBrowserUp20Entries")}
+              </p>
               <Button
                 variant="ghost"
                 size="sm"
@@ -187,16 +199,23 @@ export default function AiDiagnostics({ kind }: { kind: "claude" | "gpt" }) {
               </Button>
             </div>
             {history.length ? (
-              <div className="history-grid">
+              <div className="mt-3 grid grid-cols-[1fr_1fr] gap-x-6 gap-y-2 text-[0.85rem] max-xs:grid-cols-1">
                 {history.map((item) => (
-                  <div key={item.time}>
+                  <div
+                    key={item.time}
+                    className="flex flex-wrap justify-between gap-3"
+                  >
                     <IpText ip={item.ip} />
-                    <time>{new Date(item.time).toLocaleString(locale)}</time>
+                    <time className="text-[0.75rem] text-subtle">
+                      {new Date(item.time).toLocaleString(locale)}
+                    </time>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="small muted">{t("ai.noHistory")}</p>
+              <p className="text-[0.78rem] text-muted-foreground">
+                {t("ai.noHistory")}
+              </p>
             )}
           </AccordionContent>
         </AccordionItem>

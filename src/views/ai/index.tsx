@@ -44,9 +44,9 @@ export default function PlatformDiagnostics({
     retry: false,
   });
   return (
-    <div className="ai-diagnostics">
+    <div>
       <PageHeading title={t("ai.networkCheck", [platform.name])} />
-      <div className="ai-overview">
+      <div className="mb-3 grid grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-start gap-3 max-sm:grid-cols-1">
         <ToolCard
           title={
             <div className="flex items-center justify-between gap-3">
@@ -60,7 +60,7 @@ export default function PlatformDiagnostics({
         >
           {platform.traceDomain ? (
             <>
-              <div className="ip-value text-primary">
+              <div className="mb-1 text-[1.5rem] leading-[1.45] font-bold wrap-anywhere text-primary max-sm:text-[1.2rem]">
                 {exit.isPending ? (
                   <Pending>{t("ai.checkingEgress")}</Pending>
                 ) : (
@@ -93,19 +93,26 @@ export default function PlatformDiagnostics({
               {t("ai.publicEndpointCurrentlyAvailableReadPlatformSEgress")}
             </p>
           )}
-          <div className="ai-exit-comparison">
-            <span className="small muted">{t("ai.otherEgressAddresses")}</span>
+          <div className="mt-4 border-t border-border pt-3">
+            <span className="text-[0.78rem] text-muted-foreground">
+              {t("ai.otherEgressAddresses")}
+            </span>
             {[
               { query: domestic, title: t("ai.chinaIpv4") },
               { query: cf, title: "Cloudflare" },
             ].map(({ query, title }) => (
-              <div className="ai-exit-row" key={title}>
-                <span className="muted">{title}</span>
-                <span>
+              <div
+                className="flex items-baseline justify-between gap-4 pt-2 text-[0.82rem]"
+                key={title}
+              >
+                <span className="shrink-0 text-muted-foreground">{title}</span>
+                <span className="min-w-0 text-right">
                   {query.isPending ? (
                     <Pending>{t("common.checking")}</Pending>
                   ) : query.isError ? (
-                    <span className="muted">{t("common.unavailable")}</span>
+                    <span className="text-muted-foreground">
+                      {t("common.unavailable")}
+                    </span>
                   ) : (
                     <IpText ip={query.data?.ip} />
                   )}
@@ -113,7 +120,7 @@ export default function PlatformDiagnostics({
               </div>
             ))}
             {(domestic.isError || cf.isError) && (
-              <p className="small muted">
+              <p className="text-[0.78rem] text-muted-foreground">
                 {t(
                   "ai.referenceEgressMayLimitedConnectivityCrossOriginRestrictions",
                 )}
@@ -122,7 +129,7 @@ export default function PlatformDiagnostics({
           </div>
         </ToolCard>
         <AiNetworkCheck domains={[platform.domain]}>
-          <p className="small muted mt-3">
+          <p className="mt-3 text-[0.78rem] text-muted-foreground">
             {t("ai.browserHttpProbesDoIndicateAccountAccessModel")}
           </p>
           <AiPlatformLinks platform={platform} />
