@@ -1,18 +1,10 @@
-# One IP
+# <img src="public/icon.svg" alt="One IP Logo" width="32" height="32" /> One IP
 
 <p align="left">
   <img src="https://img.shields.io/badge/React-19-282C34?logo=react&amp;logoColor=61DAFB" alt="React 19" />
   <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&amp;logoColor=white" alt="Vite 8" />
   <img src="https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&amp;logoColor=white" alt="TypeScript 6" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&amp;logoColor=white" alt="shadcn/ui" />
-  <img src="https://img.shields.io/badge/Lucide-F56565?logo=lucide&amp;logoColor=white" alt="Lucide" />
-  <img src="https://img.shields.io/badge/Jotai-000000" alt="Jotai" />
-  <img src="https://img.shields.io/badge/TanStack_Query-FF4154?logo=reactquery&amp;logoColor=white" alt="TanStack Query" />
   <img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflareworkers&amp;logoColor=white" alt="Cloudflare Workers" />
-  <img src="https://img.shields.io/badge/Leaflet-199900?logo=leaflet&amp;logoColor=white" alt="Leaflet" />
-  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&amp;logoColor=white" alt="pnpm 10" />
-  <img src="https://img.shields.io/badge/Prettier-F7B93E?logo=prettier&amp;logoColor=black" alt="Prettier" />
 </p>
 
 A toolbox for IP lookups, network diagnostics, browser checks and AI service status.
@@ -22,252 +14,72 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 [Live demo](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
 <!-- sponsors:start -->
+
 [Advertise here](mailto:ip@huzhihui.com) · [<img src="public/contact/wechat.svg" alt="" width="14" height="14" /> WeChat](public/contact/wechat.jpg)
 <!-- sponsors:end -->
 
-Click the button below for one-click deployment to Cloudflare.
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
-
-## Cloudflare Pages deployment
-
-Pages reuses the existing API through [Advanced mode](https://developers.cloudflare.com/pages/functions/advanced-mode/). The build creates `dist-pages/_worker.js` and `_routes.json`; only API and protected backend paths invoke the function. Use `dist-pages` for a complete Pages deployment.
-
-For Git integration, create a Pages project with preset **None**, repository root as the root directory, build command `pnpm build:pages`, and output directory `dist-pages`. Set build variables `NODE_VERSION=24` and `PNPM_VERSION=10.32.1`. Set the Functions compatibility date to `2026-09-09` and add `nodejs_compat` for both production and preview. The root `wrangler.toml` is for Workers; Pages CLI configuration lives in `deploy/pages/wrangler.toml`.
-
-For direct deployment:
-
-```bash
-pnpm install --frozen-lockfile
-pnpm build:pages
-pnpm exec wrangler login
-# First deployment only; skip if the project already exists
-pnpm exec wrangler pages project create one-ip --production-branch main
-pnpm deploy:pages --branch main
-```
-
-Change the project name in `deploy/pages/wrangler.toml`. Configure optional secrets separately for production and preview in Pages, or use `pnpm exec wrangler pages secret put NAME --cwd deploy/pages`. To upload an existing `.secrets.production.env`, run `node scripts/sync-worker-secrets.mjs production --pages`. After building, use `pnpm pages:dev` for local preview; its secrets file is `deploy/pages/.dev.vars`.
-
-## Docker deployment
-
-The image includes the frontend and a standalone Node.js API server. The Compose configuration requires Docker Compose 2.24 or later. The multi-stage build copies only static assets, the bundled server and license into the runtime image, which runs as a non-root user.
-
-```bash
-# Optional map and verification settings; edit the file if it already exists
-cp .env.docker.example .env.docker
-docker compose up -d --build
-```
-
-Open `http://your-server:8080`. Override the host port with `PORT=8088 docker compose up -d --build`. To build and run manually:
-
-```bash
-docker build -t one-ip:local .
-docker run -d --name one-ip --restart unless-stopped -p 8080:8080 --env-file .env.docker one-ip:local
-```
-
-Settings are read when the container starts and are never embedded in the frontend. Apply changes with `docker compose up -d --force-recreate`. The `/healthz` endpoint checks container health without an external provider. To run the same server without Docker, use `pnpm build:docker` followed by `pnpm start`.
-
-Use an HTTPS reverse proxy in production; some browser diagnostics require a secure context. By default, the server uses the socket address and ignores client-supplied `CF-Connecting-IP` and forwarded identity. When using a proxy, list its immediate IP or dedicated CIDR in `.env.docker` as `TRUSTED_PROXIES`, comma-separated. For a proxy on the same host, bind locally with `BIND_ADDRESS=127.0.0.1 docker compose up -d --build`, then allow the proxy address actually seen by the container. Example Nginx location:
-
-```nginx
-location / {
-    proxy_pass http://127.0.0.1:8080;
-    proxy_set_header Host $http_host;
-    proxy_set_header X-Forwarded-For $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
-```
-
-The proxy must overwrite forwarded headers. The server trusts only the rightmost client address supplied by an allowlisted proxy; resolve real client identity at the ingress for multi-proxy setups. If an allowlisted proxy omits `X-Forwarded-For`, the server logs `proxy_missing_client_ip` once.
-
-Set `PUBLIC_ORIGIN` to the address visitors use, such as `https://ip.example.com`. Same-origin checks and challenge hostnames then use it instead of relying on `X-Forwarded-Proto`. It is required when the HTTPS proxy is not allowlisted; otherwise Ping and challenge POST requests fail the same-origin check.
-
-When Docker sits behind the Cloudflare proxy, set `TRUST_CF_CONNECTING_IP=true` to read the visitor from `CF-Connecting-IP` relayed by an allowlisted proxy. The allowlist must contain [Cloudflare IP ranges](https://www.cloudflare.com/ips/) or a proxy that accepts only Cloudflare traffic; the header is discarded from any other source.
-
-Docker geolocation uses public providers and does not present private socket addresses as public egress. Missing Cloudflare JA3/JA4/TLS metadata remains null. Docker replaces the Cloudflare edge cache with an in-process cache (1000 entries, 32 MB) that honours each endpoint's TTL and clears on restart.
-
-Workers retains native rate limiting. Pages and Docker use per-instance memory limits: 180 ordinary requests/minute, a separate 180 icon requests/minute, and 5 POST requests/minute, counting each IPv6 /64 as one client. Counts reset on restart and are not shared across replicas. Pages spreads counts across many edge isolates, so the fallback is weak there; add a Cloudflare WAF rate limiting rule for `/api/*` when strict limits matter.
-
-## Terminal and API
-
-After deploying this version, use `GET /api/ip/health` without an API key:
-
-```bash
-# Current request's public egress IP, readable terminal output
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'
-# JSON (default)
-curl -fsS 'https://ip.huzhihui.com/api/ip/health'
-# Explicit public IPv4 or IPv6
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'
-curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=2606:4700:4700::1111&format=text'
-```
-
-Replace the domain for your deployment. Local development uses `http://127.0.0.1:8787` and requires `ip`. Without `ip`, the API uses the caller address identified by Cloudflare; a proxy changes that egress address.
-
-Returns `ip`, `checked_at`, `score`, `status`, location, ISP, ASN and `flags` (residential, datacenter, mobile, VPN, proxy, Tor, crawler, abuser). The trust score ranges from 0 to 100, higher is better. Matching the UI, 75–100 is `good`, 45–74 is `moderate`, below 45 is `poor`. Missing or invalid scores yield `score: null` and `status: "unknown"`; missing flags are `null`, not `false`.
-
-`format` accepts `json` (default) or `text`. Errors always use JSON `{ "error": "…" }`: 400 for invalid input, 429 for rate limits, 503 when the caller IP is unavailable, and 502 for provider failures or mismatched IPs. Existing API rate limits apply; responses are not cached. This reports third-party IP reputation, not terminal speed tests, browser diagnostics or AI account availability.
-
-## Deploy to Cloudflare
-
-1. [Fork this project](https://github.com/zhihui-hu/one-ip/fork) into your GitHub account.
-2. Open the [Cloudflare dashboard](https://dash.cloudflare.com/), go to **Workers & Pages**, create a Worker and choose to import a Git repository.
-3. Connect GitHub, select your `one-ip` fork and set the production branch to `main`.
-4. Set the build command to `pnpm build` and the deploy command to `pnpm deploy`. Use Node.js 24 and pnpm 10.32.1. Keep the default root directory.
-5. Deploy and open the assigned `workers.dev` address. Use the Worker settings to connect a custom domain.
-
-The project uses **Cloudflare Workers with Static Assets**. The `/api/*` routes need a Worker. Core features require no application environment variables or API keys. See “Verification” for Turnstile and reCAPTCHA setup.
-
-For map access from mainland China, configure `TIANDITU_TOKEN` under Worker → Settings → Variables and Secrets (or run `pnpm exec wrangler secret put TIANDITU_TOKEN`). Maps prefer Tianditu and fall back to OpenStreetMap when unavailable; without the token, OpenStreetMap remains the default.
-
-The default map requires no account or API key. OpenStreetMap's public tiles are subject to its [usage policy](https://operations.osmfoundation.org/policies/tiles/): keep attribution visible, load tiles on demand, respect browser caching, and do not offer offline downloads or bulk prefetching. Availability is not guaranteed. Tile requests send only this site's origin as the Referer, excluding page paths containing queried IPs. Failed maps can be retried independently while location text and coordinates remain available.
-
-Workers Builds builds and deploys when `main` receives a commit. The button above points to the original repository. To preserve the fork relationship and update workflow, follow the steps to import your fork.
+![Desktop overview, redacted](docs/screenshots/desktop-home-redacted.png)
 
 ## Features
 
-| Module                   | Features                                                                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Overview                 | Domestic and external IPv4 probes, location, ISP, reputation and network classifications                                                                      |
-| IP details               | IPv4 / IPv6 lookups, ASN, CIDR, registration, network attributes, risk flags, maps, location comparison and related addresses, subject to source availability |
-| Routing and connectivity | Compare website egress addresses, group sites by IP, measure HTTP response times over multiple samples and sort by median latency                             |
-| Global Ping              | Globalping probes, region and city selection, latency, packet loss and incremental results                                                                    |
-| DNS / CDN                | DNS resolver egress, CDN serving nodes and available cache metadata                                                                                           |
-| WHOIS                    | RDAP records for domains, IPs and ASNs, including raw responses                                                                                               |
-| Browser checks           | Environment details, FingerprintJS fingerprints, consistency checks, CreepJS modules, automation signals, permissions and WebRTC                              |
-| AI access                | ChatGPT, Claude, Grok, Perplexity, Gemini, DeepSeek, Qwen and Kimi resource probes, with egress comparisons where supported                                   |
-| Service status           | Official status feeds, incidents, maintenance, components and event details                                                                                   |
-| Usability                | Chinese / English, light / dark themes, mobile layouts and drawers, local lookup history, QR sharing and link copying                                         |
-| Optional verification    | Cloudflare Turnstile and Google reCAPTCHA v3; menu entries require complete configuration and a matching hostname                                             |
+- **IP lookup**: IPv4 / IPv6 location, ISP, ASN, reputation score, risk flags and maps
+- **Network diagnostics**: per-site egress routing, connectivity timing, global Ping, DNS / CDN, WHOIS
+- **Browser checks**: fingerprints, consistency checks, automation signals, permissions and WebRTC
+- **AI access**: connectivity and egress comparison for ChatGPT, Claude, Gemini and more
+- **Service status**: official status feeds and incidents in one place
+- Chinese / English, light / dark themes, mobile layouts; native browser [WebMCP](https://developer.chrome.com/docs/ai/webmcp/) tools
 
-Some lookups rely on third-party services and may fail because of rate limits or CORS restrictions. HTTP timing isn't the same as ICMP Ping. IP classifications and reputation scores are references, not official decisions from AI platforms.
+Results rely on third-party services and may be affected by rate limits or CORS. IP classifications and scores are for reference only.
 
-### WebMCP
+## Deploy
 
-In browsers with native `document.modelContext`, the site registers structured tools for IP, WHOIS and subdomain lookups, network and AI checks, service status, and browser diagnostics. `one_ip_catalog` lists supported sites, platforms and pages; `one_ip_open_page` opens interactive permission and human verification pages. Tools reuse the site's existing sources and request limits, and support cancellation. Browsers without WebMCP continue to use the normal UI.
+One-click deploy to Cloudflare:
 
-WebMCP is experimental. For local testing, enable `chrome://flags/#enable-webmcp-testing` and inspect `await document.modelContext.getTools()`. Live Chrome use requires the [WebMCP Origin Trial](https://developer.chrome.com/docs/ai/webmcp/) or later native support; this repository does not include an origin trial token. Tools are exposed only to the current same-origin page, with no cross-origin iframe delegation. Results can contain third-party content; users should decide whether to share browser fingerprints, egress IPs or WebRTC results with an agent.
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https%3A%2F%2Fgithub.com%2Fzhihui-hu%2Fone-ip)
 
-## Screenshots
+Or fork the repo and import it under Cloudflare **Workers & Pages** with build command `pnpm build` and deploy command `pnpm deploy`. Core features need no API keys.
 
-IP addresses, detailed locations and ISP / ASN information have been redacted. Values are not live results.
+Self-host with Docker:
 
-![Desktop overview, redacted](docs/screenshots/desktop-home-redacted.png)
+```bash
+cp .env.docker.example .env.docker   # optional settings
+docker compose up -d --build         # open http://your-server:8080
+```
 
-<table>
-  <tr><th>Mobile · Light</th><th>Mobile · Dark</th></tr>
-  <tr>
-    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="Redacted mobile light overview" width="360" /></td>
-    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="Redacted mobile dark overview" width="360" /></td>
-  </tr>
-</table>
+See [Deployment and configuration](docs/deploy.en.md) for Cloudflare Pages, reverse proxies, Tianditu maps, human verification, GitHub Actions and fork syncing.
+
+## API
+
+```bash
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?format=text'   # current egress IP
+curl -fsS 'https://ip.huzhihui.com/api/ip/health?ip=1.1.1.1'    # explicit IP, JSON by default
+```
+
+Returns location, ISP, ASN, a reputation score (0–100, higher is better) and residential / datacenter / proxy / VPN flags. No API key required.
+
+## Local development
+
+```bash
+pnpm install --frozen-lockfile
+pnpm worker:dev   # http://127.0.0.1:8787
+pnpm build && pnpm test && pnpm lint
+```
+
+## Data sources
+
+Net.Coffee, ip-api, Globalping, IANA / RDAP and official platform status feeds. Browser checks use FingerprintJS and CreepJS (see [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)); the Claude environment dictionary is based on [FuckClaude](https://github.com/LinXiaoTao/FuckClaude) (see `vendor/claude-environment/`). Results are for troubleshooting only and are not official decisions by any platform.
+
+Issues are welcome. Redact IPs, locations and fingerprint identifiers before sharing screenshots.
 
 ## Business Cooperation
 
-One IP offers a closed-source commercial edition and related services for organizations that need network and browser environment checks, AI service connectivity diagnostics, batch acceptance testing or continuous monitoring. Cooperation can cover:
-
-- Commercial licenses and team workflows
-- Private deployment and data isolation
-- Custom development, integrations and API access
-- Technical consulting, deployment and ongoing support
-
-To discuss the commercial edition, private deployment or a custom solution, contact us by email at [ip@huzhihui.com](mailto:ip@huzhihui.com) or scan the WeChat QR code below. Include your use case, deployment model and expected scale. See the [GitHub repository](https://github.com/zhihui-hu/one-ip) for project details. The final service scope, data permissions and delivery terms are subject to agreement.
+A closed-source commercial edition is available: commercial licenses, private deployment, custom development and API access, and technical support. Contact [ip@huzhihui.com](mailto:ip@huzhihui.com) or WeChat with your use case and expected scale.
 
 <details>
   <summary>Contact on WeChat (show QR code)</summary>
 
   <img src="public/contact/wechat.jpg" alt="WeChat contact QR code" width="240" />
 </details>
-
-## Update your fork
-
-Click **Sync fork → Update branch** on your GitHub repository page. Review differences if you have code changes, and resolve merge conflicts.
-
-For scheduled updates, enable `Sync upstream`:
-
-1. Enable workflows in your fork's Actions tab.
-2. Under Settings → Secrets and variables → Actions → **Variables**, add `AUTO_SYNC_UPSTREAM=true`.
-3. The workflow checks for updates at 04:23 UTC each day. You can run it from the Actions page.
-
-The workflow supports forks created from `zhihui-hu/one-ip` and requires no personal access token. It uses GitHub's `merge-upstream` API, stops on conflicts and preserves your commits. Use GitHub's Sync fork if you want to review updates.
-
-- **Workers Builds:** connect your fork's production branch and check deployment records for synchronized commits in Cloudflare's build history.
-- **GitHub Actions deployment:** the sync workflow triggers deployment when it merges updates. Pushes made with `GITHUB_TOKEN` do not trigger ordinary `push` workflows.
-- If branch protection blocks a merge, use a PR.
-- Enable scheduled workflows in your fork. GitHub may disable schedules after 60 days of inactivity in a public repository; use the Actions page to enable them.
-
-References: [Syncing a fork](https://docs.github.com/en/pull-requests/how-tos/work-with-forks/syncing-a-fork), [GITHUB_TOKEN triggering behavior](https://docs.github.com/en/actions/concepts/security/github_token), [Workflow disabling rules](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows).
-
-## GitHub Actions deployment (optional)
-
-Choose Workers Builds or GitHub Actions to avoid duplicate deployments. Actions runs builds and tests by default. To enable deployment, add these settings to your repository's Actions configuration:
-
-| Kind     | Name                    | Purpose                                             |
-| -------- | ----------------------- | --------------------------------------------------- |
-| Variable | `ENABLE_CF_DEPLOY=true` | Enable deployment                                   |
-| Variable | `CF_DEPLOY_TARGET`      | `workers` (default) or `pages`                      |
-| Secret   | `CLOUDFLARE_API_TOKEN`  | Workers/Pages deployment credentials for the target |
-| Secret   | `CLOUDFLARE_ACCOUNT_ID` | Target Cloudflare account ID                        |
-
-Push to `main` or run `Build and deploy one-ip`. Deployment starts after builds and tests pass. External PRs run tests without deployment credentials. These credentials are used by CI.
-
-For `pages`, first create the Pages project named in `deploy/pages/wrangler.toml`. When using Pages Git integration, leave Actions deployment disabled.
-
-## Local development and deployment
-
-```bash
-pnpm install --frozen-lockfile
-pnpm worker:dev
-```
-
-Open `http://127.0.0.1:8787`. The command starts Vite and the local Worker with hot reload. The launcher sets `LOCAL_DEV=true` for the local process, with no changes to your Wrangler configuration.
-
-```bash
-pnpm build
-pnpm test
-pnpm lint
-
-# Log in to Cloudflare and deploy
-pnpm exec wrangler login
-pnpm deploy
-```
-
-`pnpm deploy` uses the build output in `dist`; run `pnpm build` before deployment. `make deploy` updates the version, builds and deploys without a secrets file.
-
-## Verification (optional)
-
-Choose Turnstile or reCAPTCHA and provide a Site Key, Secret and allowed hostname. The verification entry appears when the configuration is complete and the hostname matches. Missing configuration keeps the entry hidden. New Ping measurements require configured Turnstile (managed or Non-interactive), alongside the existing five-request-per-minute limit. Each batch uses a fresh token; the server validates its `ping_start` action, hostname and validity, and rejects measurements when verification is unconfigured. WebMCP calls also show the verification dialog.
-
-| Provider     | Settings                                                        |
-| ------------ | --------------------------------------------------------------- |
-| Turnstile    | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`, `TURNSTILE_HOSTNAMES` |
-| reCAPTCHA v3 | `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET`, `RECAPTCHA_HOSTNAMES` |
-
-For local development, copy the [configuration example](docs/config/challenges.env.example) to `.dev.vars` in the project root, fill in your keys and restart. Edit the existing file if present. Use comma-separated hostnames such as `example.com`, and allow those hostnames in the provider's console.
-
-For production, enter the settings under Worker → Settings → Variables and Secrets, or run `pnpm exec wrangler secret put NAME`. To use a configuration file, copy `.secrets.example` to `.secrets.production.env`, fill it in and run:
-
-```bash
-node scripts/sync-worker-secrets.mjs production --check
-node scripts/sync-worker-secrets.mjs production
-```
-
-The script uploads non-empty values, preserves existing secrets and skips missing optional files. Add `--pages` for Pages; use `.env.docker` for Docker. Sensitive files are in the Git ignore list. Store secrets in server settings, not `VITE_*` variables. Check the `configured` fields at `/api/browser/challenges` to inspect the setup.
-
-reCAPTCHA uses v3 score-based keys. The backend validates hostname, the `browser_check` action and score, with a passing threshold of 0.5. The v2 checkbox and Enterprise assessment API are unsupported. Production rejects localhost.
-
-## Structure and data sources
-
-Data sources differ by edition: the open-source edition uses publicly accessible data on the internet and public third-party APIs; the closed-source commercial edition supports private deployment and uses data from the private deployment environment. The specific data scope, retention and usage rights are subject to the commercial plan and contract.
-
-- `src/app.css`: interface styles; `src/components/ui`: shadcn/ui components.
-- `src/views`: network, browser, AI and status pages; `worker`: Worker APIs.
-- Net.Coffee: IP details. Available fields depend on the API response.
-- Supplemental IP classification calls the free ip-api HTTP endpoint from the Worker, without an API key, and retains caching and rate-limit backoff. See the [official documentation](https://ip-api.com/docs/api:json) for its permitted scope of use.
-- Globalping: global measurements; IANA / RDAP: registration records; official platform status feeds: service status.
-- FingerprintJS and CreepJS: browser checks. See [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md) for module details.
-
-Issues and suggestions are welcome. Redact private information such as IPs, locations and fingerprint identifiers before sharing screenshots.
 
 ## Star History
 

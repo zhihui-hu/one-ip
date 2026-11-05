@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { OverflowDetailText } from "@/components/overflow-detail-text";
-import { SiteLogo } from "@/components/site-logo";
+import {
+  SiteLogo,
+  siteCellClass,
+  siteCellIconClass,
+} from "@/components/site-logo";
 import { PageHeading, Pending, ActionButton } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
@@ -22,8 +26,11 @@ const columns: ColumnDef<Row>[] = [
     accessorKey: "name",
     header: t("common.vendor"),
     cell: ({ row }) => (
-      <span className="site-cell">
-        <SiteLogo website={providerWebsite(row.original.name)} />
+      <span className={siteCellClass}>
+        <SiteLogo
+          website={providerWebsite(row.original.name)}
+          className={`${siteCellIconClass} max-md:size-4`}
+        />
         <OverflowDetailText
           text={row.original.name}
           title={t("cdn.cdnProvider")}
@@ -62,6 +69,13 @@ const columns: ColumnDef<Row>[] = [
       ),
   },
 ];
+// Column widths and cell padding for the shared DataTable markup.
+const cdnTableClass = [
+  "[&_table]:min-w-0 [&_table]:table-fixed",
+  "[&_th:first-child]:w-[28%] [&_th:nth-child(2)]:w-[36%] [&_th:nth-child(3)]:w-[14%] [&_th:nth-child(4)]:w-[22%]",
+  "max-md:[&_td]:px-[5px] max-md:[&_td]:py-2 max-md:[&_td]:text-[0.75rem] max-md:[&_th]:px-[5px] max-md:[&_th]:py-2 max-md:[&_th]:text-[0.75rem]",
+].join(" ");
+
 export default function CdnPage() {
   const [round, setRound] = useState(0);
   const queries = useQueries({
@@ -78,11 +92,11 @@ export default function CdnPage() {
   return (
     <>
       <PageHeading title={t("cdn.cdnServingNodes")} />
-      <div className="toolbar">
+      <div className="my-5 flex flex-wrap items-center justify-between gap-3">
         <ActionButton busy={busy} onClick={() => setRound((n) => n + 1)}>
           {busy ? t("common.checkingDots") : t("common.runAgain")}
         </ActionButton>
-        <span className="small muted">
+        <span className="text-[0.78rem] text-muted-foreground">
           {queries.filter((query) => query.isSuccess).length}/{providers.length}{" "}
           {t("cdn.readable")}
         </span>
@@ -90,7 +104,7 @@ export default function CdnPage() {
       <Card>
         <CardContent>
           <DataTable
-            className="cdn-table"
+            className={cdnTableClass}
             columns={columns}
             getRowId={(row) => row.name}
             animateChanges={false}

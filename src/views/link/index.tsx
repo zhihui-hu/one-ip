@@ -3,11 +3,22 @@ import { CountryFlag } from "@/components/country-flag";
 import { DataTable } from "@/components/data-table";
 import { LatencyBadge } from "@/components/latency-badge";
 import { NumberTicker } from "@/components/number-ticker";
-import { SiteLogo } from "@/components/site-logo";
+import {
+  latencyTone,
+  pingDotClass,
+  pingToneBgClass,
+} from "@/components/ping-dot";
+import {
+  SiteLogo,
+  siteCellClass,
+  siteCellIconClass,
+  siteIconClass,
+} from "@/components/site-logo";
 import { ActionButton } from "@/components/toolkit";
 import { Card, CardContent } from "@/components/ui/card";
 import { t } from "@/i18n";
 import { localizeCatalogItem } from "@/lib/localize-catalog";
+import { cn } from "@/lib/utils";
 import { SplitResults } from "@/views/home/split-results";
 import { skipToken, useQueries, useQueryClient } from "@tanstack/react-query";
 import type { LegacyColumnDef as ColumnDef } from "@tanstack/react-table/legacy";
@@ -47,16 +58,26 @@ function ObservedSite({ row }: { row: ConnectivityRow }) {
     };
   }, [name, observe]);
   return (
-    <span ref={ref} className="site-cell">
+    <span ref={ref} className={cn(siteCellClass, "overflow-hidden")}>
       {row.started ? (
-        <SiteLogo src={row.icon} />
+        <SiteLogo src={row.icon} className={siteCellIconClass} />
       ) : (
-        <span className="site-icon" />
+        <span className={cn(siteIconClass, siteCellIconClass)} />
       )}
       {name}
     </span>
   );
 }
+
+const legendDotClass = "size-[7px] rounded-full";
+
+// Column widths and cell padding for the shared DataTable markup.
+const connectivityTableClass = [
+  "[&_table]:w-full [&_table]:min-w-0 [&_table]:table-fixed",
+  "[&_th:first-child]:w-[42%] [&_th:nth-child(2)]:w-[32%] [&_th:nth-child(3)]:w-[26%]",
+  "[&_td]:px-[10px] [&_td]:py-2 [&_th]:px-[10px] [&_th]:py-2",
+  "max-md:[&_td]:px-[5px] max-md:[&_td]:text-[0.75rem] max-md:[&_th]:px-[5px] max-md:[&_th]:text-[0.75rem]",
+].join(" ");
 
 const columns: ColumnDef<ConnectivityRow>[] = [
   {
@@ -69,7 +90,7 @@ const columns: ColumnDef<ConnectivityRow>[] = [
     header: t("common.testHistory"),
     cell: ({ row }) => (
       <div
-        className="ping-dots"
+        className="flex gap-[3px] max-md:gap-0.5"
         aria-label={t("link.8Tests", [
           row.original.result?.samples.length ?? 0,
         ])}
@@ -86,7 +107,9 @@ const columns: ColumnDef<ConnectivityRow>[] = [
                     ? t("link.connectionFailed")
                     : `${sample}ms`
               }
-              className={`ping-dot ${sample == null ? "" : sample < 0 ? "dot-fail" : sample < 100 ? "dot-good" : sample < 400 ? "dot-warn" : "dot-slow"}`}
+              className={pingDotClass(
+                sample == null ? undefined : latencyTone(sample),
+              )}
             />
           );
         })}
@@ -103,6 +126,7 @@ const columns: ColumnDef<ConnectivityRow>[] = [
         <LatencyBadge
           result={row.original.result}
           running={row.original.running}
+          className="min-w-16 tabular-nums max-md:min-w-0"
         />
       ),
   },
@@ -173,16 +197,16 @@ function ConnectivityGroup({
       (a, b) => (a.result?.median ?? Infinity) - (b.result?.median ?? Infinity),
     );
   return (
-    <section className="country-block connectivity-section">
-      <div className="connectivity-heading">
-        <h2>
+    <section className="mb-3 rounded-xl bg-card p-3">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <h2 className="m-0 flex shrink-0 items-center gap-2 text-[1rem] font-semibold [&>span]:ml-auto [&>span]:text-[0.78rem] [&>span]:font-normal [&>span]:text-subtle">
           {["cn", "jp", "us", "gl"].includes(cc) && (
             <CountryFlag code={cc === "gl" ? undefined : cc} />
           )}
           {label}
         </h2>
-        <div className="connectivity-actions">
-          <span className="small muted">
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+          <span className="text-[0.78rem] text-muted-foreground">
             {t("link.readableResponse")}{" "}
             <NumberTicker
               value={
@@ -215,7 +239,7 @@ function ConnectivityGroup({
       <Card>
         <CardContent>
           <DataTable
-            className="connectivity-table"
+            className={connectivityTableClass}
             columns={columns}
             data={tableRows}
             getRowId={(row) => row.name}
@@ -223,14 +247,14 @@ function ConnectivityGroup({
             animateSorting
           />
           {showLegend && (
-            <div className="legend connectivity-legend mt-3 border-t pt-3 text-xs">
-              <i className="dot-good" />
+            <div className="mt-3 flex items-center gap-[7px] border-t pt-3 text-[0.78rem] leading-[calc(1/0.75)] text-subtle">
+              <i className={`${legendDotClass} ${pingToneBgClass.good}`} />
               {t("link.excellent")}
-              <i className="dot-warn" />
+              <i className={`${legendDotClass} ${pingToneBgClass.warn}`} />
               {t("link.good")}
-              <i className="dot-slow" />
+              <i className={`${legendDotClass} ${pingToneBgClass.slow}`} />
               {t("link.slow")}
-              <i className="dot-fail" />
+              <i className={`${legendDotClass} ${pingToneBgClass.fail}`} />
               {t("link.connectionFailed")}
             </div>
           )}
@@ -248,8 +272,10 @@ export default function LinkPage() {
     <>
       <h1 className="sr-only">{t("link.connectivityAndRoutedEgress")}</h1>
       <SplitResults />
-      <div className="section-heading connectivity-page-heading">
-        <h2>{t("link.websiteConnectivity")}</h2>
+      <div className="mt-5 -mb-2">
+        <h2 className="mb-2 text-[1.4rem] font-bold">
+          {t("link.websiteConnectivity")}
+        </h2>
       </div>
       {groups.map(([cc, label], index) => (
         <ConnectivityGroup
@@ -259,7 +285,7 @@ export default function LinkPage() {
           showLegend={index === groups.length - 1}
         />
       ))}
-      <p className="principle">
+      <p className="mt-6 rounded-[8px] border border-border bg-muted px-5 py-4 text-[0.84rem] leading-[1.8] text-muted-foreground">
         {t("link.browserHttpRequestTimingMedianSuccessfulRequestsAcross")}
       </p>
     </>

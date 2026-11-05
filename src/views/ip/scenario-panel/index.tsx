@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { dataTableClass, dataTableHeaderClass } from "@/components/data-table";
 import { Pending, ToolCard } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,12 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { AccessRows } from "./access-rows";
 import { EvidenceDetails } from "./evidence-details";
 import { metricLabels, stateLabels, stateTone } from "./labels";
 import { ScenarioStars } from "./scenario-stars";
+import { tableClass, tableHeadClass } from "./styles";
 import { ScenarioSummaryRow, platformCount } from "./summary-row";
 import {
   accessRating,
@@ -114,7 +117,7 @@ export function ScenarioPanel({
   return (
     <ToolCard title={t("ip.scenarios.applicationAccessRatings")}>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="ip-scenario-intro !mb-0">
+        <p className="text-[11px] text-muted-foreground">
           {t(
             "ip.scenarios.automaticallyTestsScenariosAcrossPlatformsSelectScenarioDetails",
             [scenarioGroups.length, platformCount],
@@ -133,13 +136,19 @@ export function ScenarioPanel({
           )}
         </Button>
       </div>
-      <div className="data-table connectivity-table ip-scenario-table">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("ip.scenarios.scenario")}</TableHead>
-              <TableHead>{t("ip.scenarios.coverage")}</TableHead>
-              <TableHead>{t("ip.scenarios.averageRating")}</TableHead>
+      <div className={cn(dataTableClass, "rounded-none bg-transparent")}>
+        <Table className={tableClass}>
+          <TableHeader className={dataTableHeaderClass}>
+            <TableRow className="border-0 border-current">
+              <TableHead className={`w-[42%] ${tableHeadClass}`}>
+                {t("ip.scenarios.scenario")}
+              </TableHead>
+              <TableHead className={`w-[25%] max-sm:w-[23%] ${tableHeadClass}`}>
+                {t("ip.scenarios.coverage")}
+              </TableHead>
+              <TableHead className={`w-[33%] max-sm:w-[35%] ${tableHeadClass}`}>
+                {t("ip.scenarios.averageRating")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -182,7 +191,7 @@ export function ScenarioPanel({
         )}
       >
         {group && average && (
-          <div className="ip-scenario-dialog space-y-3 text-xs">
+          <div className="space-y-3 text-xs wrap-anywhere">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span>{t("ip.scenarios.averageAccessRating")}</span>
               {average.average !== null ? (

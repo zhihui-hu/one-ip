@@ -18,6 +18,12 @@ import {
   graphHeight,
   nodeCenterY,
 } from "./layout";
+import {
+  columnLabelClass,
+  edgeClass,
+  graphSvgClass,
+  graphWrapClass,
+} from "./styles";
 
 export function AnnouncementChart({
   ip,
@@ -38,25 +44,25 @@ export function AnnouncementChart({
   const centerY = height / 2 - NODE_HEIGHT / 2;
 
   return (
-    <div className="ip-route-graph-wrap">
+    <div className={graphWrapClass}>
       <svg
-        className="ip-route-graph-svg"
+        className={graphSvgClass}
         viewBox={`0 0 ${GRAPH_WIDTH} ${height}`}
         role="img"
         aria-label={t("ip.bgpAnnouncementsFor", [displayIp])}
       >
-        <text x={ORIGIN_X} y="16" className="ip-route-column-label">
+        <text x={ORIGIN_X} y="16" className={columnLabelClass}>
           {t("ip.queriedIp")}
         </text>
-        <text x={DIRECT_X} y="16" className="ip-route-column-label">
+        <text x={DIRECT_X} y="16" className={columnLabelClass}>
           {t("ip.bgpPrefix")}
         </text>
-        <text x={SECONDARY_X} y="16" className="ip-route-column-label">
+        <text x={SECONDARY_X} y="16" className={columnLabelClass}>
           {t("ip.announcingAsn")}
         </text>
         <g className="ip-route-graph-edges" aria-hidden="true">
           <path
-            className="ip-route-edge"
+            className={edgeClass()}
             d={curvePath(
               ORIGIN_X + ORIGIN_WIDTH,
               nodeCenterY(centerY),
@@ -68,7 +74,7 @@ export function AnnouncementChart({
           {asns.map((asn, index) => (
             <path
               key={asn}
-              className="ip-route-edge"
+              className={edgeClass()}
               d={curvePath(
                 DIRECT_X + DIRECT_WIDTH,
                 nodeCenterY(centerY),
@@ -85,7 +91,7 @@ export function AnnouncementChart({
           width={ORIGIN_WIDTH}
           eyebrow={t("ip.queriedIp")}
           title={displayIp}
-          className="is-origin"
+          origin
         />
         <GraphNode
           x={DIRECT_X}
@@ -93,7 +99,7 @@ export function AnnouncementChart({
           width={DIRECT_WIDTH}
           eyebrow={t("ip.bgpPrefix")}
           title={prefix}
-          className="is-prefix"
+          prefix
         />
         {asns.map((asn, index) => (
           <GraphNode
@@ -111,7 +117,7 @@ export function AnnouncementChart({
                 ? `${asnLabel(asn)} · ${currentAsnName}`
                 : asnLabel(asn)
             }
-            className={asn === String(currentAsn) ? "is-current" : ""}
+            current={asn === String(currentAsn)}
           />
         ))}
       </svg>

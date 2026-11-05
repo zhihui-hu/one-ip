@@ -123,7 +123,7 @@ export function App() {
         <Route
           path="*"
           element={
-            <section className="status-line">
+            <section className="py-5 text-center text-[0.88rem] leading-[1.8] text-muted-foreground">
               <h1>{t("navigation.pageNotFound")}</h1>
               <Button variant="outline" asChild>
                 <Link to="/">{t("navigation.backToOverview")}</Link>

@@ -35,25 +35,25 @@ export function ShareSite() {
         description={t("share.scanCopyLinkOpenPage")}
       >
         <div className="space-y-3">
-          <div className="share-qr-panel flex flex-col items-center rounded-xl px-3 py-3">
-            <div className="share-qr-frame relative w-full max-w-56 rounded-xl bg-white">
+          <div className="flex flex-col items-center rounded-xl bg-[color-mix(in_srgb,var(--primary)_4%,var(--card))] bg-[radial-gradient(color-mix(in_srgb,var(--primary)_12%,transparent)_0.7px,transparent_0.7px)] bg-size-[12px_12px] px-3 py-3">
+            <div className="relative w-full max-w-56 rounded-xl bg-white [box-shadow:0_4px_18px_color-mix(in_srgb,var(--primary)_8%,transparent)]">
               <Suspense fallback={<div className="aspect-square w-full" />}>
                 <ShareQrCode value={siteUrl} />
               </Suspense>
               <span
-                className="share-qr-corner left-0 top-0 rounded-tl-xl border-l-2 border-t-2"
+                className="pointer-events-none absolute size-6 border-primary left-0 top-0 rounded-tl-xl border-l-2 border-t-2"
                 aria-hidden="true"
               />
               <span
-                className="share-qr-corner right-0 top-0 rounded-tr-xl border-r-2 border-t-2"
+                className="pointer-events-none absolute size-6 border-primary right-0 top-0 rounded-tr-xl border-r-2 border-t-2"
                 aria-hidden="true"
               />
               <span
-                className="share-qr-corner bottom-0 left-0 rounded-bl-xl border-b-2 border-l-2"
+                className="pointer-events-none absolute size-6 border-primary bottom-0 left-0 rounded-bl-xl border-b-2 border-l-2"
                 aria-hidden="true"
               />
               <span
-                className="share-qr-corner bottom-0 right-0 rounded-br-xl border-b-2 border-r-2"
+                className="pointer-events-none absolute size-6 border-primary bottom-0 right-0 rounded-br-xl border-b-2 border-r-2"
                 aria-hidden="true"
               />
             </div>

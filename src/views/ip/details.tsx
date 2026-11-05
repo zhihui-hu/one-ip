@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { t } from "@/i18n";
 import { ipScoreColor } from "@/lib/ip-score";
 import type { Geo } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { hideIpAtom } from "@/store/privacy";
 import { useAtom } from "jotai";
 import { Crown, Eye, EyeOff, ShieldAlert } from "lucide-react";
@@ -19,6 +20,11 @@ import { IpLatency } from "./latency";
 import { LocationMap } from "./location-map";
 import { PerfectScoreEffects } from "./perfect-score-effects";
 import { ipProfile } from "./profile";
+import {
+  dossierTopClass,
+  reputationScaleClass,
+  routeGraphStateClass,
+} from "./styles";
 import { useIpLatency } from "./use-ip-latency";
 
 const IpProfileGraph = lazy(() => import("./profile-graph"));
@@ -28,6 +34,20 @@ const IpReputationScale = lazy(() =>
     default: module.IpReputationScale,
   })),
 );
+
+type ChipTone = "neutral" | "good" | "bad" | "residential" | "warn";
+const chipToneClass: Record<ChipTone, string> = {
+  neutral: "bg-[color-mix(in_srgb,var(--primary)_5%,transparent)] text-primary",
+  good: "bg-[color-mix(in_srgb,var(--primary)_15%,transparent)] text-primary",
+  residential:
+    "bg-[color-mix(in_srgb,var(--primary)_25%,transparent)] text-primary",
+  warn: "bg-[color-mix(in_srgb,var(--warning)_9%,transparent)] text-warn",
+  bad: "bg-[color-mix(in_srgb,var(--danger)_9%,transparent)] text-danger",
+};
+const perfectDossierClass =
+  "relative isolate border border-[rgba(190,157,94,0.55)] bg-[radial-gradient(circle_at_86%_8%,rgba(226,185,106,0.16),transparent_28%),linear-gradient(118deg,#0b111c_0%,#181d2a_48%,#332a20_100%)] text-foreground shadow-[0_0_0_1px_rgba(117,99,72,0.85),0_0_0_3px_rgba(77,59,32,0.48),inset_0_0_0_1px_rgba(244,218,157,0.22),inset_0_0_0_3px_#1e2229,0_14px_36px_rgba(19,14,7,0.25)] [--border:#514837] [--card-foreground:#f3ecdf] [--card:#191d24] [--foreground:#f3ecdf] [--muted-foreground:#bbb3a4] [--muted:#242830] [--primary:#e3c68e] [--ring:#e3c68e] [&>:not([data-perfect-effects]):not(a)]:relative [&>:not([data-perfect-effects]):not(a)]:z-1";
+const dossierHeadLineClass =
+  "max-md:items-start max-md:text-[12px] max-md:leading-[1.6]";
 
 export function IpDetails({
   data,
@@ -44,8 +64,12 @@ export function IpDetails({
   const threats = coffeeThreatLabels(d, true);
   const profile = useMemo(() => ipProfile(d), [d]);
   const inbound = useIpLatency(d.ip);
-  const chip = (label: string, tone = "neutral", title?: string) => (
-    <span className={`ip-chip ip-chip-${tone}`} title={title}>
+  const chip = (label: string, tone: ChipTone = "neutral", title?: string) => (
+    <span
+      data-ip-chip=""
+      className={`inline-flex items-center rounded-[7px] px-[9px] py-[3px] text-[12px] leading-[1.3] ${chipToneClass[tone]}`}
+      title={title}
+    >
       {label}
     </span>
   );
@@ -87,16 +111,22 @@ export function IpDetails({
     notfound: t("ip.noRoaPublished"),
     unknown: t("common.unknown"),
   };
+  const perfect = score === 100;
+  const riskNotice = profile.risk?.severity === "notice";
   return (
-    <div className="ip-dossier">
+    <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2.5 [&_[data-slot=card]]:min-w-0 [&_[data-slot=card]]:gap-1.5 [&_[data-slot=card]]:rounded-[14px] [&_[data-slot=card]]:border-0 [&_[data-slot=card]]:border-current [&_[data-slot=card]]:[box-shadow:none] [&_[data-slot=card]]:[--card-spacing:12px] max-md:[&_[data-slot=card]]:gap-1 max-md:[&_[data-slot=card]]:[--card-spacing:10px] [&_[data-slot=card-title]]:text-[14px] [&_[data-slot=card-title]]:font-semibold [&_[data-slot=card-title]]:text-foreground [&_:is([data-slot=table-row],[data-slot=table-header],[data-slot=table-cell])]:border-0 [&_:is([data-slot=table-row],[data-slot=table-header],[data-slot=table-cell])]:border-current">
       <div
-        className={`ip-dossier-top${score === 100 ? " ip-dossier-perfect" : ""}`}
+        className={`${dossierTopClass} ${perfect ? perfectDossierClass : "bg-card"}`}
       >
-        {score === 100 && <PerfectScoreEffects />}
-        <div className="ip-dossier-head">
+        {perfect && <PerfectScoreEffects />}
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 max-md:relative max-md:[align-items:start] max-md:gap-3">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="min-w-0 break-all text-xl font-semibold">
+            <div
+              className={`flex flex-wrap items-center gap-2 ${dossierHeadLineClass}`}
+            >
+              <h2
+                className={`min-w-0 break-all text-xl font-semibold max-md:pr-0 max-md:text-[length:clamp(18px,5vw,22px)] max-md:leading-[1.35] ${perfect ? " *:text-[#edcf91] *:[text-shadow:0_1px_0_rgba(255,243,198,0.46),0_-1px_0_rgba(0,0,0,0.72),0_3px_7px_rgba(0,0,0,0.58),0_0_18px_rgba(226,185,106,0.16)]" : ""}`}
+              >
                 <IpText ip={d.ip} link={false} />
               </h2>
               <div className="flex shrink-0 items-center gap-1">
@@ -126,7 +156,9 @@ export function IpDetails({
                 <CopyButton value={d.ip} />
               </div>
             </div>
-            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <div
+              className={`mt-1 flex items-center gap-2 text-sm text-muted-foreground ${dossierHeadLineClass}`}
+            >
               <CountryFlag code={data.geo.country_code} />
               <span>
                 {[d.country, d.region, d.city, d.isp]
@@ -137,21 +169,39 @@ export function IpDetails({
             </div>
           </div>
           <div
-            className={`ip-reputation-badge${score === 100 ? " ip-reputation-perfect" : ""}`}
+            className={cn(
+              "flex flex-col-reverse items-center gap-1 px-2 text-[11px] whitespace-nowrap text-primary max-md:col-[2] max-md:row-[1] max-md:justify-self-end max-md:gap-1 max-md:text-[11px]",
+              perfect ? "bg-transparent p-0 max-md:p-0" : "max-md:px-1",
+            )}
             style={{ color: ipScoreColor(score) }}
+            data-perfect-badge={perfect ? "" : undefined}
           >
-            <span className={score === 100 ? "ip-perfect-label" : undefined}>
+            <span
+              data-perfect-label={score === 100 ? "" : undefined}
+              className={
+                perfect
+                  ? "inline-flex items-center gap-1 rounded-[5px] border border-[#756348] bg-[#24272e] px-1.5 py-[3px] text-[10px] leading-[1.4] font-medium text-[#e3c68e] shadow-[inset_0_1px_0_rgba(255,240,193,0.24),0_2px_5px_rgba(0,0,0,0.4)] [text-shadow:0_1px_0_rgba(255,243,198,0.4),0_-1px_0_rgba(0,0,0,0.72),0_2px_4px_rgba(0,0,0,0.5)]"
+                  : undefined
+              }
+            >
               {score === 100 && <Crown size={13} aria-hidden="true" />}
               {score === 100
                 ? t("common.perfectReputation")
                 : t("common.ipReputation")}
             </span>
-            <strong>
+            <strong
+              className={cn(
+                perfect
+                  ? "text-[36px] text-[#efdaad] [text-shadow:0_1px_0_rgba(255,243,198,0.48),0_-1px_0_rgba(0,0,0,0.72),0_4px_8px_rgba(0,0,0,0.56),0_0_16px_rgba(239,218,173,0.2)] max-md:text-[28px]"
+                  : "text-[56px] max-md:text-[36px]",
+                "leading-none tracking-[-0.04em] tabular-nums",
+              )}
+            >
               {score == null ? "—" : <NumberTicker value={score} />}
             </strong>
           </div>
         </div>
-        <Suspense fallback={<div className="ip-reputation-scale" />}>
+        <Suspense fallback={<div className={reputationScaleClass} />}>
           <IpReputationScale profile={profile} />
         </Suspense>
         {search}
@@ -159,28 +209,39 @@ export function IpDetails({
       </div>
       {profile.risk && (
         <div
-          className="ip-risk-notice"
+          className={`flex items-start gap-2.5 rounded-[12px] border px-3.5 py-3 ${riskNotice ? "border-[#e4c88d] bg-[#fff6e5] text-[#805b16] dark:border-[#746039] dark:bg-[#30291d] dark:text-[#e5c995]" : "border-[#e8b7b7] bg-[#fff1f1] text-[#9b2727] dark:border-[#75404b] dark:bg-[#301f24] dark:text-[#f2b4ba]"}`}
           data-severity={profile.risk.severity}
           role="alert"
         >
-          <ShieldAlert size={20} aria-hidden="true" />
-          <div>
-            <strong>{profile.risk.title}</strong>
+          <ShieldAlert
+            size={20}
+            aria-hidden="true"
+            className="mt-0.5 flex-none"
+          />
+          <div className="min-w-0">
+            <strong className="text-[13px]">{profile.risk.title}</strong>
             {!!profile.risk.flags.length && (
-              <ul>
+              <ul className="mt-1.5 flex flex-wrap gap-1">
                 {profile.risk.flags.map((flag) => (
-                  <li key={flag}>{flag}</li>
+                  <li
+                    key={flag}
+                    className={`rounded-[4px] px-1.5 py-0.5 text-[11px] wrap-anywhere ${riskNotice ? "bg-[#f3e4c6] dark:bg-[#443723]" : "bg-[#f7dede] dark:bg-[#44272e]"}`}
+                  >
+                    {flag}
+                  </li>
                 ))}
               </ul>
             )}
-            <p>{profile.risk.description}</p>
+            <p className="mt-[5px] text-[12px] leading-[1.7] wrap-anywhere">
+              {profile.risk.description}
+            </p>
           </div>
         </div>
       )}
       <Suspense
         fallback={
           <ToolCard title={t("common.ipProfile")}>
-            <div className="ip-profile-loading">
+            <div className="grid h-25 place-items-center text-[12px]">
               <Pending>{t("ip.loadingProfileMap")}</Pending>
             </div>
           </ToolCard>
@@ -193,7 +254,7 @@ export function IpDetails({
           inbound={inbound}
         />
       </Suspense>
-      <div className="ip-dossier-grid">
+      <div className="grid grid-cols-2 gap-2.5 max-md:grid-cols-[1fr]">
         <ToolCard title={t("ip.networkAttributes")}>
           <IpFacts
             rows={[
@@ -302,11 +363,16 @@ export function IpDetails({
       <ToolCard title={t("ip.locationSourceComparison")}>
         {mobile ? (
           data.sources.length ? (
-            <ul className="ip-geo-mobile">
+            <ul className="grid gap-2">
               {data.sources.map((source, index) => (
-                <li key={`${source.source}-${index}`}>
-                  <span className="ip-geo-source">{source.source}</span>
-                  <div className="ip-geo-place">
+                <li
+                  key={`${source.source}-${index}`}
+                  className="min-w-0 rounded-[8px] bg-muted p-2.5"
+                >
+                  <span className="text-[11px] text-muted-foreground">
+                    {source.source}
+                  </span>
+                  <div className="mt-1 flex items-start gap-1.5 text-[13px] wrap-anywhere">
                     <CountryFlag code={source.country_code} />
                     <span>
                       {[source.country, source.region, source.city]
@@ -316,7 +382,7 @@ export function IpDetails({
                     </span>
                   </div>
                   {source.latitude != null && source.longitude != null && (
-                    <p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       {t("ip.latitude")} {source.latitude} ·{" "}
                       {t("ip.longitudeLabel")} {source.longitude}
                     </p>
@@ -331,7 +397,7 @@ export function IpDetails({
           )
         ) : (
           <DataTable<Geo>
-            className="ip-geo-table"
+            className="min-w-0 max-w-full rounded-none bg-transparent overflow-x-auto overscroll-x-contain [&_:is(th,td)]:px-3 [&_:is(th,td)]:py-2.5 [&_:is(th,td)]:whitespace-nowrap [&_:is(th,td)]:[word-break:normal] [&_:is(th,td)]:wrap-normal [&_table]:min-w-[620px] [&_table]:table-auto"
             columns={[
               { accessorKey: "source", header: t("common.dataSource") },
               { accessorKey: "country", header: t("common.countryRegion") },
@@ -340,7 +406,10 @@ export function IpDetails({
                 accessorKey: "city",
                 header: t("ip.city"),
                 cell: ({ row }) => (
-                  <span className="ip-geo-city" title={row.original.city}>
+                  <span
+                    className="block max-w-[220px] truncate"
+                    title={row.original.city}
+                  >
                     {row.original.city ?? "—"}
                   </span>
                 ),
@@ -372,7 +441,7 @@ export function IpDetails({
           />
         </ToolCard>
       )}
-      <div className="ip-dossier-grid">
+      <div className="grid grid-cols-2 gap-2.5 max-md:grid-cols-[1fr]">
         {!!d.location_history?.length && (
           <ToolCard title={t("ip.locationHistory")}>
             <IpFacts
@@ -441,6 +510,7 @@ export function IpDetails({
             </ul>
           ) : (
             <DataTable
+              className="rounded-none bg-transparent"
               columns={[
                 {
                   accessorKey: "ip",
@@ -463,7 +533,7 @@ export function IpDetails({
       <Suspense
         fallback={
           <ToolCard title={t("ip.bgpRouteTopology")}>
-            <div className="ip-route-graph-state">
+            <div className={routeGraphStateClass}>
               <Pending>{t("ip.readingRoutingData")}</Pending>
             </div>
           </ToolCard>

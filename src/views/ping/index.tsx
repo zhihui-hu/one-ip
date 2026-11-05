@@ -94,8 +94,8 @@ export default function PingPage() {
       ["finished", "failed"].includes(item.result.status),
     ).length ?? 0;
   return (
-    <div className="lookup-page ping-page">
-      <div className="lookup-search-card">
+    <div>
+      <div className="rounded-xl bg-card p-3">
         <LookupForm
           grouped
           value={params.get("host") ?? ""}

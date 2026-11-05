@@ -3,6 +3,7 @@ import { attachMapLayers, loadMapConfig } from "@/lib/map";
 import type { Geo } from "@/lib/types";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "../home.css";
 
 export function IpCardMap({ geo }: { geo?: Geo }) {
   const latitude = geo?.latitude;
@@ -97,13 +98,13 @@ export function IpCardMap({ geo }: { geo?: Geo }) {
     <>
       <div
         ref={container}
-        className="home-ip-map"
+        className="home-ip-map pointer-events-none absolute inset-y-0 right-0 left-auto z-0 w-[58%] bg-transparent opacity-0 [mask-image:linear-gradient(to_right,transparent,#000_45%)] data-[loaded=true]:opacity-55"
         data-loaded={loaded}
         aria-hidden="true"
       />
       <div
         ref={attribution}
-        className="home-ip-map-attribution"
+        className="home-ip-map-attribution absolute right-2 bottom-1 z-20 data-[loaded=false]:invisible"
         data-loaded={loaded}
       />
     </>

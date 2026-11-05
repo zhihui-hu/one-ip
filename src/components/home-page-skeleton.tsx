@@ -1,10 +1,21 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import {
+  homeIpOverviewClass,
+  homeNetworkOverviewClass,
+  homePageClass,
+  homePingGridClass,
+  homePrimaryBlockClass,
+  homePrimaryCardClass,
+  homeToolbarActionsClass,
+  homeToolbarClass,
+} from "@/views/home/styles";
 
 function OverviewCard() {
   return (
-    <Card className="home-primary-card">
-      <CardContent className="primary-ip-block space-y-3">
+    <Card className={homePrimaryCardClass}>
+      <CardContent className={cn(homePrimaryBlockClass, "space-y-3")}>
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-8 w-44" />
         <div className="space-y-2">
@@ -18,7 +29,7 @@ function OverviewCard() {
 
 function ConnectivitySkeleton() {
   return (
-    <Card className="home-connectivity-card">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <Skeleton className="h-4 w-24" />
@@ -26,7 +37,7 @@ function ConnectivitySkeleton() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="ping-grid">
+        <div className={homePingGridClass}>
           {Array.from({ length: 6 }, (_, index) => (
             <div
               className="flex min-w-0 items-center gap-2 rounded-lg bg-muted/70 px-2.5 py-2"
@@ -67,18 +78,18 @@ function SectionSkeleton({ rows = 3 }: { rows?: number }) {
 
 export function HomePageSkeleton() {
   return (
-    <div className="home-page" aria-busy="true">
-      <div className="home-toolbar">
+    <div className={homePageClass} aria-busy="true">
+      <div className={homeToolbarClass}>
         <Skeleton className="h-5 w-24" />
-        <div className="home-toolbar-actions">
+        <div className={homeToolbarActionsClass}>
           <Skeleton className="size-8 shrink-0" />
         </div>
       </div>
-      <div className="home-overview home-ip-overview">
+      <div className={homeIpOverviewClass}>
         <OverviewCard />
         <OverviewCard />
       </div>
-      <div className="home-network-overview">
+      <div className={homeNetworkOverviewClass}>
         <SectionSkeleton rows={4} />
         <ConnectivitySkeleton />
       </div>

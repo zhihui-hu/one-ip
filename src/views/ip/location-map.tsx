@@ -10,6 +10,10 @@ import { useAtomValue } from "jotai";
 import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { ExternalLink, LocateFixed } from "lucide-react";
+import "./ip.css";
+
+const mapNoteClass =
+  "mt-[5px] text-[10px] leading-normal text-muted-foreground";
 
 export function LocationMap({ geo }: { geo: Geo }) {
   const hidden = useAtomValue(hideIpAtom);
@@ -121,7 +125,7 @@ export function LocationMap({ geo }: { geo: Geo }) {
   return (
     <ToolCard
       title={
-        <span className="ip-map-heading">
+        <span className="flex items-center justify-between gap-2">
           <span>{t("ip.locationMap")}</span>
           {valid && (
             <span className="flex items-center gap-1">
@@ -158,45 +162,49 @@ export function LocationMap({ geo }: { geo: Geo }) {
     >
       {valid ? (
         <>
-          <div className="ip-map-location">
+          <div className="mb-1.5 flex flex-wrap [align-items:start] justify-between gap-x-2 gap-y-1 text-[12px]">
             <span>{location}</span>
-            <span>
+            <span className="text-[10px] text-muted-foreground tabular-nums">
               {latitude.toFixed(2)}, {longitude.toFixed(2)}
             </span>
           </div>
-          <div className="ip-map-frame">
+          <div className="relative overflow-hidden rounded-[8px] border border-border">
             <div
               ref={container}
-              className="ip-location-map exit-map"
+              className="ip-location-map exit-map z-0 h-60 w-full min-w-0 max-md:h-45"
               aria-label={t("ip.approximateLocationOf", [
                 maskedIp(geo.ip, hidden),
               ])}
               aria-busy={!loaded && !tileError}
             />
             {!loaded && !tileError && (
-              <div className="ip-map-loading" role="status">
+              <div
+                className="pointer-events-none absolute inset-0 grid place-items-center bg-muted text-[12px]"
+                role="status"
+              >
                 <Pending>{t("ip.loadingMap")}</Pending>
               </div>
             )}
           </div>
           {tileError && (
-            <p className="ip-map-error" role="status">
+            <p className={mapNoteClass} role="status">
               {t("ip.mapTilesAreUnavailableLocationDetailsRemainAvailable")}{" "}
               <button
                 type="button"
+                className="cursor-pointer text-primary underline"
                 onClick={() => setAttempt((value) => value + 1)}
               >
                 {t("common.retry")}
               </button>
             </p>
           )}
-          <p className="ip-map-caption">
+          <p className={mapNoteClass}>
             {geo.source ? `${geo.source} · ` : ""}
             {t("ip.approximateIpLocationDeviceSExactPosition")}
           </p>
         </>
       ) : (
-        <p className="small muted">
+        <p className="text-[0.78rem] text-muted-foreground">
           {t("ip.noCoordinatesAvailableToDisplayAMap")}
         </p>
       )}

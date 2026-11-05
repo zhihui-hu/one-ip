@@ -13,11 +13,8 @@ export function LookupFaq({
   items: { title: string; text: string }[];
 }) {
   return (
-    <section
-      className="lookup-faq"
-      aria-label={t("lookup.frequentlyAskedQuestions")}
-    >
-      <Card>
+    <section className="mt-4" aria-label={t("lookup.frequentlyAskedQuestions")}>
+      <Card className="gap-1.5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {t("lookup.frequentlyAskedQuestions")}{" "}

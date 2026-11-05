@@ -35,6 +35,7 @@ export function TlsFingerprint() {
       ) : (
         <>
           <Facts
+            valueClassName="max-w-[70%]"
             rows={[
               ["JA3", query.data?.ja3 ?? t("browser.notProvidedByPlatform")],
               ["JA4", query.data?.ja4 ?? t("browser.notProvidedByPlatform")],

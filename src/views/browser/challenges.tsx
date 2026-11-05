@@ -202,7 +202,7 @@ function Challenge({
     );
   return (
     <ToolCard title={provider.name}>
-      <div className="row-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <Badge variant="secondary">
           {provider.configured ? status : t("common.notConfigured")}
         </Badge>
@@ -226,7 +226,7 @@ function Challenge({
         </p>
       )}
       {provider.id !== "recaptcha" && (
-        <p className="small muted mt-3">
+        <p className="mt-3 text-[0.78rem] text-muted-foreground">
           {interaction
             ? t("challenges.anInteractiveChallengeWasShown")
             : busy
@@ -244,7 +244,7 @@ function Challenge({
             : ""
         }
       />
-      <p className="small muted mt-3" role="status">
+      <p className="mt-3 text-[0.78rem] text-muted-foreground" role="status">
         {!provider.configured
           ? provider.reason
             ? localizeApiMessage(provider.reason)
@@ -303,12 +303,12 @@ export function HumanVerification({
       {!compact && !!query.data?.some((provider) => provider.configured) && (
         <div className="mt-3">
           <ToolCard title={t("challenges.howToInterpretTheResult")}>
-            <p className="small muted">
+            <p className="text-[0.78rem] text-muted-foreground">
               {t(
                 "challenges.passingMeansAttemptSiteSucceededDoesGuaranteePassing",
               )}
             </p>
-            <p className="small muted mt-2">
+            <p className="mt-2 text-[0.78rem] text-muted-foreground">
               {t(
                 "challenges.fingerprintjsCalculatesBrowserIdentifierDoesDetermineCaptchaSuccess",
               )}

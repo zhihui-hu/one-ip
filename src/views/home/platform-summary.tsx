@@ -126,7 +126,7 @@ export function AiAccessSummary() {
                   </Link>
                 </UnderlineHover>
                 <span
-                  className="home-metric shrink-0"
+                  className="shrink-0 font-[650] tabular-nums max-md:text-[12px]"
                   title={query.data?.description}
                   style={{
                     color: query.isPending
@@ -177,10 +177,13 @@ export function PlatformSummary() {
   return (
     <Card ref={ref}>
       <CardHeader>
-        <div className="row-between">
+        <div className="flex items-center justify-between gap-3">
           <CardTitle>{t("navigation.serviceStatus")}</CardTitle>
           <UnderlineHover asChild>
-            <Link to="/ai/status" className="small muted">
+            <Link
+              to="/ai/status"
+              className="text-[0.78rem] text-muted-foreground"
+            >
               {t("home.allServicesLabel")}
             </Link>
           </UnderlineHover>
@@ -223,7 +226,7 @@ export function PlatformSummary() {
                     title={query.error?.message}
                   >
                     <span
-                      className="home-metric"
+                      className="font-[650] tabular-nums max-md:text-[12px]"
                       style={{
                         color: query.isError
                           ? "var(--warning)"
@@ -280,7 +283,7 @@ export function PlatformSummary() {
               );
             })}
         </div>
-        <p className="home-note mt-3">
+        <p className="mt-1 text-[11px] leading-[1.6] font-normal text-subtle">
           {t("home.officialStatusSourcesClickServiceComponentsIncidents")}
         </p>
       </CardContent>

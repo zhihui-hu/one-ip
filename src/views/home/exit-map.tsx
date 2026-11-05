@@ -13,7 +13,11 @@ import { useAtomValue } from "jotai";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { categoryStatusClass } from "./category-status";
+import "./home.css";
 import { siteCategories } from "./site-categories";
+
+const exitMapDotClass =
+  "relative isolate z-0 grid size-[26px] place-items-center overflow-visible rounded-[50%] border-2 border-white bg-[#2563eb] text-white shadow-[0_0_0_4px_#2563eb22,0_2px_5px_#0002] [font:600_11px/1_sans-serif] before:pointer-events-none before:absolute before:-inset-[7px] before:-z-1 before:animate-[map-marker-ping_2.4s_cubic-bezier(0,0,0.2,1)_infinite] before:rounded-[50%] before:border-2 before:border-[#2563eb66] before:content-[''] motion-reduce:before:animate-none motion-reduce:before:opacity-35 motion-reduce:before:[transform:scale(1)]";
 
 export default function ExitMap({
   rows,
@@ -143,18 +147,22 @@ export default function ExitMap({
         content.append(button);
       }
       const label = document.createElement("div");
-      label.className = "exit-map-label";
+      label.className =
+        "grid w-max max-w-[220px] min-w-[120px] gap-px [font:11px/1.4_var(--font-sans,sans-serif)]";
       const title = document.createElement("strong");
+      title.className = "overflow-hidden text-ellipsis whitespace-nowrap";
       title.textContent =
         location ||
         `${group.position[0].toFixed(2)}, ${group.position[1].toFixed(2)}`;
       const detail = document.createElement("span");
+      detail.className =
+        "overflow-hidden text-[10px] text-ellipsis whitespace-nowrap text-muted-foreground";
       detail.textContent = `${group.sites.length} ${t("home.sites")} · ${group.sites[0].domain ?? group.sites[0].name}${group.sites.length > 1 ? " …" : ""}`;
       label.append(title, detail);
       let marker = markers.current.get(key);
       if (!marker) {
         const dot = document.createElement("span");
-        dot.className = "exit-map-dot";
+        dot.className = exitMapDotClass;
         dot.textContent = String(group.sites.length);
         marker = L.marker(group.position, {
           icon: L.divIcon({
@@ -337,7 +345,7 @@ export default function ExitMap({
                     key={row.name}
                     asChild
                     variant="outline"
-                    className={`h-8 max-w-full gap-1.5 border-transparent px-2.5 transition-colors hover:brightness-95 motion-reduce:transition-none [&_.site-icon]:size-4 ${color}`}
+                    className={`h-8 max-w-full gap-1.5 border-transparent px-2.5 transition-colors hover:brightness-95 motion-reduce:transition-none ${color}`}
                   >
                     <a
                       href={website}

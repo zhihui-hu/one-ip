@@ -53,9 +53,7 @@ export function LookupForm({
     >
       <FieldGroup>
         <Field data-invalid={!!form.formState.errors.query}>
-          <Container
-            className={grouped ? "lookup-input-group h-9" : "lookup-form"}
-          >
+          <Container className={grouped ? "h-9" : "flex gap-2.5"}>
             <Control
               aria-label={placeholder}
               placeholder={placeholder}
@@ -66,6 +64,12 @@ export function LookupForm({
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
+              className={
+                grouped
+                  ? // Font size only; keeps the Input's own line-heights.
+                    "min-w-0 text-[0.85rem] leading-[1.5] md:text-[0.85rem] md:leading-[calc(1.25/0.875)]"
+                  : "h-11 min-w-0 rounded-[8px]"
+              }
               {...form.register("query")}
             />
             {grouped ? (
@@ -80,7 +84,11 @@ export function LookupForm({
                 </ActionButton>
               </InputGroupAddon>
             ) : (
-              <ActionButton type="submit" busy={busy}>
+              <ActionButton
+                className="h-11 min-w-[88px]"
+                type="submit"
+                busy={busy}
+              >
                 {label}
               </ActionButton>
             )}

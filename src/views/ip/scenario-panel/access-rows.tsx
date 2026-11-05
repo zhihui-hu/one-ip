@@ -1,6 +1,12 @@
 import { Fragment, useState } from "react";
+import {
+  dataTableClass,
+  dataTableHeaderClass,
+  dataTableRowClass,
+} from "@/components/data-table";
 import { LatencyBadge } from "@/components/latency-badge";
-import { SiteLogo } from "@/components/site-logo";
+import { latencyTone, pingDotClass } from "@/components/ping-dot";
+import { SiteLogo, siteCellIconClass } from "@/components/site-logo";
 import { Pending } from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,8 +18,17 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import { EvidenceDetails } from "./evidence-details";
 import { ScenarioStars } from "./scenario-stars";
+import {
+  pingDotsClass,
+  platformNameClass,
+  platformNameLabelClass,
+  tableCellClass,
+  tableClass,
+  tableHeadClass,
+} from "./styles";
 import { accessRating, type Evidence } from "../scenario-evidence";
 import { type ScenarioTarget } from "../scenario-targets";
 
@@ -30,13 +45,19 @@ export function AccessRows({
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
   return (
-    <div className="data-table connectivity-table ip-platform-table">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("common.website")}</TableHead>
-            <TableHead>{t("common.testHistory")}</TableHead>
-            <TableHead>{t("common.latency")}</TableHead>
+    <div className={dataTableClass}>
+      <Table className={tableClass}>
+        <TableHeader className={dataTableHeaderClass}>
+          <TableRow className="border-0 border-current">
+            <TableHead className={`w-[40%] ${tableHeadClass}`}>
+              {t("common.website")}
+            </TableHead>
+            <TableHead className={`w-[30%] ${tableHeadClass}`}>
+              {t("common.testHistory")}
+            </TableHead>
+            <TableHead className={`w-[30%] ${tableHeadClass}`}>
+              {t("common.latency")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,13 +90,17 @@ export function AccessRows({
               <Fragment key={target.url}>
                 <TableRow
                   data-alt={index % 2}
-                  className="ip-platform-row"
+                  className={cn(
+                    dataTableRowClass,
+                    "cursor-pointer",
+                    index % 2 ? "!bg-muted" : "!bg-transparent",
+                  )}
                   onClick={toggle}
                 >
-                  <TableCell>
+                  <TableCell className={tableCellClass}>
                     <button
                       type="button"
-                      className="site-cell ip-platform-name"
+                      className={platformNameClass}
                       aria-expanded={open}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -85,13 +110,16 @@ export function AccessRows({
                       <SiteLogo
                         src={target.icon}
                         website={target.website ?? target.url}
+                        className={siteCellIconClass}
                       />
-                      <span>{target.name}</span>
+                      <span className={platformNameLabelClass}>
+                        {target.name}
+                      </span>
                     </button>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={tableCellClass}>
                     <div
-                      className="ping-dots"
+                      className={pingDotsClass}
                       aria-label={t("ip.scenarios.responses", [
                         rating.responses,
                         rating.total,
@@ -105,7 +133,13 @@ export function AccessRows({
                         return (
                           <span
                             key={sampleIndex}
-                            className={`ping-dot ${!sample ? "" : !good ? "dot-fail" : sample.elapsedMs < 100 ? "dot-good" : sample.elapsedMs < 400 ? "dot-warn" : "dot-slow"}`}
+                            className={pingDotClass(
+                              !sample
+                                ? undefined
+                                : !good
+                                  ? "fail"
+                                  : latencyTone(sample.elapsedMs),
+                            )}
                             title={
                               !sample
                                 ? t("ip.scenarios.notSampled")
@@ -120,7 +154,7 @@ export function AccessRows({
                       })}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={tableCellClass}>
                     {rating.median !== null &&
                     !rating.stale &&
                     !["failed", "rate-limited", "cancelled"].includes(
@@ -136,6 +170,7 @@ export function AccessRows({
                           ),
                         }}
                         running={running}
+                        className="min-w-16 tabular-nums max-md:min-w-0"
                       />
                     ) : (
                       <Badge variant={running ? "secondary" : "warning"}>
@@ -145,8 +180,11 @@ export function AccessRows({
                   </TableCell>
                 </TableRow>
                 {open && (
-                  <TableRow className="ip-platform-evidence">
-                    <TableCell colSpan={3}>
+                  <TableRow className={dataTableRowClass}>
+                    <TableCell
+                      colSpan={3}
+                      className={`whitespace-normal wrap-anywhere [&_p]:mt-1 ${tableCellClass}`}
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <span>
                           {rating.scope === "ip"

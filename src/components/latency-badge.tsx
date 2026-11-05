@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { useTheme } from "@/hooks/use-theme";
 import { t } from "@/i18n";
+import { cn } from "@/lib/utils";
 import type { ProbeResult } from "@/views/link/api";
 import { gsap } from "gsap";
 import { AnimatedValue } from "./animated-value";
@@ -10,9 +11,11 @@ import { Pending } from "./toolkit";
 export function LatencyBadge({
   result,
   running,
+  className,
 }: {
   result?: ProbeResult;
   running: boolean;
+  className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const { resolvedTheme } = useTheme();
@@ -58,7 +61,10 @@ export function LatencyBadge({
   return (
     <span
       ref={ref}
-      className="ping-ms latency-badge"
+      className={cn(
+        "inline-flex min-w-[42px] shrink-0 justify-center rounded-[6px] px-1.5 py-0.5 text-[0.8rem] font-semibold whitespace-nowrap tabular-nums max-xs:text-[0.68rem]",
+        className,
+      )}
       title={t("common.medianBrowserHttpRequestTimeColorsMatchDisplayed")}
     >
       <AnimatedValue value={pending}>

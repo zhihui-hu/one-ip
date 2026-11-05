@@ -24,6 +24,20 @@
     "icon": "https://icons.duckduckgo.com/ip3/ip.sb.ico"
   },
   {
+    "name": "ipify IPv6",
+    "type": "international",
+    "method": "ip-json",
+    "url": "https://api6.ipify.org?format=json",
+    "icon": "https://icons.duckduckgo.com/ip3/ipify.org.ico"
+  },
+  {
+    "name": "Cloudflare IPv6",
+    "type": "international",
+    "method": "cftrace",
+    "domain": "[2606:4700:4700::1111]",
+    "icon": "https://icons.duckduckgo.com/ip3/cloudflare.com.ico"
+  },
+  {
     "name": "网易",
     "type": "domestic",
     "method": "netease",

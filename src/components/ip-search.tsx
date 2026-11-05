@@ -67,7 +67,8 @@ export function IpSearch() {
         <Button
           variant="outline"
           size="icon"
-          className="header-ip-search h-8 gap-1.5 rounded-lg text-muted-foreground"
+          data-ip-search=""
+          className="h-8 gap-1.5 rounded-lg text-muted-foreground"
           aria-label={t("home.searchIp")}
           aria-keyshortcuts="Control+k Meta+k"
           title={`${t("home.searchIp")} (${mac ? "⌘K" : "Ctrl+K"})`}

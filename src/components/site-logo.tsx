@@ -1,7 +1,25 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import { Globe2 } from "lucide-react";
 
-export function SiteLogo({ src, website }: { src?: string; website?: string }) {
+/** Site favicon box; also used for the placeholder before a logo loads. */
+export const siteIconClass = "size-5 shrink-0 rounded-[3px] object-contain";
+
+/** Logo + name row used in result tables. */
+export const siteCellClass =
+  "flex min-w-0 items-center gap-2 font-semibold whitespace-nowrap max-xs:gap-[5px]";
+/** Logo size inside `siteCellClass` rows. */
+export const siteCellIconClass = "max-xs:size-4";
+
+export function SiteLogo({
+  src,
+  website,
+  className,
+}: {
+  src?: string;
+  website?: string;
+  className?: string;
+}) {
   const hostname = website ? new URL(website).hostname : undefined;
   const iconHost =
     hostname === "api.openai.com"
@@ -32,7 +50,10 @@ export function SiteLogo({ src, website }: { src?: string; website?: string }) {
     ? `${import.meta.env.VITE_API_BASE_URL ?? "/api"}/icons/${encodeURIComponent(proxyHost)}`
     : icon;
   return (
-    <Avatar className="site-icon rounded-sm after:hidden" aria-hidden="true">
+    <Avatar
+      className={cn(siteIconClass, "after:hidden", className)}
+      aria-hidden="true"
+    >
       <AvatarImage
         src={imageSrc}
         alt=""

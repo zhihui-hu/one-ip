@@ -17,6 +17,15 @@ import { getDomesticIp, getGeo, inspectSite } from "../api";
 import { matchesSiteCategory } from "../category-status";
 import { ExitGroups, type SiteFilter } from "../exit-groups";
 
+const routeClass: Record<"direct" | "proxy" | "unknown", string> = {
+  direct: "bg-ok/12 text-ok",
+  proxy: "bg-warn/12 text-warn",
+  unknown: "bg-muted text-muted-foreground",
+};
+const summaryLineClass = "flex flex-wrap items-center gap-x-3 gap-y-1.5";
+// Small print under the home (summary) card.
+const homeNoteClass = "mt-1 text-[11px] leading-[1.6] font-normal text-subtle";
+
 export function SplitResults({ summary = false }: { summary?: boolean }) {
   const [round, setRound] = useState(0);
   const [detailName, setDetailName] = useState<string | null>(null);
@@ -124,18 +133,41 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
       route: "direct" | "proxy" | "unknown";
     }
   >();
+  const domesticExits = [
+    ...(domestic.data
+      ? [{ ...domestic.data, ...geoByIp.get(domestic.data.ip)?.data }]
+      : []),
+    ...rows.flatMap((row) =>
+      row.type === "domestic" && row.geo ? [row.geo] : [],
+    ),
+  ];
   for (const geo of exits) {
-    const references = [
-      ...(domestic.data ? [domestic.data.ip] : []),
-      ...rows.flatMap((row) =>
-        row.type === "domestic" && row.geo ? [row.geo.ip] : [],
-      ),
-    ].filter((ip) => ip.includes(":") === geo.ip.includes(":"));
-    const route = references.some((ip) => sameIp(ip, geo.ip))
-      ? "direct"
-      : references.length
-        ? "proxy"
-        : "unknown";
+    const v6 = geo.ip.includes(":");
+    const references = domesticExits.filter(
+      (ref) => ref.ip.includes(":") === v6,
+    );
+    // No same-protocol domestic exit (common for IPv6): compare the operator
+    // and country with the other protocol's domestic exit instead.
+    const crossReferences = domesticExits.filter(
+      (ref) => ref.ip.includes(":") !== v6,
+    );
+    const route: "direct" | "proxy" | "unknown" = references.length
+      ? references.some((ref) => sameIp(ref.ip, geo.ip))
+        ? "direct"
+        : "proxy"
+      : geo.asn != null &&
+          crossReferences.some(
+            (ref) => ref.asn != null && String(ref.asn) === String(geo.asn),
+          )
+        ? "direct"
+        : geo.country_code &&
+            crossReferences.some((ref) => ref.country_code) &&
+            crossReferences.every(
+              (ref) =>
+                !ref.country_code || ref.country_code !== geo.country_code,
+            )
+          ? "proxy"
+          : "unknown";
     const location = [geo.country_code ?? geo.country, geo.region, geo.city];
     const key = JSON.stringify([
       location.some(Boolean) ? location : geo.ip,
@@ -152,6 +184,11 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     group.items.push(...rows.filter((row) => row.geo?.ip === geo.ip));
     locationGroups.set(key, group);
   }
+  // IPv4 first, then IPv6.
+  for (const group of locationGroups.values())
+    group.addresses.sort(
+      (a, b) => Number(a.ip.includes(":")) - Number(b.ip.includes(":")),
+    );
   const exitRows = [...locationGroups].sort(
     ([, a], [, b]) => b.items.length - a.items.length,
   );
@@ -161,13 +198,20 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
   const Container = summary ? Card : "div";
   const Content = summary ? CardContent : "div";
   return (
-    <Container ref={container} className="mb-3">
+    <Container
+      ref={container}
+      // On the home page (summary) the dashboard grid owns the spacing.
+      className={summary ? undefined : "mb-3"}
+    >
       {summary && (
         <CardHeader>
-          <div className="row-between">
+          <div className="flex items-center justify-between gap-3">
             <CardTitle>{t("home.websiteEgressRouting")}</CardTitle>
             <UnderlineHover asChild>
-              <Link className="small muted" to="/network/connectivity">
+              <Link
+                className="text-[0.78rem] text-muted-foreground"
+                to="/network/connectivity"
+              >
                 {t("home.viewAll")}
               </Link>
             </UnderlineHover>
@@ -176,26 +220,28 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
       )}
       <Content>
         {summary ? (
-          <div className="egress-summary">
+          <div className="grid gap-1.5">
             {exitRows.map(([key, { geo, addresses, items, route }]) => (
               <button
                 type="button"
                 key={key}
-                className="egress-summary-row"
+                className="relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-3 overflow-hidden rounded-[12px] bg-muted/45 px-3 pt-2.5 pb-3 text-left transition-[background-color] duration-150 ease-[ease] hover:bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] focus-visible:bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] max-xs:grid-cols-[auto_minmax(0,1fr)_auto]"
                 onClick={() => {
                   setDetailName(null);
                   setDetailIp(key);
                 }}
               >
                 <CountryFlag code={geo.country_code} size="lg" />
-                <span className="egress-summary-main">
-                  <span className="egress-summary-location">
-                    <span className={`egress-route egress-route-${route}`}>
+                <span className="grid min-w-0 gap-0.5">
+                  <span className={summaryLineClass}>
+                    <span
+                      className={`shrink-0 rounded-[5px] px-1.5 py-0.5 text-[11px] ${routeClass[route]}`}
+                    >
                       {t(
                         `home.route${route === "direct" ? "Direct" : route === "proxy" ? "Proxy" : "Unknown"}`,
                       )}
                     </span>
-                    <span className="egress-summary-location-name">
+                    <span className="min-w-0 text-[13px] font-semibold wrap-anywhere">
                       {[
                         countryName(geo.country_code) ?? geo.country,
                         geo.city,
@@ -207,27 +253,45 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                         t("common.locationDetailsAreUnavailable")}
                     </span>
                   </span>
-                  <span className="egress-summary-addresses">
+                  <span className={summaryLineClass}>
                     {addresses.map((address) => (
-                      <span key={address.ip} className="egress-summary-address">
-                        <span className="muted">
+                      <span
+                        key={address.ip}
+                        className="min-w-0 text-[12px] wrap-anywhere"
+                      >
+                        <span className="text-muted-foreground">
                           {address.ip.includes(":") ? "IPv6" : "IPv4"}
                         </span>{" "}
-                        <IpText ip={address.ip} link={false} />
+                        <IpText
+                          ip={address.ip}
+                          link={false}
+                          className="font-semibold text-foreground"
+                        />
                       </span>
                     ))}
                   </span>
                 </span>
-                <span className="egress-summary-logos" aria-hidden="true">
+                <span className="flex pl-1.5 max-xs:hidden" aria-hidden="true">
                   {items.slice(0, 5).map((row) => (
-                    <SiteLogo key={row.name} src={row.icon} />
+                    <SiteLogo
+                      key={row.name}
+                      src={row.icon}
+                      className="-ml-1.5 size-[22px] rounded-[999px] bg-card p-0.5 shadow-[0_0_0_1.5px_var(--card)]"
+                    />
                   ))}
                 </span>
-                <span className="egress-summary-count">
-                  <strong>{items.length}</strong> {t("home.sites")}
+                <span className="text-[12px] whitespace-nowrap text-muted-foreground">
+                  <strong className="text-[20px] font-[650] text-foreground tabular-nums">
+                    {items.length}
+                  </strong>{" "}
+                  {t("home.sites")}
                 </span>
-                <span className="egress-summary-bar" aria-hidden="true">
+                <span
+                  className="absolute inset-x-0 top-auto bottom-0 h-[3px] bg-primary/8"
+                  aria-hidden="true"
+                >
                   <span
+                    className="block h-full rounded-[0_3px_3px_0] bg-primary/70 transition-[width] duration-400 ease-[ease]"
                     style={{
                       width: `${(items.length / Math.max(collected, 1)) * 100}%`,
                     }}
@@ -235,8 +299,8 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 </span>
               </button>
             ))}
-            <p className="home-note">{t("home.routeInferenceNote")}</p>
-            <p className="home-note">
+            <p className={homeNoteClass}>{t("home.routeInferenceNote")}</p>
+            <p className={homeNoteClass}>
               {pending ? (
                 <Pending>{t("home.checkingRoutedEgress")}</Pending>
               ) : (
@@ -250,11 +314,13 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
           </div>
         ) : (
           <>
-            <div className="split-results-heading">
+            <div className="mt-0 mb-2 flex items-center justify-between gap-3">
               <div className="min-w-0 flex items-baseline gap-2">
-                <h2>{t("home.websiteEgressRouting")}</h2>
+                <h2 className="m-0 text-[1.05rem] leading-[1.25] font-bold">
+                  {t("home.websiteEgressRouting")}
+                </h2>
                 {filter && (
-                  <span>
+                  <span className="min-w-0 overflow-hidden text-[0.75rem] text-ellipsis whitespace-nowrap text-muted-foreground">
                     {t(filter.kind === "site" ? "common.website" : "common.ip")}{" "}
                     · {filter.value}
                   </span>
@@ -349,7 +415,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 <Badge
                   key={row.name}
                   variant="secondary"
-                  className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground [&_.site-icon]:size-3.5"
+                  className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground"
                   asChild
                 >
                   <button type="button" onClick={() => setDetailName(row.name)}>

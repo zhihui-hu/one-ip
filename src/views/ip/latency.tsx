@@ -29,7 +29,7 @@ export function IpLatency({
             </Button>
             <ActionButton
               size="sm"
-              className="min-w-22 text-xs"
+              className="text-xs"
               variant="default"
               busy={busy}
               onClick={start}
@@ -64,7 +64,7 @@ export function IpLatency({
             return (
               <div
                 key={cc}
-                className="ip-latency-item"
+                className="flex min-w-0 flex-wrap items-center justify-between gap-x-1 gap-y-0.5 rounded-[6px] bg-muted px-1 py-[5px]"
                 title={
                   node
                     ? `${node.city} · ${node.preferredNetwork ?? ""} · AS${node.preferredAsn}${stats ? ` · ${t("common.packetLoss")} ${stats.loss}%` : ""}`
@@ -76,7 +76,7 @@ export function IpLatency({
                   <span className="truncate">{names[cc]}</span>
                 </div>
                 <div
-                  className="ip-latency-value"
+                  className="text-[12px] font-semibold whitespace-nowrap tabular-nums"
                   style={{
                     color:
                       latency == null
@@ -110,7 +110,7 @@ export function IpLatency({
                 </div>
                 {stats && stats.loss > 0 && (
                   <span
-                    className="ip-latency-loss text-[10px] text-destructive"
+                    className="ml-auto text-[10px] text-destructive"
                     title={t("common.packetLoss")}
                   >
                     <NumberTicker value={stats.loss} />%

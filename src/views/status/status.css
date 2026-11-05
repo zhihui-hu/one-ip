@@ -1,0 +1,6 @@
+@keyframes service-probing {
+  50% {
+    opacity: 0.3;
+    transform: scale(0.75);
+  }
+}
