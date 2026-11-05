@@ -5,7 +5,6 @@ import { SweepShine } from "@/components/ui/sweep-shine";
 import { t } from "@/i18n";
 import { updatePendingAtom } from "@/store/app-update";
 import { useAtom } from "jotai";
-import { X } from "lucide-react";
 
 export interface UpdateAvailableNoticeProps {
   open: boolean;
@@ -25,9 +24,9 @@ export function UpdateAvailableNotice({
   onUpdate,
   title = t("appUpdate.newVersionAvailable"),
   description = t("appUpdate.newVersionReadyUseAfterUpdating"),
-  updateLabel = t("appUpdate.update"),
+  updateLabel = t("appUpdate.updateNow"),
   updatingLabel = t("appUpdate.updating"),
-  closeLabel = t("appUpdate.dismissUpdateNotice"),
+  closeLabel = t("appUpdate.remindLater"),
   resetUpdatingAfterUpdate = false,
 }: UpdateAvailableNoticeProps) {
   const [updating, setUpdating] = useAtom(updatePendingAtom);
@@ -60,18 +59,28 @@ export function UpdateAvailableNotice({
         aria-label={title}
         className="relative animate-in fade-in slide-in-from-bottom-3 bg-card gap-0 rounded-xl border-0 px-3 py-3 shadow-md ring-1 ring-foreground/5 duration-300 motion-reduce:animate-none"
       >
-        <div className="relative pr-32">
+        <div className="grid gap-3">
           <div className="min-w-0">
             <p className="text-sm leading-5 font-semibold">{title}</p>
             <p className="text-muted-foreground mt-0.5 text-xs leading-4">
               {error ?? description}
             </p>
           </div>
-          <div className="absolute right-0 top-1/2 flex -translate-y-1/2 items-center gap-1">
+          <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               size="sm"
-              className="h-7 px-2.5 text-xs"
+              variant="outline"
+              className="h-8 text-xs"
+              onClick={() => onOpenChange(false)}
+              disabled={updating}
+            >
+              {closeLabel}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 text-xs"
               onClick={() => void handleUpdate()}
               disabled={updating}
               aria-busy={updating || undefined}
@@ -82,17 +91,6 @@ export function UpdateAvailableNotice({
               >
                 {updating ? updatingLabel : updateLabel}
               </SweepShine>
-            </Button>
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="ghost"
-              className="size-7 text-muted-foreground/60 hover:text-muted-foreground"
-              onClick={() => onOpenChange(false)}
-              disabled={updating}
-              aria-label={closeLabel}
-            >
-              <X aria-hidden="true" />
             </Button>
           </div>
         </div>

@@ -41,7 +41,6 @@
   "pageHelp.dismissPageHelp": "Dismiss page help",
   "appUpdate.yourNextUpdateIsReady": "Your next update is ready",
   "appUpdate.tryTheNewVersionWhenYouReReady": "Try the new version when you’re ready.",
-  "appUpdate.tryTheUpdate": "Try the update",
   "appUpdate.gettingItReady": "Getting it ready…",
   "common.refreshPage": "Refresh page",
   "appearance.switchToLightMode": "Switch to light mode",
@@ -55,9 +54,7 @@
   "common.close": "Close",
   "appUpdate.newVersionAvailable": "New version available",
   "appUpdate.newVersionReadyUseAfterUpdating": "The new version is ready to use after updating.",
-  "appUpdate.update": "Update",
   "appUpdate.updating": "Updating…",
-  "appUpdate.dismissUpdateNotice": "Dismiss update notice",
   "appUpdate.updateFailedPleaseRetry": "Update failed. Please retry.",
   "navigation.siteTitle": "IP Tools overview",
   "navigation.diagnostics": "Network diagnostics",
@@ -218,5 +215,7 @@
   "pageHelp.webrtcLeak": "Collects WebRTC ICE candidates and compares them with your HTTP egress to see whether your real IP is exposed.",
   "pageHelp.unlockSites": "Checks reachability, latency and routed egress for AI, streaming and popular regional sites.",
   "pageHelp.speedtest": "Measures download, upload and latency over Cloudflare's global edge. Traffic is used only after you click start.",
-  "home.globalPing": "Global Ping"
+  "home.globalPing": "Global Ping",
+  "appUpdate.updateNow": "Update now",
+  "appUpdate.remindLater": "Remind me later"
 }

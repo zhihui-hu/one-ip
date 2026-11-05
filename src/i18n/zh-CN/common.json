@@ -41,7 +41,6 @@
   "pageHelp.dismissPageHelp": "关闭功能说明",
   "appUpdate.yourNextUpdateIsReady": "新版本，等你来体验",
   "appUpdate.tryTheNewVersionWhenYouReReady": "准备好了，就来体验新版吧。",
-  "appUpdate.tryTheUpdate": "体验新版",
   "appUpdate.gettingItReady": "正在为你切换…",
   "common.refreshPage": "刷新页面",
   "appearance.switchToLightMode": "切换为浅色模式",
@@ -55,9 +54,7 @@
   "common.close": "关闭",
   "appUpdate.newVersionAvailable": "发现新版本",
   "appUpdate.newVersionReadyUseAfterUpdating": "新版本已经准备好，更新后即可使用。",
-  "appUpdate.update": "更新",
   "appUpdate.updating": "正在更新…",
-  "appUpdate.dismissUpdateNotice": "关闭更新提示",
   "appUpdate.updateFailedPleaseRetry": "更新失败，请重试。",
   "navigation.siteTitle": "IP 网络工具概览",
   "navigation.diagnostics": "网络诊断工具",
@@ -218,5 +215,7 @@
   "pageHelp.webrtcLeak": "通过 WebRTC 收集 ICE 候选地址，与 HTTP 出口对比，判断是否暴露了真实 IP。",
   "pageHelp.unlockSites": "检测 AI、流媒体及各地区常用网站的连通性、延迟与分流出口。",
   "pageHelp.speedtest": "通过 Cloudflare 全球边缘网络测试下载、上传速度与延迟。点击开始后才会消耗流量。",
-  "home.globalPing": "全球 Ping"
+  "home.globalPing": "全球 Ping",
+  "appUpdate.updateNow": "立即更新",
+  "appUpdate.remindLater": "稍后提醒"
 }
