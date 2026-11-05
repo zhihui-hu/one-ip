@@ -12,9 +12,6 @@ const env = {
   TURNSTILE_SITE_KEY: "public-sitekey",
   TURNSTILE_SECRET: "private-test-secret",
   TURNSTILE_HOSTNAMES: hostname,
-  RECAPTCHA_SITE_KEY: "public-google",
-  RECAPTCHA_SECRET: "private-google",
-  RECAPTCHA_HOSTNAMES: hostname,
 };
 async function withFetch(value, run) {
   const original = globalThis.fetch;
@@ -108,25 +105,13 @@ test("verification requires provider success, exact hostname and Turnstile actio
         true,
       ),
   );
-  await withFetch({ success: true, hostname, action: "browser_check", score: 0.9 }, async () =>
-    assert.equal(
-      (
-        await verifyChallenge(
-          { provider: "recaptcha", token: "token" },
-          env,
-          hostname,
-        )
-      ).success,
-      true,
-    ),
-  );
   await withFetch(
     { success: false, "error-codes": ["timeout-or-duplicate"] },
     async () =>
       assert.equal(
         (
           await verifyChallenge(
-            { provider: "recaptcha", token: "token" },
+            { provider: "turnstile", token: "token" },
             env,
             hostname,
           )
@@ -149,60 +134,26 @@ test("provider outage fails closed without exposing the upstream error", async (
     globalThis.fetch = original;
   }
 });
-test("Worker exposes config read-only and enforces origin and POST on verification", async () => {
+test("Worker exposes challenge config read-only and no standalone verify endpoint", async () => {
   const url = `https://${hostname}/api/browser/challenges`;
   assert.equal((await worker.fetch(new Request(url), env)).status, 200);
-  assert.equal(
-    (await worker.fetch(new Request(`${url}/verify`), env)).status,
-    405,
-  );
   assert.equal(
     (await worker.fetch(new Request(url, { method: "POST" }), env)).status,
     405,
   );
   assert.equal(
-    (
-      await worker.fetch(
-        new Request(`${url}/verify`, {
-          method: "POST",
-          headers: { Origin: "https://other.example.com" },
-        }),
-        env,
-      )
-    ).status,
-    403,
+    (await worker.fetch(new Request(`${url}/verify`), env)).status,
+    404,
   );
 });
 
 
 test("missing configuration keeps providers visible with actionable reasons", () => {
-  assert.equal(challengeConfig({}, hostname).length, 2);
+  assert.equal(challengeConfig({}, hostname).length, 1);
   assert.ok(challengeConfig({}, hostname).every((item) => !item.configured && item.reason.includes("Key")));
-  assert.deepEqual(challengeConfig({ ...env, TURNSTILE_SITE_KEY: "  " }, hostname).map((item) => item.id), ["turnstile", "recaptcha"]);
-  assert.deepEqual(challengeConfig({ ...env, RECAPTCHA_SITE_KEY: "" }, hostname).map((item) => item.id), ["turnstile", "recaptcha"]);
+  assert.deepEqual(challengeConfig({ ...env, TURNSTILE_SITE_KEY: "  " }, hostname).map((item) => item.id), ["turnstile"]);
   const invalid = challengeConfig({ ...env, TURNSTILE_SECRET: "" }, hostname);
-  assert.equal(invalid.length, 2);
+  assert.equal(invalid.length, 1);
   assert.equal(invalid[0].configured, false);
   assert.equal(invalid[0].sitekey, undefined);
-});
-
-test("reCAPTCHA v3 requires the expected action and a valid score meeting the threshold", async () => {
-  for (const fields of [
-    { action: "signup", score: 0.9 },
-    { action: "browser_check" },
-    { action: "browser_check", score: "0.9" },
-    { action: "browser_check", score: -1 },
-    { action: "browser_check", score: 1.1 },
-    { action: "browser_check", score: 0.49 },
-  ]) {
-    await withFetch({ success: true, hostname, ...fields }, async () => {
-      const result = await verifyChallenge({ provider: "recaptcha", token: "token" }, env, hostname);
-      assert.equal(result.success, false);
-    });
-  }
-  await withFetch({ success: true, hostname, action: "browser_check", score: 0.5 }, async () => {
-    const result = await verifyChallenge({ provider: "recaptcha", token: "token" }, env, hostname);
-    assert.equal(result.success, true);
-    assert.equal(result.score, 0.5);
-  });
 });

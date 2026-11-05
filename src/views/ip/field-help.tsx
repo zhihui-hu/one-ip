@@ -66,7 +66,7 @@ const definitions = new Map([
   ],
 ]);
 
-export function FieldHelp({ label }: { label: string }) {
+function FieldHelp({ label }: { label: string }) {
   const mobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const description = definitions.get(label);
@@ -174,7 +174,7 @@ export function IpFacts({ rows }: { rows: [string, ReactNode][] }) {
       }
       valueClassName={(label) =>
         cn(
-          "overflow-x-auto font-normal wrap-normal whitespace-nowrap [scrollbar-width:thin] *:max-w-full max-md:flex-1 max-md:overflow-x-visible max-md:text-[12px] max-md:leading-[1.6] max-md:wrap-anywhere max-md:whitespace-normal",
+          "overflow-x-auto font-normal wrap-break-word [scrollbar-width:thin] *:max-w-full max-md:flex-1 max-md:overflow-x-visible max-md:text-[12px] max-md:leading-[1.6] max-md:wrap-anywhere max-md:whitespace-normal",
           isCompact(label) &&
             "max-md:max-w-full max-md:flex-[0_1_auto] max-md:text-right max-md:[&_[data-ip-chip]]:px-[5px] max-md:[&_[data-ip-chip]]:py-0.5 max-md:[&_[data-ip-chip]]:text-[12px]",
         )

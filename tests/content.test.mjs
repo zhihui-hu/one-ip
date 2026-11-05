@@ -3,10 +3,9 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { test } from "node:test";
 import {
   activeNavigationRoute,
-  activeTool,
   navigationRoutes,
   legacyRoutes,
-  toolGroups,
+  pageTabs,
 } from "../src/layout/routes.ts";
 
 const json = (path) => JSON.parse(readFileSync(path, "utf8"));
@@ -24,21 +23,19 @@ test("removed DNS and news routes have no page source or navigation entries", ()
     assert.equal(existsSync(path), false, path);
   const app = readFileSync("src/App.tsx", "utf8");
   assert.doesNotMatch(app, /DnsPage|NewsPage|ArticlePage|articlePaths/);
-  assert.ok(navigationRoutes.every((route) => !/dns|news/.test(route.value)));
+  assert.ok(navigationRoutes.every((route) => !/dns|news/.test(route.path)));
 });
-test("animated navigation maps IP details and live status to their parent tools", () => {
+test("header navigation maps IP details and tabbed pages to their owner", () => {
   for (const route of navigationRoutes) {
-    assert.equal(activeNavigationRoute(route.value), route.value);
-    assert.equal(
-      activeNavigationRoute(route.value.replace(/\/$/, "") || "/"),
-      route.value,
-    );
+    assert.equal(activeNavigationRoute(route.path), route.path);
+    assert.equal(activeNavigationRoute(`${route.path}/`), route.path);
   }
-  assert.equal(activeNavigationRoute("/lookup/ip/1.1.1.1"), "/lookup/");
-  assert.equal(activeNavigationRoute("/ai/status/claude"), "/ai/");
-  assert.equal(activeNavigationRoute("/ai/status/openai"), "/ai/");
-  assert.equal(activeTool("/lookup/ip/1.1.1.1"), "/lookup/ip");
-  assert.equal(activeTool("/ai/status/claude"), "/ai/status");
+  assert.equal(activeNavigationRoute("/ip/1.1.1.1"), "");
+  assert.equal(activeNavigationRoute("/leak/webrtc"), "/leak");
+  assert.equal(activeNavigationRoute("/unlock/claude/"), "/unlock");
+  // Reachable pages outside the header highlight no link.
+  for (const path of ["/", "/ip", "/whois", "/ping", "/status", "/browser/checks"])
+    assert.equal(activeNavigationRoute(path), "", path);
   for (const path of [
     "/dns/",
     "/news/",
@@ -46,10 +43,13 @@ test("animated navigation maps IP details and live status to their parent tools"
     "/claude/identity.html",
     "/missing",
     "/query/missing",
-    "/network/ping/missing",
+    "/ping/missing",
     "/ai/gpt/missing",
+    "/leak/missing",
+    "/browser/challenges",
+    "/ai/grok",
   ])
-    assert.equal(activeNavigationRoute(path), "not-found");
+    assert.equal(activeNavigationRoute(path), "not-found", path);
 });
 test("site logos use HTTPS icon URLs rather than bundled files", () => {
   const sites = json("src/views/home/sites.json");
@@ -83,36 +83,44 @@ test("production assets exclude deleted content and backend source", () => {
   );
 });
 
-test("tool routes select their grouped navigation", () => {
+test("routes are at most two levels deep and removed tools are gone", () => {
+  assert.deepEqual(
+    navigationRoutes.map((route) => route.path),
+    ["/leak", "/unlock", "/speedtest"],
+  );
+  const tabs = Object.values(pageTabs).flat();
   for (const path of [
-    "/network/connectivity/",
-    "/network/cdn/",
-    "/network/dns/",
-    "/network/ping/",
+    ...navigationRoutes.map((route) => route.path),
+    ...tabs.map((tab) => tab.path),
   ])
-    assert.equal(activeNavigationRoute(path), "/network/");
-  assert.equal(activeNavigationRoute("/lookup/whois/"), "/lookup/");
-  assert.equal(activeNavigationRoute("/ai/claude/"), "/ai/");
-  assert.equal(navigationRoutes.length, 5);
+    assert.ok(path.split("/").filter(Boolean).length <= 2, path);
+  for (const path of [
+    "src/views/subdomains",
+    "src/views/cdn",
+    "src/views/browser/challenges.tsx",
+    "src/views/ai/index.tsx",
+    "worker/subdomains.js",
+  ])
+    assert.equal(existsSync(path), false, path);
 });
 
-test("all module links map to exactly one parent and legacy paths redirect to canonical destinations", () => {
-  const paths = Object.values(toolGroups)
+test("tabs map to one owner and legacy paths redirect to live pages", () => {
+  const paths = Object.values(pageTabs)
     .flat()
-    .map((item) => item.path);
+    .map((tab) => tab.path);
   assert.equal(new Set(paths).size, paths.length);
-  for (const [group, routes] of Object.entries(toolGroups))
-    for (const route of routes)
-      assert.equal(activeNavigationRoute(route.path), `/${group}/`);
+  for (const [owner, tabs] of Object.entries(pageTabs))
+    for (const tab of tabs)
+      assert.equal(activeNavigationRoute(tab.path), owner);
   for (const to of Object.values(legacyRoutes))
-    assert.notEqual(activeNavigationRoute(to), "not-found", to);
-  assert.equal(legacyRoutes["/network/webrtc"], "/browser/privacy");
-  assert.equal(legacyRoutes["/ai/gpt/status"], "/ai/status/openai");
-  // Pre-merge URLs keep working.
-  assert.equal(legacyRoutes["/network/ip/:ip"], "/lookup/ip");
-  assert.equal(legacyRoutes["/network/whois"], "/lookup/whois");
-  assert.equal(legacyRoutes["/network/subdomains"], "/lookup/subdomains");
-  assert.equal(legacyRoutes["/status"], "/ai/status");
+    assert.notEqual(activeNavigationRoute(to.split("?")[0]), "not-found", to);
+  assert.equal(legacyRoutes["/network/webrtc"], "/leak/webrtc");
+  assert.equal(legacyRoutes["/network/dns"], "/leak/dns");
+  assert.equal(legacyRoutes["/ai/claude"], "/unlock/claude");
+  assert.equal(legacyRoutes["/ai/gpt/status"], "/status?service=9");
+  assert.equal(legacyRoutes["/lookup/ip/:ip"], "/ip");
+  assert.equal(legacyRoutes["/network/connectivity"], "/unlock/sites");
+  assert.equal(legacyRoutes["/browser/automation"], "/browser/checks");
   for (const from of Object.keys(legacyRoutes))
     assert.equal(
       activeNavigationRoute(from.replace(":ip", "1.1.1.1")),

@@ -189,7 +189,6 @@ export async function measurePlatform(
   return result[target.url];
 }
 
-export const QUALITY_MAX_BYTES = 66_600_000;
 export async function measureQuality(
   ip: string,
   signal: AbortSignal,

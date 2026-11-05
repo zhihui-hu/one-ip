@@ -46,6 +46,9 @@ const chipToneClass: Record<ChipTone, string> = {
 };
 const perfectDossierClass =
   "relative isolate border border-[rgba(190,157,94,0.55)] bg-[radial-gradient(circle_at_86%_8%,rgba(226,185,106,0.16),transparent_28%),linear-gradient(118deg,#0b111c_0%,#181d2a_48%,#332a20_100%)] text-foreground shadow-[0_0_0_1px_rgba(117,99,72,0.85),0_0_0_3px_rgba(77,59,32,0.48),inset_0_0_0_1px_rgba(244,218,157,0.22),inset_0_0_0_3px_#1e2229,0_14px_36px_rgba(19,14,7,0.25)] [--border:#514837] [--card-foreground:#f3ecdf] [--card:#191d24] [--foreground:#f3ecdf] [--muted-foreground:#bbb3a4] [--muted:#242830] [--primary:#e3c68e] [--ring:#e3c68e] [&>:not([data-perfect-effects]):not(a)]:relative [&>:not([data-perfect-effects]):not(a)]:z-1";
+// Masonry columns: fact cards of uneven height pack tightly instead of leaving grid gaps.
+const factColumnsClass =
+  "columns-1 gap-x-2.5 md:columns-2 xl:columns-3 [&>*]:mb-2.5 [&>*]:break-inside-avoid [&>*:last-child]:mb-0 empty:hidden";
 const dossierHeadLineClass =
   "max-md:items-start max-md:text-[12px] max-md:leading-[1.6]";
 
@@ -254,7 +257,7 @@ export function IpDetails({
           inbound={inbound}
         />
       </Suspense>
-      <div className="grid grid-cols-2 gap-2.5 max-md:grid-cols-[1fr]">
+      <div className={factColumnsClass}>
         <ToolCard title={t("ip.networkAttributes")}>
           <IpFacts
             rows={[
@@ -320,128 +323,151 @@ export function IpDetails({
             ]}
           />
         </ToolCard>
-      </div>
-      <ToolCard title={t("ip.ipIntelligenceThreatIndicators")}>
-        <IpFacts
-          rows={[
-            [
-              t("ip.threatFlags"),
-              Array.isArray(d.intelligence?.threats)
-                ? threats.length
-                  ? chip(threats.join(" · "), "bad")
-                  : chip(t("ip.noApparentThreats"), "good")
-                : chip(t("common.unknown")),
-            ],
-            [t("ip.abuseLevel"), d.intelligence?.abuser_level],
-            [
-              t("ip.httpHoneypotBlacklist"),
-              d.intelligence?.rep_threat == null
-                ? chip(t("common.unknown"))
-                : JSON.stringify(d.intelligence.rep_threat),
-            ],
-            [
-              t("ip.vpnDetails"),
-              d.vpn_trace == null
-                ? "—"
-                : typeof d.vpn_trace === "string"
-                  ? d.vpn_trace
-                  : JSON.stringify(d.vpn_trace),
-            ],
-            [t("ip.accessAssessment"), d.ai_verdict?.label],
-            [
-              t("ip.assessmentConfidence"),
-              d.ai_verdict?.confidence == null ? (
-                "—"
-              ) : (
-                <span key="confidence">{number(d.ai_verdict.confidence)}%</span>
-              ),
-            ],
-            [t("ip.assessmentReasoning"), d.ai_verdict?.reasoning],
-          ]}
-        />
-      </ToolCard>
-      <ToolCard title={t("ip.locationSourceComparison")}>
-        {mobile ? (
-          data.sources.length ? (
-            <ul className="grid gap-2">
-              {data.sources.map((source, index) => (
-                <li
-                  key={`${source.source}-${index}`}
-                  className="min-w-0 rounded-[8px] bg-muted p-2.5"
-                >
-                  <span className="text-[11px] text-muted-foreground">
-                    {source.source}
-                  </span>
-                  <div className="mt-1 flex items-start gap-1.5 text-[13px] wrap-anywhere">
-                    <CountryFlag code={source.country_code} />
-                    <span>
-                      {[source.country, source.region, source.city]
-                        .filter(Boolean)
-                        .filter((value, i, all) => all.indexOf(value) === i)
-                        .join(" · ") || t("common.unknown")}
-                    </span>
-                  </div>
-                  {source.latitude != null && source.longitude != null && (
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      {t("ip.latitude")} {source.latitude} ·{" "}
-                      {t("ip.longitudeLabel")} {source.longitude}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              {t("ip.noLocationDataObtained")}
-            </p>
-          )
-        ) : (
-          <DataTable<Geo>
-            className="min-w-0 max-w-full rounded-none bg-transparent overflow-x-auto overscroll-x-contain [&_:is(th,td)]:px-3 [&_:is(th,td)]:py-2.5 [&_:is(th,td)]:whitespace-nowrap [&_:is(th,td)]:[word-break:normal] [&_:is(th,td)]:wrap-normal [&_table]:min-w-[620px] [&_table]:table-auto"
-            columns={[
-              { accessorKey: "source", header: t("common.dataSource") },
-              { accessorKey: "country", header: t("common.countryRegion") },
-              { accessorKey: "region", header: t("ip.region") },
-              {
-                accessorKey: "city",
-                header: t("ip.city"),
-                cell: ({ row }) => (
-                  <span
-                    className="block max-w-[220px] truncate"
-                    title={row.original.city}
-                  >
-                    {row.original.city ?? "—"}
+        <ToolCard title={t("ip.ipIntelligenceThreatIndicators")}>
+          <IpFacts
+            rows={[
+              [
+                t("ip.threatFlags"),
+                Array.isArray(d.intelligence?.threats)
+                  ? threats.length
+                    ? chip(threats.join(" · "), "bad")
+                    : chip(t("ip.noApparentThreats"), "good")
+                  : chip(t("common.unknown")),
+              ],
+              [t("ip.abuseLevel"), d.intelligence?.abuser_level],
+              [
+                t("ip.httpHoneypotBlacklist"),
+                d.intelligence?.rep_threat == null
+                  ? chip(t("common.unknown"))
+                  : JSON.stringify(d.intelligence.rep_threat),
+              ],
+              [
+                t("ip.vpnDetails"),
+                d.vpn_trace == null
+                  ? "—"
+                  : typeof d.vpn_trace === "string"
+                    ? d.vpn_trace
+                    : JSON.stringify(d.vpn_trace),
+              ],
+              [t("ip.accessAssessment"), d.ai_verdict?.label],
+              [
+                t("ip.assessmentConfidence"),
+                d.ai_verdict?.confidence == null ? (
+                  "—"
+                ) : (
+                  <span key="confidence">
+                    {number(d.ai_verdict.confidence)}%
                   </span>
                 ),
-              },
-              { accessorKey: "latitude", header: t("ip.latitude") },
-              { accessorKey: "longitude", header: t("ip.longitudeLabel") },
+              ],
+              [t("ip.assessmentReasoning"), d.ai_verdict?.reasoning],
             ]}
-            data={data.sources}
-            empty={t("ip.noLocationDataObtained")}
-          />
-        )}
-      </ToolCard>
-      <IpLatency measurement={inbound} />
-      <LocationMap
-        geo={
-          data.sources.find(
-            (source) =>
-              source.latitude != null &&
-              source.longitude != null &&
-              source.latitude === data.geo.latitude &&
-              source.longitude === data.geo.longitude,
-          ) ?? data.geo
-        }
-      />
-      {!!d.related_domains?.length && (
-        <ToolCard title={t("ip.relatedDomains")}>
-          <IpFacts
-            rows={d.related_domains.map((item) => [item.domain, item.via])}
           />
         </ToolCard>
-      )}
-      <div className="grid grid-cols-2 gap-2.5 max-md:grid-cols-[1fr]">
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <ToolCard title={t("ip.locationSourceComparison")}>
+          {mobile ? (
+            data.sources.length ? (
+              <ul className="grid gap-2">
+                {data.sources.map((source, index) => (
+                  <li
+                    key={`${source.source}-${index}`}
+                    className="min-w-0 rounded-[8px] bg-muted p-2.5"
+                  >
+                    <span className="text-[11px] text-muted-foreground">
+                      {source.source}
+                    </span>
+                    <div className="mt-1 flex items-start gap-1.5 text-[13px] wrap-anywhere">
+                      <CountryFlag code={source.country_code} />
+                      <span>
+                        {[source.country, source.region, source.city]
+                          .filter(Boolean)
+                          .filter((value, i, all) => all.indexOf(value) === i)
+                          .join(" · ") || t("common.unknown")}
+                      </span>
+                    </div>
+                    {source.latitude != null && source.longitude != null && (
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {t("ip.latitude")} {source.latitude} ·{" "}
+                        {t("ip.longitudeLabel")} {source.longitude}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {t("ip.noLocationDataObtained")}
+              </p>
+            )
+          ) : (
+            <DataTable<Geo>
+              className="min-w-0 max-w-full rounded-none bg-transparent overflow-x-auto overscroll-x-contain [&_:is(th,td)]:px-2.5 [&_:is(th,td)]:py-2 [&_:is(th,td)]:whitespace-nowrap [&_:is(th,td)]:[word-break:normal] [&_:is(th,td)]:wrap-normal [&_table]:table-auto"
+              columns={[
+                { accessorKey: "source", header: t("common.dataSource") },
+                {
+                  id: "location",
+                  header: t("common.location"),
+                  cell: ({ row }) => {
+                    const source = row.original;
+                    const place = [source.country, source.region, source.city]
+                      .filter(Boolean)
+                      .filter((value, i, all) => all.indexOf(value) === i)
+                      .join(" · ");
+                    return (
+                      <span
+                        className="flex min-w-0 items-center gap-1.5"
+                        title={place}
+                      >
+                        <CountryFlag code={source.country_code} />
+                        <span className="max-w-[200px] truncate">
+                          {place || t("common.unknown")}
+                        </span>
+                      </span>
+                    );
+                  },
+                },
+                {
+                  id: "coordinates",
+                  header: t("ip.coordinates"),
+                  cell: ({ row }) =>
+                    row.original.latitude != null &&
+                    row.original.longitude != null ? (
+                      <span className="text-muted-foreground tabular-nums">
+                        {row.original.latitude}, {row.original.longitude}
+                      </span>
+                    ) : (
+                      "—"
+                    ),
+                },
+              ]}
+              data={data.sources}
+              empty={t("ip.noLocationDataObtained")}
+            />
+          )}
+        </ToolCard>
+        <LocationMap
+          geo={
+            data.sources.find(
+              (source) =>
+                source.latitude != null &&
+                source.longitude != null &&
+                source.latitude === data.geo.latitude &&
+                source.longitude === data.geo.longitude,
+            ) ?? data.geo
+          }
+        />
+      </div>
+      <IpLatency measurement={inbound} />
+      <div className={factColumnsClass}>
+        {!!d.related_domains?.length && (
+          <ToolCard title={t("ip.relatedDomains")}>
+            <IpFacts
+              rows={d.related_domains.map((item) => [item.domain, item.via])}
+            />
+          </ToolCard>
+        )}
         {!!d.location_history?.length && (
           <ToolCard title={t("ip.locationHistory")}>
             <IpFacts
@@ -547,7 +573,7 @@ export function IpDetails({
       </Suspense>
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" asChild>
-          <Link to={`/network/ping/?host=${encodeURIComponent(d.ip)}`}>
+          <Link to={`/ping/?host=${encodeURIComponent(d.ip)}`}>
             {t("common.globalLatencyTest")}
           </Link>
         </Button>

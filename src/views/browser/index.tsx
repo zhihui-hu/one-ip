@@ -62,6 +62,7 @@ const columns: ColumnDef<Check>[] = [
 const titles: Record<string, string> = {
   environment: t("common.environment"),
   fingerprint: t("common.fingerprint"),
+  checks: t("common.environmentChecks"),
   consistency: t("common.consistency"),
   automation: t("common.automation"),
   privacy: t("common.permissionsPrivacy"),
@@ -360,10 +361,11 @@ export default function BrowserPage({ page }: { page: string }) {
       ) : page === "privacy" ? (
         <Privacy />
       ) : (
-        <>
-          <Checks page={page} />
-          {page === "consistency" && <DeepPanel />}
-        </>
+        <div className="flex flex-col gap-3">
+          <Checks page="consistency" />
+          <DeepPanel />
+          <Checks page="automation" />
+        </div>
       )}
     </div>
   );

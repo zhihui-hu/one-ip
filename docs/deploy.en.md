@@ -10,7 +10,7 @@
 4. Set the build command to `pnpm build` and the deploy command to `pnpm deploy`. Use Node.js 24 and pnpm 10.32.1. Keep the default root directory.
 5. Deploy and open the assigned `workers.dev` address. Use the Worker settings to connect a custom domain.
 
-The project uses **Cloudflare Workers with Static Assets**. The `/api/*` routes need a Worker. Core features require no application environment variables or API keys. See “Verification” for Turnstile and reCAPTCHA setup.
+The project uses **Cloudflare Workers with Static Assets**. The `/api/*` routes need a Worker. Core features require no application environment variables or API keys. See “Verification” for Turnstile setup.
 
 For map access from mainland China, configure `TIANDITU_TOKEN` under Worker → Settings → Variables and Secrets (or run `pnpm exec wrangler secret put TIANDITU_TOKEN`). Maps prefer Tianditu and fall back to OpenStreetMap when unavailable; without the token, OpenStreetMap remains the default.
 
@@ -79,12 +79,11 @@ Workers retains native rate limiting. Pages and Docker use per-instance memory l
 
 ## Verification (optional)
 
-Choose Turnstile or reCAPTCHA and provide a Site Key, Secret and allowed hostname. The verification entry appears when the configuration is complete and the hostname matches. Missing configuration keeps the entry hidden. New Ping measurements require configured Turnstile (managed or Non-interactive), alongside the existing five-request-per-minute limit. Each batch uses a fresh token; the server validates its `ping_start` action, hostname and validity, and rejects measurements when verification is unconfigured. WebMCP calls also show the verification dialog.
+Provide a Turnstile Site Key, Secret and allowed hostname. New Ping measurements require configured Turnstile (managed or Non-interactive), alongside the existing five-request-per-minute limit. Each batch uses a fresh token; the server validates its `ping_start` action, hostname and validity, and rejects measurements when verification is unconfigured. WebMCP calls also show the verification dialog.
 
-| Provider     | Settings                                                        |
-| ------------ | --------------------------------------------------------------- |
-| Turnstile    | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`, `TURNSTILE_HOSTNAMES` |
-| reCAPTCHA v3 | `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET`, `RECAPTCHA_HOSTNAMES` |
+| Provider  | Settings                                                        |
+| --------- | --------------------------------------------------------------- |
+| Turnstile | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET`, `TURNSTILE_HOSTNAMES` |
 
 For local development, copy the [configuration example](config/challenges.env.example) to `.dev.vars` in the project root, fill in your keys and restart. Edit the existing file if present. Use comma-separated hostnames such as `example.com`, and allow those hostnames in the provider's console.
 
@@ -96,8 +95,6 @@ node scripts/sync-worker-secrets.mjs production
 ```
 
 The script uploads non-empty values, preserves existing secrets and skips missing optional files. Add `--pages` for Pages; use `.env.docker` for Docker. Sensitive files are in the Git ignore list. Store secrets in server settings, not `VITE_*` variables. Check the `configured` fields at `/api/browser/challenges` to inspect the setup.
-
-reCAPTCHA uses v3 score-based keys. The backend validates hostname, the `browser_check` action and score, with a passing threshold of 0.5. The v2 checkbox and Enterprise assessment API are unsupported. Production rejects localhost.
 
 ## GitHub Actions deployment (optional)
 
@@ -135,6 +132,6 @@ References: [Syncing a fork](https://docs.github.com/en/pull-requests/how-tos/wo
 
 ## WebMCP
 
-In browsers with native `document.modelContext`, the site registers structured tools for IP, WHOIS and subdomain lookups, network and AI checks, service status, and browser diagnostics. `one_ip_catalog` lists supported sites, platforms and pages; `one_ip_open_page` opens interactive permission and human verification pages. Tools reuse the site's existing sources and request limits, and support cancellation. Browsers without WebMCP continue to use the normal UI.
+In browsers with native `document.modelContext`, the site registers structured tools for IP and WHOIS lookups, network and AI checks, service status, and browser diagnostics. `one_ip_catalog` lists supported sites, platforms and pages; `one_ip_open_page` opens the interactive permission page. Tools reuse the site's existing sources and request limits, and support cancellation. Browsers without WebMCP continue to use the normal UI.
 
 WebMCP is experimental. For local testing, enable `chrome://flags/#enable-webmcp-testing` and inspect `await document.modelContext.getTools()`. Live Chrome use requires the [WebMCP Origin Trial](https://developer.chrome.com/docs/ai/webmcp/) or later native support; this repository does not include an origin trial token. Tools are exposed only to the current same-origin page, with no cross-origin iframe delegation. Results can contain third-party content; users should decide whether to share browser fingerprints, egress IPs or WebRTC results with an agent.

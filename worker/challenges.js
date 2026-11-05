@@ -11,11 +11,6 @@ const providers = {
     name: "Cloudflare Turnstile · Non-interactive",
     url: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
   },
-  recaptcha: {
-    prefix: "RECAPTCHA",
-    name: "Google reCAPTCHA v3",
-    url: "https://www.google.com/recaptcha/api/siteverify",
-  },
 };
 function settings(env, id) {
   const provider = providers[id];
@@ -77,7 +72,7 @@ export async function verifyChallenge(
   if (
     typeof body.token !== "string" ||
     !body.token.trim() ||
-    body.token.length > (body.provider !== "recaptcha" ? 2048 : 8192)
+    body.token.length > 2048
   )
     throw new HttpError(400, "验证凭证无效，请重新验证");
   let result;
@@ -117,23 +112,7 @@ export async function verifyChallenge(
     return { success: false, message: "验证站点不匹配，请重新验证。" };
   if (result.action !== action)
     return { success: false, message: "验证场景不匹配，请重新验证。" };
-  if (body.provider === "recaptcha") {
-    if (
-      typeof result.score !== "number" ||
-      !Number.isFinite(result.score) ||
-      result.score < 0 ||
-      result.score > 1
-    )
-      return { success: false, message: "验证评分无效，请重新验证。" };
-    if (result.score < 0.5)
-      return {
-        success: false,
-        score: result.score,
-        message: "本次评分低于通过阈值。",
-      };
-  }
   return {
-    ...(body.provider === "recaptcha" ? { score: result.score } : {}),
     success: true,
     message: "本站本次验证通过",
     verifiedAt: new Date().toISOString(),

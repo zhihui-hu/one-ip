@@ -1,6 +1,5 @@
 import { probe } from "@/lib/network";
 
-export { probe };
 export interface ProbeResult {
   samples: number[];
   median: number | null;

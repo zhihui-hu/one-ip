@@ -214,12 +214,12 @@ export default function IpProfileGraph({
       <ToolCard title={t("common.ipProfile")}>
         <dl
           ref={fieldsRef}
-          className="max-md:grid max-md:grid-cols-2 max-md:gap-x-3 max-md:gap-y-0"
+          className="grid grid-cols-2 gap-2 max-md:gap-x-3 max-md:gap-y-0 lg:grid-cols-4"
         >
           {fields.map((field, index) => (
             <div
               key={field.label}
-              className="flex items-center justify-between gap-3 border-b border-border py-[3px] text-[12px] last:border-b-0 max-md:flex-col max-md:items-start max-md:gap-0 max-md:[&:nth-last-child(-n+2)]:border-b-0"
+              className="flex min-w-0 flex-col items-start gap-0.5 rounded-[10px] bg-muted/60 px-3 py-2 text-[12px] max-md:gap-0 max-md:rounded-none max-md:border-b max-md:border-border max-md:bg-transparent max-md:px-0 max-md:py-[3px] max-md:[&:nth-last-child(-n+2)]:border-b-0"
             >
               <dt className="flex items-center gap-1 text-muted-foreground">
                 <span>{field.label}</span>
@@ -232,7 +232,7 @@ export default function IpProfileGraph({
                   <Info size={14} aria-hidden="true" />
                 </button>
               </dt>
-              <dd className="flex min-w-0 flex-wrap items-center gap-1 text-right font-medium wrap-anywhere max-md:text-left max-md:text-[12px]">
+              <dd className="flex min-w-0 flex-wrap items-center gap-1 text-left font-medium wrap-anywhere max-md:text-[12px]">
                 <Badge variant={field.tone ?? "info"}>{field.value}</Badge>
                 {field.special && (
                   <Badge variant="outline">

@@ -30,11 +30,5 @@
   "policy.tsx.optionalCaptcha": "Optional CAPTCHA",
   "policy.tsx.whenConfiguredUsedCaptchaFeaturesLoadCloudflareTurnstile": "When configured and used, CAPTCHA features load Cloudflare Turnstile or Google reCAPTCHA. This site forwards verification tokens to the provider for validation. Those services also process device and network signals under their own policies.",
   "policy.tsx.retentionAndDeletion": "Retention and deletion",
-  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "Lookup history keeps the latest 10 successful queries and results per category in the current browser; clear site data to remove it. The server uses request IPs for rate limiting. Hosting configuration enables sampled logs; actual records and retention depend on deployment settings. Clearing browser data does not remove third-party or hosting records. Contact the author with the request time and feature for data questions.",
-  "policy.tsx.optionalPublicIpv4Ipv6DefaultsRequestEgressRequired": "Optional public IPv4 / IPv6; defaults to request egress. Required locally.",
-  "policy.tsx.jsonDefaultOrText": "json (default) or text.",
-  "policy.tsx.ipLocationIspAsnReputationScoreRiskFlags": "IP, location, ISP, ASN, reputation score and risk flags; unknown values are null.",
-  "policy.tsx.75100Good4574Moderate044": "75–100 good · 45–74 moderate · 0–44 poor; unknown when no score is available.",
-  "policy.tsx.jsonError400InvalidInput403CrossSite": "JSON error: 400 invalid input · 403 cross-site request · 405 wrong method · 429 rate limit · 502 upstream failure · 503 specify an IP.",
-  "policy.tsx.netCoffeeDataIpReputationReferenceBrowserCalls": "Net.Coffee data is for IP reputation reference. Browser calls must be same-origin. Retry later after rate limiting."
+  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "Lookup history keeps the latest 10 successful queries and results per category in the current browser; clear site data to remove it. The server uses request IPs for rate limiting. Hosting configuration enables sampled logs; actual records and retention depend on deployment settings. Clearing browser data does not remove third-party or hosting records. Contact the author with the request time and feature for data questions."
 }

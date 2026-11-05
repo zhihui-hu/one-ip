@@ -10,7 +10,7 @@
 4. 构建命令填 `pnpm build`，部署命令填 `pnpm deploy`。使用 Node.js 24 和 pnpm 10.32.1，根目录保持默认。
 5. 点击部署，完成后打开 `workers.dev` 地址。自定义域名在 Worker 设置中绑定。
 
-项目使用 **Cloudflare Workers + Static Assets**，`/api/*` 接口需要 Worker。基础功能无需应用环境变量或 API Key。Turnstile 和 reCAPTCHA 的配置见“验证体验”。
+项目使用 **Cloudflare Workers + Static Assets**，`/api/*` 接口需要 Worker。基础功能无需应用环境变量或 API Key。Turnstile 的配置见“验证体验”。
 
 国内网络访问地图时，建议在 Worker → Settings → Variables and Secrets 配置 `TIANDITU_TOKEN`（也可以用 `pnpm exec wrangler secret put TIANDITU_TOKEN`）。配置后地图优先使用天地图，失败时回退到 OpenStreetMap；未配置时保持 OpenStreetMap。
 
@@ -79,12 +79,11 @@ Workers 使用原生限流。Pages 和 Docker 使用每个实例内的内存限�
 
 ## 验证体验（可选）
 
-选择 Turnstile 或 reCAPTCHA，填写 Site Key、Secret 和允许访问的域名。配置齐全且访问域名匹配时，页面显示“验证体验”入口；缺少配置时隐藏入口。发起新的 Ping 测量必须配置 Turnstile（普通或 Non-interactive），保留每分钟 5 次限流；每个批次使用独立 token，服务端校验 `ping_start` action、hostname 和凭证有效性，未配置时拒绝发起测量。WebMCP 调用同样需要完成弹出的人机校验。
+为 Turnstile 填写 Site Key、Secret 和允许访问的域名。发起新的 Ping 测量必须配置 Turnstile（普通或 Non-interactive），保留每分钟 5 次限流；每个批次使用独立 token，服务端校验 `ping_start` action、hostname 和凭证有效性，未配置时拒绝发起测量。WebMCP 调用同样需要完成弹出的人机校验。
 
-| 提供商       | 配置项                                                          |
-| ------------ | --------------------------------------------------------------- |
-| Turnstile    | `TURNSTILE_SITE_KEY`、`TURNSTILE_SECRET`、`TURNSTILE_HOSTNAMES` |
-| reCAPTCHA v3 | `RECAPTCHA_SITE_KEY`、`RECAPTCHA_SECRET`、`RECAPTCHA_HOSTNAMES` |
+| 提供商    | 配置项                                                          |
+| --------- | --------------------------------------------------------------- |
+| Turnstile | `TURNSTILE_SITE_KEY`、`TURNSTILE_SECRET`、`TURNSTILE_HOSTNAMES` |
 
 本地开发：把[配置示例](config/challenges.env.example)复制到根目录 `.dev.vars`，填写密钥并重启。文件存在时编辑原文件。域名用逗号分隔，填写格式为 `example.com`，提供商控制台需要允许对应域名。
 
@@ -96,8 +95,6 @@ node scripts/sync-worker-secrets.mjs production
 ```
 
 脚本上传非空项，保留已有 Secret，跳过缺失的可选文件。Pages 加 `--pages`；Docker 使用 `.env.docker`。敏感文件在 Git 忽略列表中。Secret 应放在服务端配置中，不能放进 `VITE_*`。`/api/browser/challenges` 的 `configured` 字段用于检查配置结果。
-
-reCAPTCHA 使用 v3 评分型密钥。服务端校验 hostname、`browser_check` action 和 score，通过阈值为 0.5。v2 复选框和 Enterprise assessment 不在支持范围内，生产环境不接受 localhost。
 
 ## GitHub Actions 部署（可选）
 
@@ -135,13 +132,11 @@ Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布�
 
 ## WebMCP
 
-支持浏览器原生 WebMCP：在提供 `document.modelContext` 的浏览器中，页面会注册结构化工具，覆盖 IP / WHOIS / 子域名查询、网络与 AI 检测、服务状态及浏览器诊断。`one_ip_catalog` 可列出支持的站点、平台和页面；`one_ip_open_page` 可导航到需要用户操作的权限与人机校验页面。工具使用现有数据源和请求限制，支持取消；不支持 WebMCP 的浏览器仍可正常使用网页。
+支持浏览器原生 WebMCP：在提供 `document.modelContext` 的浏览器中，页面会注册结构化工具，覆盖 IP / WHOIS 查询、网络与 AI 检测、服务状态及浏览器诊断。`one_ip_catalog` 可列出支持的站点、平台和页面；`one_ip_open_page` 可导航到需要用户操作的权限页面。工具使用现有数据源和请求限制，支持取消；不支持 WebMCP 的浏览器仍可正常使用网页。
 
 WebMCP 仍处于实验阶段。本地可在 Chrome 开启 `chrome://flags/#enable-webmcp-testing` 后检查 `await document.modelContext.getTools()`；线上 Chrome 访问需要参与 [WebMCP Origin Trial](https://developer.chrome.com/docs/ai/webmcp/) 或等待浏览器正式支持。本站没有内置试验令牌。工具只在当前页面同源暴露，不向跨源 iframe 授权。查询结果可能包含第三方数据；浏览器指纹、出口 IP 和 WebRTC 结果可能涉及隐私，调用前应由用户决定是否交给代理处理。
 
 ## 人机校验与 Claude 环境对照
-
-人机校验打开页面后自动运行，展示 Turnstile 状态和 reCAPTCHA v3 分数（通过阈值 0.50）；单轮最长等待 45 秒，可重试。
 
 可选的第二个 Turnstile 组件使用 `TURNSTILE_NONINTERACTIVE_SITE_KEY`、`TURNSTILE_NONINTERACTIVE_SECRET` 和 `TURNSTILE_NONINTERACTIVE_HOSTNAMES`，并须在 Cloudflare 中选择 **Non-interactive** 模式；未配置时不显示。
 

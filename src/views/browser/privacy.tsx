@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { ToolCard, Facts } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
-import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
 import WebRtcPage from "@/views/webrtc";
 import { useQuery } from "@tanstack/react-query";
@@ -163,11 +161,6 @@ export default function Privacy() {
       <div className="mt-3">
         <WebRtcPage />
       </div>
-      <p className="mt-3 text-[0.78rem] text-muted-foreground">
-        <UnderlineHover asChild>
-          <Link to="/network/dns">{t("browser.viewDnsEgress")}</Link>
-        </UnderlineHover>
-      </p>
     </>
   );
 }

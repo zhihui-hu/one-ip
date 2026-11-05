@@ -1,7 +1,6 @@
-import { toolGroups } from "@/layout/routes";
+import { navigationRoutes, pageTabs } from "@/layout/routes";
 import { endpoint, trace } from "@/lib/network";
 import { aiPlatforms } from "@/views/ai/platforms";
-import { providers } from "@/views/cdn/providers";
 import egressSites from "@/views/home/sites.json";
 import connectivityTargets from "@/views/link/targets.json";
 import services from "@/views/status/services.json";
@@ -25,20 +24,12 @@ export type ModelContext = {
 const empty = { type: "object", properties: {} };
 const text = (description: string) => ({ type: "string", description });
 const pages = [
-  ...new Set([
-    "/",
-    "/lookup",
-    "/network",
-    "/browser",
-    "/ai",
-    "/ai/status/openai",
-    "/ai/status/claude",
-    "/terms",
-    "/privacy",
-    ...Object.values(toolGroups)
-      .flat()
-      .map((route) => route.path),
-  ]),
+  ...navigationRoutes.map((route) => route.path as string),
+  ...Object.values(pageTabs)
+    .flat()
+    .map((tab) => tab.path),
+  "/terms",
+  "/privacy",
 ];
 
 function required(input: Input, key: string, max = 253) {
@@ -86,7 +77,7 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
     {
       name: "one_ip_open_page",
       description:
-        "Open a One IP diagnostics page, including interactive browser permission and human verification pages.",
+        "Open a One IP diagnostics page, including the interactive browser permission page.",
       inputSchema: {
         type: "object",
         properties: {
@@ -194,26 +185,6 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
         const { lookupWhois } = await import("@/views/whois/api");
         signal.throwIfAborted();
         return lookupWhois(query, signal);
-      },
-    },
-    {
-      name: "one_ip_lookup_subdomains",
-      description:
-        "Look up subdomains of a public domain using passive DNS data with certificate transparency as a fallback. Sources may limit results; this is not a complete or current DNS inventory.",
-      inputSchema: {
-        type: "object",
-        properties: {
-          domain: text("Public domain, without a URL scheme or path"),
-        },
-        required: ["domain"],
-      },
-      annotations: { readOnlyHint: true, untrustedContentHint: true },
-      execute: async (input, { signal }) => {
-        const domain = required(input, "domain");
-        signal.throwIfAborted();
-        return endpoint(`/subdomains/${encodeURIComponent(domain)}`, {
-          signal,
-        });
       },
     },
     {
@@ -333,7 +304,10 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
           platform: platform.name,
           reachability,
           exit,
-          page: `/ai/${id}`,
+          page:
+            id === "gpt" || id === "claude"
+              ? `/unlock/${id}`
+              : `/status?service=${platform.statusId}`,
         };
       },
     },
@@ -380,42 +354,6 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
         const { inspectSite } = await import("@/views/home/api");
         signal.throwIfAborted();
         return { site: site.name, ...(await inspectSite(site, signal)) };
-      },
-    },
-    {
-      name: "one_ip_dns_exit",
-      description:
-        "Sample this browser's DNS resolver exits across One IP's fixed third-party sources. Makes 16 requests and returns observed resolvers.",
-      inputSchema: empty,
-      annotations: { readOnlyHint: true, untrustedContentHint: true },
-      execute: async (_, { signal }) => {
-        const { detectDnsExits } = await import("@/views/dns-exit/api");
-        signal.throwIfAborted();
-        return detectDnsExits(signal, () => {});
-      },
-    },
-    {
-      name: "one_ip_cdn_node",
-      description:
-        "Check which edge node of a supported CDN answers this browser, when response headers or trace are readable.",
-      inputSchema: {
-        type: "object",
-        properties: { provider: text("Exact CDN name from one_ip_catalog") },
-        required: ["provider"],
-      },
-      annotations: { readOnlyHint: true, untrustedContentHint: true },
-      execute: async (input, { signal }) => {
-        const provider = selected(
-          providers,
-          required(input, "provider", 80),
-          "CDN provider",
-        );
-        const { checkCdnProvider } = await import("@/views/cdn/api");
-        signal.throwIfAborted();
-        return {
-          provider: provider.name,
-          ...(await checkCdnProvider(provider, signal)),
-        };
       },
     },
     {
@@ -528,7 +466,7 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
     {
       name: "one_ip_catalog",
       description:
-        "List available One IP pages, service names, connectivity sites, CDN providers, and AI platforms before selecting a diagnostic tool.",
+        "List available One IP pages, service names, connectivity sites, and AI platforms before selecting a diagnostic tool.",
       inputSchema: empty,
       annotations: { readOnlyHint: true },
       execute: () => ({
@@ -536,7 +474,6 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
         services: services.map(({ id, name }) => ({ id, name })),
         connectivitySites: connectivityTargets.map(({ name }) => name),
         egressSites: egressSites.map(({ name }) => name),
-        cdnProviders: providers.map(({ name }) => name),
         aiPlatforms: aiPlatforms.map(({ id, name }) => ({ id, name })),
       }),
     },

@@ -6,46 +6,31 @@ import { t } from "@/i18n";
 import { X } from "lucide-react";
 
 const descriptions: Record<string, string> = {
+  "/leak/dns": t("pageHelp.dnsLeak"),
+  "/leak/webrtc": t("pageHelp.webrtcLeak"),
+  "/unlock/sites": t("pageHelp.unlockSites"),
+  "/speedtest": t("pageHelp.speedtest"),
   "/browser/environment": t(
     "pageHelp.viewSystemLanguageScreenHardwareInformationBrowserExposes",
   ),
   "/browser/fingerprint": t(
     "pageHelp.inspectBrowserFingerprintComponentsRepeatCheckCompareChanges",
   ),
-  "/browser/consistency": t(
+  "/browser/checks": t(
     "pageHelp.compareBrowserDeclarationsInformationOtherContextsDifferencesDo",
-  ),
-  "/browser/automation": t(
-    "pageHelp.checkObservableAutomationSignalsSignalsFoundDoesRule",
-  ),
-  "/browser/challenges": t(
-    "pageHelp.tryThirdPartyVerificationBrowserViewActualResult",
-  ),
-
-  "/lookup/whois": t("pageHelp.lookUpRegistrationDetailsDomainIpAsnIncluding"),
-  "/network/ping": t("pageHelp.testLatencyPacketLossRegionsAroundWorldCompare"),
-  "/network/cdn": t("pageHelp.seeWhichCdnNodesNetworkReachesWhereContent"),
-  "/network/dns": t(
-    "pageHelp.inspectDnsEgressAddressesLocationsUnderstandWhereDomain",
   ),
   "/browser/privacy": t(
     "pageHelp.reviewWebsitePermissionsBrowserCapabilitiesWebrtcEgressUnderstand",
   ),
-  "/ai/gpt": t(
+  "/whois": t("pageHelp.lookUpRegistrationDetailsDomainIpAsnIncluding"),
+  "/ping": t("pageHelp.testLatencyPacketLossRegionsAroundWorldCompare"),
+  "/unlock/gpt": t(
     "pageHelp.checkNetworkEgressConnectivityGptServicesTroubleshootAccess",
   ),
-  "/ai/claude": t(
+  "/unlock/claude": t(
     "pageHelp.checkNetworkEgressConnectivityClaudeServicesTroubleshootAccess",
   ),
-  "/ai/status": t(
-    "pageHelp.viewOfficialServiceHealthIncidentsSeeWhetherServices",
-  ),
-  "/ai/status/openai": t(
-    "pageHelp.viewOfficialOpenaiServiceHealthIncidentsIdentifyAffected",
-  ),
-  "/ai/status/claude": t(
-    "pageHelp.viewOfficialClaudeServiceHealthIncidentsIdentifyAffected",
-  ),
+  "/status": t("pageHelp.viewOfficialServiceHealthIncidentsSeeWhetherServices"),
 };
 
 function DismissibleHelp({ page, text }: { page: string; text: string }) {
@@ -89,10 +74,7 @@ function DismissibleHelp({ page, text }: { page: string; text: string }) {
 
 export function PageHelpAlert() {
   const { pathname } = useLocation();
-  const normalized = pathname.replace(/\/+$/, "") || "/";
-  const page = /^\/lookup\/ip\/[^/]+$/.test(normalized)
-    ? "/lookup/ip"
-    : normalized;
+  const page = pathname.replace(/\/+$/, "") || "/";
   const text = descriptions[page];
   return text ? <DismissibleHelp key={page} page={page} text={text} /> : null;
 }

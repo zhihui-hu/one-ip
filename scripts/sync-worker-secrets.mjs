@@ -21,9 +21,6 @@ const allowed = [
   "TURNSTILE_SITE_KEY",
   "TURNSTILE_SECRET",
   "TURNSTILE_HOSTNAMES",
-  "RECAPTCHA_SITE_KEY",
-  "RECAPTCHA_SECRET",
-  "RECAPTCHA_HOSTNAMES",
   "TIANDITU_TOKEN",
 ];
 if (Object.keys(values).some((key) => !allowed.includes(key)))

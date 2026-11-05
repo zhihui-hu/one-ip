@@ -16,19 +16,12 @@ function tools() {
   const require = (name) => {
     if (name === "@/layout/routes")
       return {
-        toolGroups: {
-          network: [{ path: "/network/ip" }],
-          browser: [{ path: "/browser/privacy" }],
-          ai: [],
-        },
+        navigationRoutes: [{ path: "/" }, { path: "/ip" }],
+        pageTabs: { "/browser": [{ path: "/browser/privacy" }] },
       };
     if (name === "@/views/ai/platforms")
       return {
         aiPlatforms: [{ id: "gpt", name: "ChatGPT", domain: "chatgpt.com" }],
-      };
-    if (name === "@/views/cdn/providers")
-      return {
-        providers: [{ name: "Cloudflare", url: "https://example.com" }],
       };
     if (name === "@/views/home/sites.json")
       return [
@@ -84,16 +77,16 @@ function tools() {
 test("WebMCP registers unique, complete tool definitions and restricts navigation", () => {
   const { calls, list, find } = tools();
   assert.equal(new Set(list.map((tool) => tool.name)).size, list.length);
-  assert.ok(list.length >= 15);
+  assert.ok(list.length >= 12);
   for (const tool of list) {
     assert.ok(tool.description);
     assert.equal(tool.inputSchema.type, "object");
     assert.equal(typeof tool.execute, "function");
   }
-  assert.deepEqual(find("one_ip_open_page").execute({ path: "/network/ip" }), {
-    page: "/network/ip",
+  assert.deepEqual(find("one_ip_open_page").execute({ path: "/ip" }), {
+    page: "/ip",
   });
-  assert.deepEqual(calls, [["navigate", "/network/ip"]]);
+  assert.deepEqual(calls, [["navigate", "/ip"]]);
   assert.throws(
     () => find("one_ip_open_page").execute({ path: "https://example.com" }),
     /Unknown One IP page/,

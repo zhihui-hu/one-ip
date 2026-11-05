@@ -101,6 +101,8 @@ export function DataTable<T extends RowData>({
           },
         );
       } else if (!reduced && offset && animateSorting) {
+        // An interrupted entry tween must not leave the row transparent.
+        gsap.set(row, { clearProps: "opacity" });
         gsap.fromTo(
           row,
           { y: offset },
@@ -112,7 +114,7 @@ export function DataTable<T extends RowData>({
             overwrite: true,
           },
         );
-      } else gsap.set(row, { clearProps: "transform" });
+      } else gsap.set(row, { clearProps: "opacity,transform" });
     }
     positions.current = next;
   }, [order, animateSorting, animateEntries]);

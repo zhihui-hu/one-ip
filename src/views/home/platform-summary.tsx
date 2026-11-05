@@ -117,7 +117,11 @@ export function AiAccessSummary() {
               >
                 <UnderlineHover asChild>
                   <Link
-                    to={`/ai/${platform.id}`}
+                    to={
+                      platform.id === "gpt" || platform.id === "claude"
+                        ? `/unlock/${platform.id}`
+                        : `/status?service=${platform.statusId}`
+                    }
                     className="flex min-w-0 items-center gap-2 text-foreground"
                     style={{ display: "flex" }}
                   >
@@ -180,10 +184,7 @@ export function PlatformSummary() {
         <div className="flex items-center justify-between gap-3">
           <CardTitle>{t("navigation.serviceStatus")}</CardTitle>
           <UnderlineHover asChild>
-            <Link
-              to="/ai/status"
-              className="text-[0.78rem] text-muted-foreground"
-            >
+            <Link to="/status" className="text-[0.78rem] text-muted-foreground">
               {t("home.allServicesLabel")}
             </Link>
           </UnderlineHover>
@@ -211,7 +212,7 @@ export function PlatformSummary() {
                 >
                   <UnderlineHover asChild>
                     <Link
-                      to={`/ai/status?service=${service.id}`}
+                      to={`/status?service=${service.id}`}
                       className="flex min-w-0 items-center gap-2 text-foreground"
                       style={{ display: "flex" }}
                     >

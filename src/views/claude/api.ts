@@ -11,9 +11,9 @@ export const claudeApi = {
     endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, { signal }),
 };
 
-export const claudeDomains = ["claude.ai", "claude.com"] as const;
+const claudeDomains = ["claude.ai", "claude.com"] as const;
 
-export function claudeExit(
+function claudeExit(
   domain: (typeof claudeDomains)[number],
   signal: AbortSignal,
 ) {

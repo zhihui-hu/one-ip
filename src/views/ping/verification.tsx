@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import type { ChallengeProvider } from "@/hooks/use-challenge-config";
 import { t } from "@/i18n";
 import { loadWidget, type WidgetApi } from "@/lib/challenge-widget";
 import { endpoint } from "@/lib/network";
@@ -10,10 +9,14 @@ export type PingVerification = {
   provider: "turnstile" | "turnstile-noninteractive";
   token: string;
 };
-type TurnstileProvider = ChallengeProvider & {
+type ChallengeProvider = {
   id: PingVerification["provider"];
-  sitekey: string;
+  name: string;
+  configured: boolean;
+  reason?: string;
+  sitekey?: string;
 };
+type TurnstileProvider = ChallengeProvider & { sitekey: string };
 
 function VerificationWidget({
   provider,
@@ -31,7 +34,7 @@ function VerificationWidget({
     let active = true;
     let api: WidgetApi | undefined;
     let widget: string | number | undefined;
-    void loadWidget(provider.id, provider.sitekey)
+    void loadWidget()
       .then((loaded) => {
         if (!active) return;
         api = loaded;
@@ -94,7 +97,7 @@ export async function getPingVerification(
     await endpoint<ChallengeProvider[]>("/browser/challenges", { signal })
   ).filter(
     (provider): provider is TurnstileProvider =>
-      provider.configured && !!provider.sitekey && provider.id !== "recaptcha",
+      provider.configured && !!provider.sitekey,
   );
   signal.throwIfAborted();
   const provider =

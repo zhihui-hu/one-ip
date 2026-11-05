@@ -13,8 +13,7 @@ import { lookupIp } from "@/views/ip/api";
 import { testConnectivity } from "@/views/link/api";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
-import { getGeo, getBrowserIp, getDomesticIp } from "./api";
-import { HomeShortcuts } from "./components/home-shortcuts";
+import { getGeo, getDomesticIp, getOverseasIp } from "./api";
 import { IpOverviewCard } from "./components/ip-overview-card";
 import { PagePortrait } from "./page-portrait";
 import { AiAccessSummary, PlatformSummary } from "./platform-summary";
@@ -97,13 +96,14 @@ export function HomePage() {
       },
       {
         queryKey: ["browser-ip", 4],
-        queryFn: ({ signal }: { signal: AbortSignal }) =>
-          getBrowserIp(4, signal),
+        queryFn: ({ signal }: { signal: AbortSignal }) => getOverseasIp(signal),
       },
     ].map((probe) => ({ retry: false, staleTime: 60_000, ...probe })),
   });
   const cards = probes.flatMap((query, index) => {
     // Only dedicated probes belong in the overview; per-site routes stay in SplitResults.
+    // Hide a probe once it has settled without an IP instead of showing an empty card.
+    if (!query.data && !query.isPending) return [];
     return [
       {
         query,
@@ -200,7 +200,7 @@ export function HomePage() {
                 <UnderlineHover asChild>
                   <Link
                     className="text-[0.78rem] whitespace-nowrap text-muted-foreground"
-                    to="/network/connectivity/"
+                    to="/unlock/sites"
                   >
                     {t("home.viewMore")}
                   </Link>
@@ -222,7 +222,6 @@ export function HomePage() {
       <SplitResults summary />
       <PlatformSummary />
       <PagePortrait />
-      <HomeShortcuts />
     </div>
   );
 }

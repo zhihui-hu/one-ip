@@ -6,52 +6,75 @@ import type { Geo } from "@/lib/types";
 
 export const getMyIp = (signal?: AbortSignal) =>
   endpoint<Geo>("/me", { signal });
+/** Location for an IP: browser-direct providers first, then the same-origin API. */
 export async function getGeo(
   ip: string,
   signal?: AbortSignal,
   timeoutMs = 3000,
 ): Promise<Geo> {
-  const timeout = AbortSignal.timeout(timeoutMs);
-  signal = signal ? AbortSignal.any([signal, timeout]) : timeout;
-  const options = () => ({ signal });
+  // Each provider gets its own budget so one blocked host (common from
+  // mainland China) cannot starve the others.
+  const scoped = () => {
+    const timeout = AbortSignal.timeout(timeoutMs);
+    return signal ? AbortSignal.any([signal, timeout]) : timeout;
+  };
   try {
-    const data = await request<Geo>(
-      `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
-      options(),
-    );
-    if (!sameIp(data?.ip, ip) || (!data.country && !data.isp))
-      throw new Error(t("home.incompleteLocationInformation"));
-    return { ...data, ip, source: "ip.sb" };
+    return await Promise.any([
+      geoFromIpSb(ip, scoped()),
+      geoFromIpWhoIs(ip, scoped()),
+    ]);
   } catch {
     signal?.throwIfAborted();
-    const data = await request<{
-      ip?: string;
-      success: boolean;
-      country?: string;
-      country_code?: string;
-      region?: string;
-      city?: string;
-      connection?: { isp?: string; asn?: number };
-      latitude?: number;
-      longitude?: number;
-      timezone?: { id?: string };
-    }>(`https://ipwho.is/${encodeURIComponent(ip)}`, options());
-    if (data?.success !== true || !sameIp(data.ip, ip))
-      throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
-    return {
-      ip,
-      country: data.country,
-      country_code: data.country_code,
-      region: data.region,
-      city: data.city,
-      isp: data.connection?.isp,
-      asn: data.connection?.asn,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      timezone: data.timezone?.id,
-      source: "ipwho.is",
-    };
   }
+  try {
+    const data = await endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, {
+      signal: scoped(),
+    });
+    if (!sameIp(data?.ip, ip) || (!data.country && !data.isp))
+      throw new Error(t("home.incompleteLocationInformation"));
+    return { ...data, ip };
+  } catch {
+    signal?.throwIfAborted();
+    throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
+  }
+}
+async function geoFromIpSb(ip: string, signal: AbortSignal): Promise<Geo> {
+  const data = await request<Geo>(
+    `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
+    { signal },
+  );
+  if (!sameIp(data?.ip, ip) || (!data.country && !data.isp))
+    throw new Error(t("home.incompleteLocationInformation"));
+  return { ...data, ip, source: "ip.sb" };
+}
+async function geoFromIpWhoIs(ip: string, signal: AbortSignal): Promise<Geo> {
+  const data = await request<{
+    ip?: string;
+    success: boolean;
+    country?: string;
+    country_code?: string;
+    region?: string;
+    city?: string;
+    connection?: { isp?: string; asn?: number };
+    latitude?: number;
+    longitude?: number;
+    timezone?: { id?: string };
+  }>(`https://ipwho.is/${encodeURIComponent(ip)}`, { signal });
+  if (data?.success !== true || !sameIp(data.ip, ip))
+    throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
+  return {
+    ip,
+    country: data.country,
+    country_code: data.country_code,
+    region: data.region,
+    city: data.city,
+    isp: data.connection?.isp,
+    asn: data.connection?.asn,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    timezone: data.timezone?.id,
+    source: "ipwho.is",
+  };
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   const timeout = AbortSignal.timeout(3000);
@@ -138,10 +161,7 @@ export async function inspectSite(
   }
 }
 
-export async function detectSite(
-  site: Site,
-  signal?: AbortSignal,
-): Promise<Geo> {
+async function detectSite(site: Site, signal?: AbortSignal): Promise<Geo> {
   if (site.method === "unsupported")
     throw new Error(
       localizeCatalogItem(site).note ?? t("home.noReadableEgressIpObtained"),
@@ -193,6 +213,41 @@ export async function detectSite(
     geo = { ip: address, source: site.name };
   }
   return geo;
+}
+
+/**
+ * IP seen by overseas sites. ipify alone is often slow or blocked from
+ * mainland China (or sent direct by split rules), which used to hide the
+ * overseas card even though the proxy worked. Cloudflare traces on overseas
+ * sites act as fallbacks; sources run in parallel and the earliest source in
+ * this list that answers wins, so the result stays stable between runs.
+ */
+export async function getOverseasIp(signal?: AbortSignal): Promise<Geo> {
+  // The card is labelled IPv4, so dual-stack traces must answer over IPv4;
+  // 1.1.1.1 is IPv4-only and comes last because rules often send it direct.
+  const ipv4Trace = async (domain: string) => {
+    const geo = await trace(domain, signal);
+    if (geo.ip.includes(":")) throw new Error(t("home.noValidIpObtained"));
+    return geo;
+  };
+  const attempts: Promise<Geo>[] = [
+    getBrowserIp(4, signal),
+    ipv4Trace("chatgpt.com"),
+    ipv4Trace("www.cloudflare.com"),
+    ipv4Trace("1.1.1.1"),
+  ];
+  // Settle every attempt so later rejections are never unhandled.
+  attempts.forEach((attempt) => attempt.catch(() => undefined));
+  let lastError: unknown;
+  for (const attempt of attempts) {
+    try {
+      return await attempt;
+    } catch (error) {
+      signal?.throwIfAborted();
+      lastError = error;
+    }
+  }
+  throw lastError;
 }
 
 export async function getBrowserIp(
