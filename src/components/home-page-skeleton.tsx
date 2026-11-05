@@ -71,13 +71,15 @@ export function HomePageSkeleton() {
       <div className="home-toolbar">
         <Skeleton className="h-5 w-24" />
         <div className="home-toolbar-actions">
-          <Skeleton className="home-ip-search h-8" />
-          <Skeleton className="h-8 w-28 shrink-0" />
+          <Skeleton className="size-8 shrink-0" />
         </div>
       </div>
       <div className="home-overview home-ip-overview">
         <OverviewCard />
         <OverviewCard />
+      </div>
+      <div className="home-network-overview">
+        <SectionSkeleton rows={4} />
         <ConnectivitySkeleton />
       </div>
       <SectionSkeleton rows={4} />

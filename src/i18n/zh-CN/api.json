@@ -28,6 +28,7 @@
   "api.verificationServiceConfiguredSite": "此验证服务尚未在当前站点配置",
   "api.invalidVerificationTokenPleaseVerifyAgain": "验证凭证无效，请重新验证",
   "api.verificationServiceUnavailablePleaseRetryLater": "验证服务暂时不可用，请稍后重试",
+  "api.invalidVerificationSecretCheckConfiguration": "验证服务的私密密钥（Secret）无效，请站点管理员检查配置，注意区分字母 O 和数字 0。",
   "api.verificationFailedTokenExpiredPleaseVerifyAgain": "验证未通过或凭证已过期，请重新验证。",
   "api.verificationHostnameMismatchPleaseVerifyAgain": "验证站点不匹配，请重新验证。",
   "api.verificationActionMismatchPleaseVerifyAgain": "验证场景不匹配，请重新验证。",

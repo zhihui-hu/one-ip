@@ -1,11 +1,19 @@
 import { useEffect, type PropsWithChildren } from "react";
+import { HttpRequestError } from "@/lib/network";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       networkMode: "always",
-      retry: 1,
+      retry: (failureCount, error) =>
+        failureCount < 1 &&
+        error.name !== "AbortError" &&
+        !(
+          error instanceof HttpRequestError &&
+          error.status >= 400 &&
+          error.status < 500
+        ),
       refetchOnWindowFocus: false,
     },
   },

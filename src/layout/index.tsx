@@ -2,11 +2,12 @@ import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AuthorContact } from "@/components/author-contact";
 import { HomePageSkeleton } from "@/components/home-page-skeleton";
+import { IpSearch } from "@/components/ip-search";
 import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
 import { ShareSite } from "@/components/share-site";
 import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
-import { Pending } from "@/components/toolkit";
+import { Pending, PrivacyToggle } from "@/components/toolkit";
 import { AnimatedSegmentedTabs } from "@/components/ui/animated-segmented-tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UnderlineHover } from "@/components/underline-hover";
@@ -114,10 +115,12 @@ export function AppLayout() {
           >
             <img src="/icon.svg" width="24" height="24" alt="" />
           </Link>
-          <div className="flex items-center gap-1">
-            <ShareSite />
+          <div className="header-actions flex items-center gap-1">
+            {mobile && <IpSearch />}
+            <PrivacyToggle iconOnly />
             <LanguageSelect />
             <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
+            <ShareSite />
           </div>
         </header>
         <AnimatedSegmentedTabs
@@ -159,10 +162,12 @@ export function AppLayout() {
               ) : (
                 <DesktopNavigation activeRoute={activeRoute} />
               )}
-              <div className="desktop-preferences flex items-center gap-1">
-                <ShareSite />
+              <div className="header-actions desktop-preferences flex items-center gap-1">
+                {!mobile && <IpSearch />}
+                <PrivacyToggle iconOnly />
                 <LanguageSelect />
                 <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
+                <ShareSite />
               </div>
             </nav>
           )}
@@ -187,7 +192,7 @@ export function AppLayout() {
                   items={menus[activeRoute]!}
                 />
               )}
-              <RouteErrorBoundary key={activeRoute}>
+              <RouteErrorBoundary key={pathname}>
                 <Suspense
                   fallback={
                     activeRoute === "/" ? (
@@ -245,7 +250,9 @@ export function AppLayout() {
           </UnderlineHover>{" "}
           ·{" "}
           <UnderlineHover asChild>
-            <a href="https://ipbot.net">IPBot</a>
+            <a href="https://ipbot.net">
+              {t("navigation.commercialProjectExample")}
+            </a>
           </UnderlineHover>
         </footer>
       </div>

@@ -28,6 +28,7 @@
   "api.verificationServiceConfiguredSite": "This verification service is not configured on this site",
   "api.invalidVerificationTokenPleaseVerifyAgain": "Invalid verification token. Please verify again",
   "api.verificationServiceUnavailablePleaseRetryLater": "Verification service unavailable. Please retry later",
+  "api.invalidVerificationSecretCheckConfiguration": "The verification service's secret key is invalid. The site administrator should check the configuration, especially the letter O and the digit 0.",
   "api.verificationFailedTokenExpiredPleaseVerifyAgain": "Verification failed or the token expired. Please verify again.",
   "api.verificationHostnameMismatchPleaseVerifyAgain": "Verification hostname mismatch. Please verify again.",
   "api.verificationActionMismatchPleaseVerifyAgain": "Verification action mismatch. Please verify again.",

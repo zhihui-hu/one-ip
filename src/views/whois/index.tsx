@@ -36,6 +36,15 @@ export default function WhoisPage() {
     retry: false,
   });
   const data = query.data?.data;
+  const lookup = (value: string) => {
+    if (value === q) {
+      if (!query.isFetching) void query.refetch();
+      return;
+    }
+    const next = new URLSearchParams(params);
+    next.set("q", value);
+    setParams(next);
+  };
   return (
     <div className="lookup-page">
       <div className="lookup-search-card">
@@ -45,9 +54,7 @@ export default function WhoisPage() {
           value={q}
           placeholder={t("whois.enterADomainIpAddressOrAsNumber")}
           busy={query.isFetching}
-          onSubmit={(value) =>
-            value === q ? void query.refetch() : setParams({ q: value })
-          }
+          onSubmit={lookup}
         />
       </div>
       <Card className="mt-3">
@@ -66,7 +73,7 @@ export default function WhoisPage() {
                 <button
                   type="button"
                   className="cursor-pointer rounded-md px-2 py-1 h-auto hover:bg-accent"
-                  onClick={() => setParams({ q: value })}
+                  onClick={() => lookup(value)}
                 >
                   {value}
                 </button>

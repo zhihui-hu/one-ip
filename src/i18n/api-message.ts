@@ -18,6 +18,7 @@ const apiMessageKeys = [
   "api.verificationServiceConfiguredSite",
   "api.invalidVerificationTokenPleaseVerifyAgain",
   "api.verificationServiceUnavailablePleaseRetryLater",
+  "api.invalidVerificationSecretCheckConfiguration",
   "api.verificationFailedTokenExpiredPleaseVerifyAgain",
   "api.verificationHostnameMismatchPleaseVerifyAgain",
   "api.verificationActionMismatchPleaseVerifyAgain",

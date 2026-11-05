@@ -1,3 +1,4 @@
+import { normalizeIp } from "@/lib/ip-address";
 import { endpoint, trace } from "@/lib/network";
 import type { Geo } from "@/lib/types";
 import { getDomesticIp } from "@/views/home/api";
@@ -20,8 +21,8 @@ export function claudeExit(
 }
 
 export function compareExits(left?: string, right?: string) {
-  if (!left || !right) return "unknown";
-  const normalize = (ip: string) =>
-    ip.includes(":") ? new URL(`https://[${ip}]/`).hostname : ip;
-  return normalize(left) === normalize(right) ? "same" : "different";
+  const leftIp = normalizeIp(left);
+  const rightIp = normalizeIp(right);
+  if (!leftIp || !rightIp) return "unknown";
+  return leftIp === rightIp ? "same" : "different";
 }

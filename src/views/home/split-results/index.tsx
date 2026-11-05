@@ -9,10 +9,11 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { UnderlineHover } from "@/components/underline-hover";
 import { t } from "@/i18n";
 import { countryName } from "@/lib/country";
+import { sameIp } from "@/lib/ip-address";
 import { useQueries } from "@tanstack/react-query";
 import { type Row, SiteEgressTable } from "./site-egress-table";
 import { sites } from "./sites";
-import { getGeo, inspectSite } from "../api";
+import { getDomesticIp, getGeo, inspectSite } from "../api";
 import { matchesSiteCategory } from "../category-status";
 import { ExitGroups, type SiteFilter } from "../exit-groups";
 
@@ -37,6 +38,17 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     observer.observe(container.current);
     return () => observer.disconnect();
   }, [summary]);
+  const [domestic] = useQueries({
+    queries: [
+      {
+        queryKey: ["home-domestic-ip", 3],
+        queryFn: ({ signal }: { signal: AbortSignal }) => getDomesticIp(signal),
+        enabled: visibleSites.size > 0,
+        staleTime: 60_000,
+        retry: false,
+      },
+    ],
+  });
   const inspectionQueries = useQueries({
     queries: sites.map((site) => ({
       queryKey: ["split", site.name, round],
@@ -103,12 +115,47 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
     ).values(),
   ];
   const collected = rows.filter((row) => row.geo).length;
-  const exitRows = exits
-    .map((geo) => ({
+  const locationGroups = new Map<
+    string,
+    {
+      geo: NonNullable<Row["geo"]>;
+      addresses: NonNullable<Row["geo"]>[];
+      items: Row[];
+      route: "direct" | "proxy" | "unknown";
+    }
+  >();
+  for (const geo of exits) {
+    const references = [
+      ...(domestic.data ? [domestic.data.ip] : []),
+      ...rows.flatMap((row) =>
+        row.type === "domestic" && row.geo ? [row.geo.ip] : [],
+      ),
+    ].filter((ip) => ip.includes(":") === geo.ip.includes(":"));
+    const route = references.some((ip) => sameIp(ip, geo.ip))
+      ? "direct"
+      : references.length
+        ? "proxy"
+        : "unknown";
+    const location = [geo.country_code ?? geo.country, geo.region, geo.city];
+    const key = JSON.stringify([
+      location.some(Boolean) ? location : geo.ip,
+      geo.asn ?? geo.isp ?? geo.ip,
+      route,
+    ]);
+    const group = locationGroups.get(key) ?? {
       geo,
-      items: rows.filter((row) => row.geo?.ip === geo.ip),
-    }))
-    .sort((a, b) => b.items.length - a.items.length);
+      addresses: [],
+      items: [],
+      route,
+    };
+    group.addresses.push(geo);
+    group.items.push(...rows.filter((row) => row.geo?.ip === geo.ip));
+    locationGroups.set(key, group);
+  }
+  const exitRows = [...locationGroups].sort(
+    ([, a], [, b]) => b.items.length - a.items.length,
+  );
+  const selectedGroup = detailIp ? locationGroups.get(detailIp) : undefined;
   const detail = rows.find((row) => row.name === detailName);
   const pending = inspectionQueries.some((query) => query.isFetching);
   const Container = summary ? Card : "div";
@@ -130,30 +177,45 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
       <Content>
         {summary ? (
           <div className="egress-summary">
-            {exitRows.map(({ geo, items }) => (
+            {exitRows.map(([key, { geo, addresses, items, route }]) => (
               <button
                 type="button"
-                key={geo.ip}
+                key={key}
                 className="egress-summary-row"
                 onClick={() => {
                   setDetailName(null);
-                  setDetailIp(geo.ip);
+                  setDetailIp(key);
                 }}
               >
                 <CountryFlag code={geo.country_code} size="lg" />
                 <span className="egress-summary-main">
-                  <span className="egress-summary-ip">
-                    <IpText ip={geo.ip} link={false} />
+                  <span className="egress-summary-location">
+                    <span className={`egress-route egress-route-${route}`}>
+                      {t(
+                        `home.route${route === "direct" ? "Direct" : route === "proxy" ? "Proxy" : "Unknown"}`,
+                      )}
+                    </span>
+                    <span className="egress-summary-location-name">
+                      {[
+                        countryName(geo.country_code) ?? geo.country,
+                        geo.city,
+                        geo.isp,
+                      ]
+                        .filter(Boolean)
+                        .filter((item, i, all) => all.indexOf(item) === i)
+                        .join(" · ") ||
+                        t("common.locationDetailsAreUnavailable")}
+                    </span>
                   </span>
-                  <span className="egress-summary-geo">
-                    {[
-                      countryName(geo.country_code) ?? geo.country,
-                      geo.city,
-                      geo.isp,
-                    ]
-                      .filter(Boolean)
-                      .filter((item, i, all) => all.indexOf(item) === i)
-                      .join(" · ") || t("common.locationDetailsAreUnavailable")}
+                  <span className="egress-summary-addresses">
+                    {addresses.map((address) => (
+                      <span key={address.ip} className="egress-summary-address">
+                        <span className="muted">
+                          {address.ip.includes(":") ? "IPv6" : "IPv4"}
+                        </span>{" "}
+                        <IpText ip={address.ip} link={false} />
+                      </span>
+                    ))}
                   </span>
                 </span>
                 <span className="egress-summary-logos" aria-hidden="true">
@@ -173,6 +235,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                 </span>
               </button>
             ))}
+            <p className="home-note">{t("home.routeInferenceNote")}</p>
             <p className="home-note">
               {pending ? (
                 <Pending>{t("home.checkingRoutedEgress")}</Pending>
@@ -276,26 +339,25 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
           </div>
         ) : (
           <div className="space-y-3">
-            <IpText ip={detailIp ?? undefined} />
+            {selectedGroup?.addresses.map((geo) => (
+              <div key={geo.ip}>
+                <IpText ip={geo.ip} />
+              </div>
+            ))}
             <div className="flex flex-wrap gap-2">
-              {rows
-                .filter((row) => row.geo?.ip === detailIp)
-                .map((row) => (
-                  <Badge
-                    key={row.name}
-                    variant="secondary"
-                    className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground [&_.site-icon]:size-3.5"
-                    asChild
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setDetailName(row.name)}
-                    >
-                      <SiteLogo src={row.icon} />
-                      <span className="min-w-0 truncate">{row.name}</span>
-                    </button>
-                  </Badge>
-                ))}
+              {(selectedGroup?.items ?? []).map((row) => (
+                <Badge
+                  key={row.name}
+                  variant="secondary"
+                  className="h-auto max-w-full gap-1.5 px-2.5 py-1.5 hover:bg-accent hover:text-accent-foreground [&_.site-icon]:size-3.5"
+                  asChild
+                >
+                  <button type="button" onClick={() => setDetailName(row.name)}>
+                    <SiteLogo src={row.icon} />
+                    <span className="min-w-0 truncate">{row.name}</span>
+                  </button>
+                </Badge>
+              ))}
             </div>
           </div>
         )}

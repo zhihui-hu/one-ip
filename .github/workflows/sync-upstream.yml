@@ -42,5 +42,5 @@ jobs:
           after=$(gh api "repos/$REPO/commits/$branch" --jq '.sha')
           if [ "$before" != "$after" ] && [ "$ENABLE_CF_DEPLOY" = 'true' ]; then
             # GITHUB_TOKEN pushes do not trigger push workflows. Dispatch explicitly.
-            gh workflow run pages.yml --repo "$REPO" --ref "$branch"
+            gh workflow run pages.yml --repo "$REPO" --ref "$branch" -f source_branch="$branch"
           fi
