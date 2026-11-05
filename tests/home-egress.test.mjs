@@ -33,6 +33,16 @@ function render(primary, split, client = {}, capture = () => {}) {
   capture(tree);
   return JSON.stringify(tree);
 }
+function findCards(node) {
+  if (!node || typeof node !== "object") return;
+  const children = node.props?.children;
+  if (Array.isArray(children) && children.length && children.every((child) => child?.props && "label" in child.props))
+    return children;
+  for (const child of Array.isArray(children) ? children : [children]) {
+    const cards = findCards(child);
+    if (cards) return cards;
+  }
+}
 const failed = { isPending: false, isError: true };
 const ipv4 = { ip: "192.0.2.1" };
 const ipv6 = { ip: "2001:db8::1" };
@@ -49,7 +59,7 @@ test("domestic egress comes first and external IPv4 remains separate", () => {
 test("matching domestic and external IPv4 keeps both probe cards", () => {
   let tree;
   render([{ data: ipv4 }, { data: ipv4 }], [], {}, (value) => { tree = value; });
-  const cards = tree.props.children[1].props.children;
+  const cards = findCards(tree);
   assert.equal(cards.length, 2);
   assert.deepEqual(cards.map((card) => card.props.label), [
     t("home.ipv4DomesticProbe"),
@@ -65,7 +75,7 @@ test("failed domestic probe never promotes a proxy or routed IPv6 to local egres
 test("failed external probe keeps its card without inventing an address", () => {
   let tree;
   render([{ data: ipv4 }, failed], [], {}, (value) => { tree = value; });
-  const cards = tree.props.children[1].props.children;
+  const cards = findCards(tree);
   assert.equal(cards.length, 2);
   assert.equal(cards[0].props.data, ipv4);
   assert.equal(cards[1].props.data, undefined);
