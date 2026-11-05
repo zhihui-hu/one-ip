@@ -5,6 +5,7 @@
   "contact.emailHint": "Click the email address to compose a message.",
   "contact.weChatQrCode": "WeChat contact QR code",
   "contact.scanWeChatHint": "Scan with WeChat, or save and recognize the image on your phone.",
+  "contact.weChatRemarkHint": "When adding, include \"oneip\" in your request note and briefly state your purpose, or it may not be accepted.",
   "navigation.documentation": "Documentation",
   "navigation.commercialProjectExample": "Commercial project example",
   "navigation.fullGuide": "Full user guide",

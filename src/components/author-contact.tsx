@@ -74,6 +74,9 @@ export function AuthorContact({
             <p className="text-xs text-muted-foreground">
               {t("contact.scanWeChatHint")}
             </p>
+            <p className="text-xs font-medium text-amber-600 dark:text-amber-500">
+              {t("contact.weChatRemarkHint")}
+            </p>
           </Tabs.Content>
           <Tabs.Content
             value="email"

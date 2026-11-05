@@ -5,6 +5,7 @@
   "contact.emailHint": "点击邮箱地址即可发送邮件。",
   "contact.weChatQrCode": "微信联系二维码",
   "contact.scanWeChatHint": "微信扫码联系，手机端可长按保存后识别。",
+  "contact.weChatRemarkHint": "添加时请备注「oneip」并说明来意，否则可能不予通过。",
   "navigation.documentation": "使用文档",
   "navigation.commercialProjectExample": "商业项目示例",
   "navigation.fullGuide": "完整使用文档",
