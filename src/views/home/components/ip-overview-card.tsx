@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CopyButton } from "@/components/copy-button";
 import { CountryFlag } from "@/components/country-flag";
 import { NumberTicker } from "@/components/number-ticker";
 import { IpText, Pending } from "@/components/toolkit";
@@ -12,6 +13,7 @@ import type { lookupIp } from "@/views/ip/api";
 import { PerfectScoreEffects } from "@/views/ip/perfect-score-effects";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Crown } from "lucide-react";
+import { IpCardMap } from "./ip-card-map";
 
 export function IpOverviewCard({
   label,
@@ -33,6 +35,12 @@ export function IpOverviewCard({
   const company = classification?.isSuccess
     ? classification.data.coffee
     : undefined;
+  const mapGeo =
+    geo?.latitude != null && geo?.longitude != null
+      ? geo
+      : classification?.isSuccess
+        ? classification.data.geo
+        : undefined;
   const score = company?.trust_score;
   const hasScore =
     typeof score === "number" &&
@@ -86,9 +94,10 @@ export function IpOverviewCard({
   const loading = pending || Boolean(data && geoQuery?.isPending);
   return (
     <Card
-      className={`home-primary-card relative${score === 100 ? " ip-dossier-perfect" : ""}`}
+      className={`home-primary-card relative isolate${score === 100 ? " ip-dossier-perfect" : ""}`}
     >
       {score === 100 && <PerfectScoreEffects />}
+      <IpCardMap geo={mapGeo} />
       {data && (
         <Link
           to={`/lookup/ip/${encodeURIComponent(data.ip)}`}
@@ -96,7 +105,7 @@ export function IpOverviewCard({
           className="absolute inset-0 z-10 rounded-[inherit] transition-colors hover:bg-primary/[0.025] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
         />
       )}
-      <CardContent className="primary-ip-block">
+      <CardContent className="primary-ip-block relative">
         <div className="row-between eyebrow">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
             <span>{label}</span>
@@ -119,6 +128,10 @@ export function IpOverviewCard({
               <>
                 <CountryFlag code={geo.country_code} size="lg" />
                 <IpText ip={geo.ip} link={false} />
+                <CopyButton
+                  value={geo.ip}
+                  className="relative z-20 size-6 shrink-0 text-muted-foreground"
+                />
               </>
             ) : (
               <span className="muted">

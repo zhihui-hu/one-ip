@@ -1359,7 +1359,7 @@ body {
 }
 
 .home-ip-overview {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 .primary-ip-list,
 .source-ip-list {
@@ -1486,7 +1486,8 @@ body {
 }
 
 .home-ip-overview > [data-slot="card"] {
-  height: 100%;
+  height: auto;
+  margin-block: 0;
 }
 .home-ip-overview .primary-ip-block .ip-value {
   font-size: 1.15rem;
@@ -1807,25 +1808,6 @@ body {
 }
 .page-help-alert [data-slot="alert-description"] {
   color: inherit;
-}
-.home-ip-overview > .home-connectivity-card {
-  grid-column: 1 / -1;
-}
-@media (min-width: 64rem) {
-  .home-ip-overview:not(:has(> :nth-child(3))) {
-    display: flex;
-    align-items: stretch;
-  }
-  .home-ip-overview:not(:has(> :nth-child(3))) > .home-primary-card {
-    flex: 0 0 24rem;
-    min-width: 24rem;
-    height: auto;
-  }
-  .home-ip-overview:not(:has(> :nth-child(3))) > .home-connectivity-card {
-    flex: 1;
-    min-width: 0;
-    height: auto;
-  }
 }
 .connectivity-table table {
   min-width: 0;
@@ -2224,6 +2206,23 @@ body {
 .mobile-site-header {
   display: none;
 }
+.header-actions > button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-color: var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+.header-actions > button:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+.header-actions > .header-ip-search {
+  width: auto;
+  padding-inline: 0.5rem;
+}
 .section-tabs {
   min-width: 0;
   margin-bottom: 0.875rem;
@@ -2389,6 +2388,9 @@ body {
 .home-page > .home-overview {
   margin-block: 0;
 }
+.home-page > .home-overview {
+  gap: 0.75rem;
+}
 .home-toolbar {
   display: flex;
   align-items: center;
@@ -2409,26 +2411,26 @@ body {
   font-weight: 650;
   white-space: nowrap;
 }
-.home-toolbar-heading [data-slot="button"] {
-  width: 1.75rem;
-  height: 1.75rem;
-  color: var(--subtle);
-}
 .home-toolbar-actions {
   gap: 0.25rem;
 }
-.home-ip-search {
-  width: 13rem;
+.home-network-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0.75rem;
+}
+.home-network-overview > [data-slot="card"] {
   min-width: 0;
+  margin-block: 0;
 }
-.home-ip-search [data-slot="input-group"] {
-  border-color: color-mix(in srgb, var(--border) 70%, transparent);
-  background: var(--card);
-  box-shadow: none;
+.home-network-overview > [data-slot="card"] > [data-slot="card-content"] {
+  display: grid;
+  flex: 1;
 }
-.home-ip-search [data-slot="input-group"]:focus-within {
-  border-color: var(--ring);
-  background: var(--card);
+.home-network-overview .ping-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  height: 100%;
 }
 .home-refresh {
   color: var(--muted-foreground);
@@ -2446,6 +2448,7 @@ body {
   line-height: 1.4;
 }
 .home-page .home-primary-card {
+  border: 1px solid var(--border);
   background: var(--card);
 }
 .home-page .home-primary-card .eyebrow {
@@ -2658,13 +2661,6 @@ body {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  .home-toolbar-actions {
-    flex: 1 1 100%;
-  }
-  .home-ip-search {
-    flex: 1;
-    width: auto;
-  }
   .shortcut-tiles {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -2721,10 +2717,6 @@ body {
     padding-inline-start: 0;
     border: 0;
   }
-  .app-nav .desktop-preferences button {
-    width: 32px;
-    height: 32px;
-  }
   .desktop-navigation {
     display: flex;
     flex: 1;
@@ -2764,6 +2756,13 @@ body {
   }
 }
 @media (max-width: 48rem) {
+  .home-page > .home-overview {
+    gap: 0.625rem;
+  }
+  .home-network-overview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.625rem;
+  }
   .home-page {
     gap: 0.625rem;
   }
@@ -3371,8 +3370,7 @@ body {
     inset 0 0 0 3px #1e2229,
     0 14px 36px rgba(19, 14, 7, 0.25);
 }
-.ip-dossier-top.ip-dossier-perfect > :not(.ip-perfect-effects):not(a),
-.home-primary-card.ip-dossier-perfect > :not(.ip-perfect-effects):not(a) {
+.ip-dossier-top.ip-dossier-perfect > :not(.ip-perfect-effects):not(a) {
   position: relative;
   z-index: 1;
 }
@@ -4556,14 +4554,51 @@ body {
   pointer-events: none;
 }
 
-/* Primary addresses must remain readable instead of being ellipsized. */
-.home-address-row .ip-text,
-.home-address-row .compact-text,
-.home-address-row .compact-text-head {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  overflow-wrap: anywhere;
+.home-ip-map {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 0;
+  width: 58%;
+  background: transparent;
+  pointer-events: none;
+  opacity: 0;
+  mask-image: linear-gradient(to right, transparent, #000 45%);
+}
+.home-ip-map[data-loaded="true"] {
+  opacity: 0.55;
+}
+.home-ip-map .leaflet-tile-pane {
+  filter: saturate(0.45);
+}
+.dark .home-ip-map .leaflet-tile-pane,
+.ip-dossier-perfect .home-ip-map .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) brightness(1.1) contrast(0.78);
+}
+.home-ip-map-attribution {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  z-index: 20;
+}
+.home-ip-map-attribution[data-loaded="false"] {
+  visibility: hidden;
+}
+.home-ip-map-attribution .leaflet-control-attribution {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--subtle);
+  font-size: 9px;
+  line-height: 1.2;
+}
+.home-ip-map-attribution a {
+  color: inherit;
+}
+
+/* Keep both IP versions on one line; CompactText preserves the address tail. */
+.home-address-row .ip-text {
+  max-width: 15ch;
+  overflow: hidden;
 }
 
 .exit-map-dot {
@@ -4845,6 +4880,40 @@ body {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+.egress-summary-location,
+.egress-summary-addresses {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+.egress-summary-location-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  font-weight: 600;
+}
+.egress-route {
+  flex-shrink: 0;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  background: var(--muted);
+}
+.egress-route-direct {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+}
+.egress-route-proxy {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+}
+.egress-summary-address {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
 }
 .egress-summary-ip {
   overflow: hidden;

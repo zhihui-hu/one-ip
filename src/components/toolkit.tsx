@@ -47,6 +47,7 @@ export function PrivacyToggle({ iconOnly = false }: { iconOnly?: boolean }) {
         type="button"
         variant="ghost"
         size="icon"
+        className="size-8 rounded-full text-muted-foreground md:size-9 md:rounded-lg"
         aria-label={label}
         title={label}
         aria-pressed={hidden}

@@ -2,9 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { SiteLogo } from "@/components/site-logo";
 import { Pending } from "@/components/toolkit";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UnderlineHover } from "@/components/underline-hover";
-import { useSortAnimation } from "@/hooks/use-sort-animation";
 import { t, locale } from "@/i18n";
 import { localizeCatalogItem } from "@/lib/localize-catalog";
 import { aiPlatforms } from "@/views/ai/platforms";
@@ -13,8 +19,20 @@ import { getStatus } from "@/views/status/api";
 import { statusOrder } from "@/views/status/order";
 import rawservices from "@/views/status/services.json";
 import { useQueries } from "@tanstack/react-query";
+import { Info } from "lucide-react";
 
 const services = rawservices.map(localizeCatalogItem);
+
+const popularAiPlatforms = [
+  "gpt",
+  "gemini",
+  "claude",
+  "deepseek",
+  "grok",
+  "perplexity",
+  "qwen",
+  "kimi",
+].map((id) => aiPlatforms.find((platform) => platform.id === id)!);
 
 const featured = ["9", "4", "10", "5", "0", "19", "15", "1"].map((id) =>
   services.find((service) => service.id === id)!,
@@ -26,7 +44,7 @@ const statusLabels: Record<string, string> = {
   critical: t("common.criticalOutage"),
   maintenance: t("common.underMaintenance"),
 };
-export function PlatformSummary() {
+function useSummaryVisibility() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -40,8 +58,13 @@ export function PlatformSummary() {
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
+  return { ref, visible };
+}
+
+export function AiAccessSummary() {
+  const { ref, visible } = useSummaryVisibility();
   const connectivity = useQueries({
-    queries: aiPlatforms.map((platform) => ({
+    queries: popularAiPlatforms.map((platform) => ({
       queryKey: ["ai-preview", "v3", platform.id],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         probeAiDomain(platform.domain, signal),
@@ -51,6 +74,95 @@ export function PlatformSummary() {
       refetchOnWindowFocus: false,
     })),
   });
+  const orderedPlatforms = popularAiPlatforms.map((platform, index) => ({
+    platform,
+    query: connectivity[index],
+  }));
+  return (
+    <Card ref={ref}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-1.5">
+          {t("home.aiAccessOverview")}
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-5 text-muted-foreground"
+                  aria-label={t("common.explain", [t("home.aiAccessOverview")])}
+                >
+                  <Info className="size-3.5" aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent
+                sideOffset={6}
+                className="max-w-72 text-xs leading-relaxed"
+              >
+                {t("home.showsHttpResponseTimeProbeUnreachableMeansProbe")}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-x-6">
+          {orderedPlatforms.map(({ platform, query }) => {
+            const latency = query.data?.median;
+            return (
+              <div
+                key={platform.id}
+                className="flex min-w-0 items-center justify-between gap-2 py-1.5 text-xs"
+              >
+                <UnderlineHover asChild>
+                  <Link
+                    to={`/ai/${platform.id}`}
+                    className="flex min-w-0 items-center gap-2 text-foreground"
+                    style={{ display: "flex" }}
+                  >
+                    <SiteLogo website={`https://${platform.domain}`} />
+                    <span className="truncate">{platform.name}</span>
+                  </Link>
+                </UnderlineHover>
+                <span
+                  className="home-metric shrink-0"
+                  title={query.data?.description}
+                  style={{
+                    color: query.isPending
+                      ? "var(--muted-foreground)"
+                      : latency == null || latency < 0
+                        ? "var(--danger)"
+                        : latency < 100
+                          ? "var(--success)"
+                          : latency < 400
+                            ? "var(--good)"
+                            : "var(--warning)",
+                  }}
+                >
+                  {query.isPending ? (
+                    <Pending>{t("common.notChecked")}</Pending>
+                  ) : latency == null || latency < 0 ? (
+                    query.data?.status === "restricted" ? (
+                      t("common.checkRestricted")
+                    ) : (
+                      t("common.unreachable")
+                    )
+                  ) : (
+                    `${latency} ms`
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function PlatformSummary() {
+  const { ref, visible } = useSummaryVisibility();
   const statuses = useQueries({
     queries: featured.map((service) => ({
       queryKey: ["service-status", service.id],
@@ -62,205 +174,116 @@ export function PlatformSummary() {
       refetchOnWindowFocus: false,
     })),
   });
-  const orderedPlatforms = aiPlatforms.map((platform, index) => ({
-    platform,
-    query: connectivity[index],
-  }));
-  if (
-    connectivity.every(
-      (query) => !query.isFetching && (query.isSuccess || query.isError),
-    )
-  )
-    orderedPlatforms.sort((a, b) => {
-      const left = a.query.data?.median;
-      const right = b.query.data?.median;
-      return (
-        (left != null && left >= 0 ? left : Infinity) -
-        (right != null && right >= 0 ? right : Infinity)
-      );
-    });
-  const sortRef = useSortAnimation(
-    orderedPlatforms.map(({ platform }) => platform.id).join("|"),
-  );
   return (
-    <div ref={ref} className="grid grid-cols-1 gap-3 mb-3 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("home.aiAccessOverview")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div
-            ref={sortRef}
-            className="grid grid-cols-2 gap-x-3 md:grid-cols-1 lg:grid-cols-2"
-          >
-            {orderedPlatforms.map(({ platform, query }) => {
-              const latency = query.data?.median;
+    <Card ref={ref}>
+      <CardHeader>
+        <div className="row-between">
+          <CardTitle>{t("navigation.serviceStatus")}</CardTitle>
+          <UnderlineHover asChild>
+            <Link to="/ai/status" className="small muted">
+              {t("home.allServicesLabel")}
+            </Link>
+          </UnderlineHover>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-x-3 md:grid-cols-1 lg:grid-cols-2">
+          {featured
+            .map((service, index) => ({ service, query: statuses[index] }))
+            .sort(
+              (a, b) =>
+                statusOrder(
+                  a.query.isError ? undefined : a.query.data?.status?.indicator,
+                ) -
+                statusOrder(
+                  b.query.isError ? undefined : b.query.data?.status?.indicator,
+                ),
+            )
+            .map(({ service, query }) => {
+              const indicator = query.data?.status?.indicator;
               return (
                 <div
-                  key={platform.id}
-                  data-sort-id={platform.id}
+                  key={service.id}
                   className="flex min-w-0 items-center justify-between gap-2 py-2 text-xs"
                 >
                   <UnderlineHover asChild>
                     <Link
-                      to={`/ai/${platform.id}`}
+                      to={`/ai/status?service=${service.id}`}
                       className="flex min-w-0 items-center gap-2 text-foreground"
                       style={{ display: "flex" }}
                     >
-                      <SiteLogo website={`https://${platform.domain}`} />
-                      <span className="truncate">{platform.name}</span>
+                      <SiteLogo src={service.icon} website={service.page} />
+                      <span className="truncate">
+                        {service.name.replace(" (Anthropic)", "")}
+                      </span>
                     </Link>
                   </UnderlineHover>
                   <span
-                    className="home-metric shrink-0"
-                    title={query.data?.description}
-                    style={{
-                      color: query.isPending
-                        ? "var(--muted-foreground)"
-                        : latency == null || latency < 0
-                          ? "var(--danger)"
-                          : latency < 100
-                            ? "var(--success)"
-                            : latency < 400
-                              ? "var(--good)"
-                              : "var(--warning)",
-                    }}
+                    className="flex shrink-0 flex-col items-end gap-0.5 text-right"
+                    title={query.error?.message}
                   >
-                    {query.isPending ? (
-                      <Pending>{t("common.notChecked")}</Pending>
-                    ) : latency == null || latency < 0 ? (
-                      query.data?.status === "restricted" ? (
-                        t("common.checkRestricted")
+                    <span
+                      className="home-metric"
+                      style={{
+                        color: query.isError
+                          ? "var(--warning)"
+                          : !indicator
+                            ? "var(--muted-foreground)"
+                            : indicator === "none"
+                              ? "var(--success)"
+                              : "var(--danger)",
+                      }}
+                    >
+                      {query.isPending ? (
+                        <Pending>{t("common.lookingUpLabel")}</Pending>
+                      ) : query.isError ? (
+                        t(
+                          query.data
+                            ? "status.updateFailed"
+                            : "status.lookupFailed",
+                        )
                       ) : (
-                        t("common.unreachable")
-                      )
-                    ) : (
-                      `${latency} ms`
+                        (statusLabels[indicator ?? ""] ??
+                        t("common.pendingConfirmation"))
+                      )}
+                    </span>
+                    {query.isError && query.data && (
+                      <>
+                        <span className="text-[10px] text-muted-foreground">
+                          {t("status.lastKnownStatus", [
+                            statusLabels[indicator ?? ""] ??
+                              t("common.pendingConfirmation"),
+                          ])}
+                        </span>
+                        <time
+                          dateTime={query.data.fetchedAt}
+                          className="text-[10px] text-muted-foreground"
+                          title={t("status.lastSuccessfulUpdate", [
+                            new Date(query.data.fetchedAt).toLocaleString(
+                              locale,
+                            ),
+                          ])}
+                          aria-label={t("status.lastSuccessfulUpdate", [
+                            new Date(query.data.fetchedAt).toLocaleString(
+                              locale,
+                            ),
+                          ])}
+                        >
+                          {new Date(query.data.fetchedAt).toLocaleTimeString(
+                            locale,
+                          )}
+                        </time>
+                      </>
                     )}
                   </span>
                 </div>
               );
             })}
-          </div>
-          <p className="home-note mt-3">
-            {t("home.showsHttpResponseTimeProbeUnreachableMeansProbe")}
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <div className="row-between">
-            <CardTitle>{t("navigation.serviceStatus")}</CardTitle>
-            <UnderlineHover asChild>
-              <Link to="/ai/status" className="small muted">
-                {t("home.allServicesLabel")}
-              </Link>
-            </UnderlineHover>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-x-3 md:grid-cols-1 lg:grid-cols-2">
-            {featured
-              .map((service, index) => ({ service, query: statuses[index] }))
-              .sort(
-                (a, b) =>
-                  statusOrder(
-                    a.query.isError
-                      ? undefined
-                      : a.query.data?.status?.indicator,
-                  ) -
-                  statusOrder(
-                    b.query.isError
-                      ? undefined
-                      : b.query.data?.status?.indicator,
-                  ),
-              )
-              .map(({ service, query }) => {
-                const indicator = query.data?.status?.indicator;
-                return (
-                  <div
-                    key={service.id}
-                    className="flex min-w-0 items-center justify-between gap-2 py-2 text-xs"
-                  >
-                    <UnderlineHover asChild>
-                      <Link
-                        to={`/ai/status?service=${service.id}`}
-                        className="flex min-w-0 items-center gap-2 text-foreground"
-                        style={{ display: "flex" }}
-                      >
-                        <SiteLogo src={service.icon} website={service.page} />
-                        <span className="truncate">
-                          {service.name.replace(" (Anthropic)", "")}
-                        </span>
-                      </Link>
-                    </UnderlineHover>
-                    <span
-                      className="flex shrink-0 flex-col items-end gap-0.5 text-right"
-                      title={query.error?.message}
-                    >
-                      <span
-                        className="home-metric"
-                        style={{
-                          color: query.isError
-                            ? "var(--warning)"
-                            : !indicator
-                              ? "var(--muted-foreground)"
-                              : indicator === "none"
-                                ? "var(--success)"
-                                : "var(--danger)",
-                        }}
-                      >
-                        {query.isPending ? (
-                          <Pending>{t("common.lookingUpLabel")}</Pending>
-                        ) : query.isError ? (
-                          t(
-                            query.data
-                              ? "status.updateFailed"
-                              : "status.lookupFailed",
-                          )
-                        ) : (
-                          (statusLabels[indicator ?? ""] ??
-                          t("common.pendingConfirmation"))
-                        )}
-                      </span>
-                      {query.isError && query.data && (
-                        <>
-                          <span className="text-[10px] text-muted-foreground">
-                            {t("status.lastKnownStatus", [
-                              statusLabels[indicator ?? ""] ??
-                                t("common.pendingConfirmation"),
-                            ])}
-                          </span>
-                          <time
-                            dateTime={query.data.fetchedAt}
-                            className="text-[10px] text-muted-foreground"
-                            title={t("status.lastSuccessfulUpdate", [
-                              new Date(query.data.fetchedAt).toLocaleString(
-                                locale,
-                              ),
-                            ])}
-                            aria-label={t("status.lastSuccessfulUpdate", [
-                              new Date(query.data.fetchedAt).toLocaleString(
-                                locale,
-                              ),
-                            ])}
-                          >
-                            {new Date(query.data.fetchedAt).toLocaleTimeString(
-                              locale,
-                            )}
-                          </time>
-                        </>
-                      )}
-                    </span>
-                  </div>
-                );
-              })}
-          </div>
-          <p className="home-note mt-3">
-            {t("home.officialStatusSourcesClickServiceComponentsIncidents")}
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+        <p className="home-note mt-3">
+          {t("home.officialStatusSourcesClickServiceComponentsIncidents")}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
