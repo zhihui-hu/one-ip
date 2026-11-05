@@ -103,7 +103,11 @@ export default function PingPage() {
           label={t("ping.start")}
           busy={query.isPending || catalog.isPending}
           onSubmit={(host) => {
-            setParams({ host });
+            setParams((current) => {
+              const next = new URLSearchParams(current);
+              next.set("host", host);
+              return next;
+            });
             setProgress(undefined);
             setStopped(false);
             query.reset();

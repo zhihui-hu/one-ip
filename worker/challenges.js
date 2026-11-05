@@ -97,8 +97,19 @@ export async function verifyChallenge(
   } catch {
     throw new HttpError(502, "验证服务暂时不可用，请稍后重试");
   }
-  if (result?.success !== true)
+  if (result?.success !== true) {
+    const errors = Array.isArray(result?.["error-codes"])
+      ? result["error-codes"]
+      : [];
+    if (errors.includes("invalid-input-secret"))
+      throw new HttpError(
+        503,
+        "验证服务的私密密钥（Secret）无效，请站点管理员检查配置，注意区分字母 O 和数字 0。",
+      );
+    if (errors.includes("missing-input-secret"))
+      throw new HttpError(503, "当前运行环境缺少服务端 Secret。");
     return { success: false, message: "验证未通过或凭证已过期，请重新验证。" };
+  }
   if (
     result.hostname !== hostname ||
     !config.hostnames.includes(result.hostname)

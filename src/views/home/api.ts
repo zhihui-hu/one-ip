@@ -1,5 +1,5 @@
 import { t } from "@/i18n";
-import { sameIp } from "@/lib/ip-address";
+import { normalizeIp, sameIp } from "@/lib/ip-address";
 import { localizeCatalogItem } from "@/lib/localize-catalog";
 import { endpoint, probe, request, trace } from "@/lib/network";
 import type { Geo } from "@/lib/types";
@@ -175,9 +175,9 @@ export async function detectSite(
         /(?:IP(?:地址)?|ip)[^\d]{0,30}((?:\d{1,3}\.){3}\d{1,3})/i,
       )?.[1];
     }
-    if (!ip || !/^[\da-fA-F:.]+$/.test(ip))
-      throw new Error(t("home.noReadableEgressIpObtained"));
-    geo = { ip, source: site.name };
+    const address = normalizeIp(ip);
+    if (!address) throw new Error(t("home.noReadableEgressIpObtained"));
+    geo = { ip: address, source: site.name };
   } else {
     const headers = await request<Headers>(
       site.url ?? fallbackSiteProbeUrl,
@@ -188,9 +188,9 @@ export async function detectSite(
       headers.get("cdn-user-ip") ??
       headers.get("x-request-ip") ??
       headers.get("x-response-cinfo");
-    if (!ip || !/^[\da-fA-F:.]+$/.test(ip))
-      throw new Error(t("home.noReadableEgressIpObtained"));
-    geo = { ip, source: site.name };
+    const address = normalizeIp(ip);
+    if (!address) throw new Error(t("home.noReadableEgressIpObtained"));
+    geo = { ip: address, source: site.name };
   }
   return geo;
 }
@@ -208,12 +208,8 @@ export async function getBrowserIp(
       cache: "no-store",
     },
   );
-  if (
-    !data.ip ||
-    (version === 6
-      ? !data.ip.includes(":")
-      : !/^\d{1,3}(\.\d{1,3}){3}$/.test(data.ip))
-  )
+  const ip = normalizeIp(data?.ip);
+  if (!ip || (version === 6) !== ip.includes(":"))
     throw new Error(t("home.noValidIpObtained"));
-  return { ip: data.ip, source: "ipify" };
+  return { ip, source: "ipify" };
 }

@@ -33,7 +33,10 @@ export default function StatusPage() {
       { replace: id === null },
     );
   };
-  const filter = params.get("group") ?? "全部";
+  const requestedGroup = params.get("group");
+  const filter = serviceGroups.some((group) => group.value === requestedGroup)
+    ? requestedGroup
+    : "全部";
   const queries = useQueries({
     queries: services.map((s) => ({
       queryKey: ["service-status", s.id],
@@ -45,9 +48,11 @@ export default function StatusPage() {
     })),
   });
   const pending = queries.some((q) => q.isFetching);
-  const rows = services
-    .map((service, i) => ({ ...service, query: queries[i] }))
-    .filter((s) => filter === "全部" || s.group === filter);
+  const allRows = services.map((service, i) => ({
+    ...service,
+    query: queries[i],
+  }));
+  const rows = allRows.filter((s) => filter === "全部" || s.group === filter);
   const sections = [
     [
       t("status.incidentsMaintenance"),
@@ -81,7 +86,8 @@ export default function StatusPage() {
   ] as const;
   const tableRows = sections.flatMap(([, items]) => items.map(toTableRow));
   const columns = statusColumns(setDetailId);
-  const detail = tableRows.find((service) => service.id === detailId);
+  const detailService = allRows.find((service) => service.id === detailId);
+  const detail = detailService ? toTableRow(detailService) : undefined;
   return (
     <div className="service-status-page">
       <PageHeading title={t("navigation.serviceStatus")} />
@@ -92,7 +98,15 @@ export default function StatusPage() {
               size="sm"
               variant={group === filter ? "secondary" : "ghost"}
               key={group}
-              onClick={() => setParams(group === "全部" ? {} : { group })}
+              aria-pressed={group === filter}
+              onClick={() =>
+                setParams((current) => {
+                  const next = new URLSearchParams(current);
+                  if (group === "全部") next.delete("group");
+                  else next.set("group", group);
+                  return next;
+                })
+              }
             >
               {label}
             </Button>

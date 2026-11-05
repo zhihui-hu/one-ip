@@ -186,7 +186,7 @@ export function AppLayout() {
                   items={menus[activeRoute]!}
                 />
               )}
-              <RouteErrorBoundary key={activeRoute}>
+              <RouteErrorBoundary key={pathname}>
                 <Suspense
                   fallback={
                     activeRoute === "/" ? (

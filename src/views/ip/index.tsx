@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, useId } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LookupForm } from "@/components/lookup-form";
 import { IpText, ErrorNotice, Pending } from "@/components/toolkit";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { IpDetails } from "./details";
 
 export default function IpPage() {
   const { ip = "" } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const history = useLookupHistory<CoffeeLookup>("ip-tools:coffee-history:v1");
   const cached = history.find(ip);
@@ -93,7 +94,10 @@ export default function IpPage() {
           onSubmit={(value) =>
             value === ip
               ? void query.refetch()
-              : navigate(`/lookup/ip/${encodeURIComponent(value)}`)
+              : navigate({
+                  pathname: `/lookup/ip/${encodeURIComponent(value)}`,
+                  search: location.search,
+                })
           }
         />
       </div>
@@ -119,7 +123,10 @@ export default function IpPage() {
               onClick={() =>
                 value === ip
                   ? void query.refetch()
-                  : navigate(`/lookup/ip/${encodeURIComponent(value)}`)
+                  : navigate({
+                      pathname: `/lookup/ip/${encodeURIComponent(value)}`,
+                      search: location.search,
+                    })
               }
             >
               <IpText ip={value} link={false} />

@@ -1,5 +1,6 @@
 import { t } from "@/i18n";
 import { localizeApiMessage } from "@/i18n/api-message";
+import { normalizeIp } from "./ip-address";
 
 export type ResponseMode =
   | "json"
@@ -84,10 +85,10 @@ export function parseTrace(text: string) {
         return [line.slice(0, i), line.slice(i + 1)];
       }),
   );
-  if (!fields.ip || !/^[\da-fA-F:.]+$/.test(fields.ip))
-    throw new Error(t("common.targetSiteDidReturnReadableEgressIp"));
+  const ip = normalizeIp(fields.ip);
+  if (!ip) throw new Error(t("common.targetSiteDidReturnReadableEgressIp"));
   return {
-    ip: fields.ip,
+    ip,
     country_code: fields.loc,
     colo: fields.colo,
     source: "Cloudflare Trace",

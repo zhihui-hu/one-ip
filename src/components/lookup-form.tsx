@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { ActionButton } from "@/components/toolkit";
 import { Field, FieldGroup, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ export function LookupForm({
   label?: string;
   onSubmit: (query: string) => void;
 }) {
+  const errorId = useId();
   const form = useForm<{ query: string }>({
     resolver: zodResolver(schema),
     defaultValues: { query: value },
@@ -44,7 +45,12 @@ export function LookupForm({
   const Container = grouped ? InputGroup : "div";
   const Control = grouped ? InputGroupInput : Input;
   return (
-    <form onSubmit={form.handleSubmit((data) => onSubmit(data.query))}>
+    <form
+      aria-busy={busy}
+      onSubmit={form.handleSubmit((data) => {
+        if (!busy) onSubmit(data.query);
+      })}
+    >
       <FieldGroup>
         <Field data-invalid={!!form.formState.errors.query}>
           <Container
@@ -54,6 +60,9 @@ export function LookupForm({
               aria-label={placeholder}
               placeholder={placeholder}
               aria-invalid={!!form.formState.errors.query}
+              aria-describedby={
+                form.formState.errors.query ? errorId : undefined
+              }
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
@@ -76,7 +85,7 @@ export function LookupForm({
               </ActionButton>
             )}
           </Container>
-          <FieldError errors={[form.formState.errors.query]} />
+          <FieldError id={errorId} errors={[form.formState.errors.query]} />
         </Field>
       </FieldGroup>
     </form>

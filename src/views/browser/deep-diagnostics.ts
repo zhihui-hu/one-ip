@@ -80,12 +80,12 @@ export function collectDeepDiagnostics(
       onAbort();
       return;
     }
-    // Only the pinned local bundle can execute; all outbound network connections are blocked.
+    // Only the pinned local bundle can execute; data: probes are allowed, external connections are blocked.
     const source = new URL(
       `/browser-diagnostics.js?v=${version.bundleHash}`,
       location.origin,
     ).href;
-    frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; font-src 'none'; connect-src 'none'; frame-src 'self' about:; worker-src 'none'"></head><body><script src="${source}"></script></body></html>`;
+    frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'unsafe-inline'; img-src data: blob:; font-src 'none'; connect-src data:; frame-src 'self' about:; worker-src 'none'"></head><body><script src="${source}"></script></body></html>`;
     document.body.append(frame);
   });
 }

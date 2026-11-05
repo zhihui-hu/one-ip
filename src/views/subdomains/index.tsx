@@ -59,6 +59,16 @@ export default function SubdomainsPage() {
   );
   const start = currentPage * pageSize;
   const end = Math.min(start + pageSize, total);
+  const lookup = (value: string) => {
+    setPage(0);
+    if (value === q) {
+      if (!query.isFetching) void query.refetch();
+      return;
+    }
+    const next = new URLSearchParams(params);
+    next.set("q", value);
+    setParams(next);
+  };
   return (
     <div className="lookup-page text-[13px] leading-relaxed">
       <div className="lookup-search-card">
@@ -68,11 +78,7 @@ export default function SubdomainsPage() {
           value={q}
           placeholder={t("subdomains.enterADomainEGExampleCom")}
           busy={query.isFetching}
-          onSubmit={(value) => {
-            setPage(0);
-            if (value === q) void query.refetch();
-            else setParams({ q: value });
-          }}
+          onSubmit={lookup}
         />
       </div>
       <Card className="mt-3">
@@ -91,10 +97,7 @@ export default function SubdomainsPage() {
                 <button
                   type="button"
                   className="cursor-pointer rounded-md px-2 py-1 h-auto hover:bg-accent"
-                  onClick={() => {
-                    setPage(0);
-                    setParams({ q: value });
-                  }}
+                  onClick={() => lookup(value)}
                 >
                   {value}
                 </button>

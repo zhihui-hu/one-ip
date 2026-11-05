@@ -1,15 +1,13 @@
 import { t } from "@/i18n";
+import { normalizeIp, sameIp } from "@/lib/ip-address";
 import { endpoint, trace } from "@/lib/network";
 import type { Geo, RtcResult } from "@/lib/types";
 
 export function isPublicCandidate(ip: string) {
-  if (ip.includes(":")) {
-    let s: string;
-    try {
-      s = new URL(`https://[${ip}]/`).hostname.slice(1, -1);
-    } catch {
-      return false;
-    }
+  const address = normalizeIp(ip);
+  if (!address) return false;
+  if (address.includes(":")) {
+    const s = address;
     if (s.startsWith("::ffff:")) {
       const [high, low] = s
         .slice(7)
@@ -25,7 +23,7 @@ export function isPublicCandidate(ip: string) {
       !/^(f[cd]|fe[89ab]|ff)/i.test(s)
     );
   }
-  const parts = ip.split(".").map(Number);
+  const parts = address.split(".").map(Number);
   if (
     parts.length !== 4 ||
     parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)
@@ -127,7 +125,7 @@ export async function runWebRtc(_: void, signal: AbortSignal) {
   );
   signal.throwIfAborted();
   const different = results.some(
-    (row) => row.public && baseline && row.ip !== baseline.ip,
+    (row) => row.public && baseline && !sameIp(row.ip, baseline.ip),
   );
   const verdict = !results.some((row) => row.public)
     ? t("webrtc.publicCandidateAddressCollectedBrowserRestrictionsUdpBlocking")
