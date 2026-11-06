@@ -29,7 +29,9 @@ const containerCardClass =
 const navClass = cn(
   "hidden",
   // Desktop: floating pill that gains a surface once the page scrolls.
-  "md:sticky md:top-2 md:z-40 md:mb-3 md:flex md:min-h-11 md:items-center md:justify-between md:gap-6 md:rounded-[999px] md:border md:border-transparent md:bg-transparent md:py-1 md:pr-1.5 md:pl-3 md:transition-[background-color,border-color,box-shadow] md:duration-200 md:ease-[ease]",
+  // The negative margin cancels the padding and 1px border, so the logo and
+  // buttons line up with the page content while the pill keeps its inset.
+  "md:sticky md:top-2 md:z-40 md:mb-3 md:flex md:min-h-11 md:items-center md:justify-between md:gap-6 md:rounded-[999px] md:border md:border-transparent md:bg-transparent md:-mx-3 md:py-1 md:px-[11px] md:transition-[background-color,border-color,box-shadow] md:duration-200 md:ease-[ease]",
   "md:data-[scrolled=true]:border-[color-mix(in_srgb,var(--border)_70%,transparent)] md:data-[scrolled=true]:bg-[color-mix(in_srgb,var(--card)_88%,transparent)] md:data-[scrolled=true]:[box-shadow:0_8px_24px_-10px_color-mix(in_srgb,var(--foreground)_20%,transparent),0_1px_3px_color-mix(in_srgb,var(--foreground)_6%,transparent)] md:data-[scrolled=true]:backdrop-blur-[16px] md:data-[scrolled=true]:backdrop-saturate-[1.4]",
 );
 
@@ -89,7 +91,7 @@ export function AppLayout() {
           <Link
             to="/"
             aria-label={t("navigation.siteTitle")}
-            className="flex h-11 w-8 shrink-0 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
+            className="flex h-11 shrink-0 items-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
           >
             <img
               src="/icon.svg"

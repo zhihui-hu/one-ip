@@ -31,8 +31,8 @@ export function AuthorContact({
   );
 }
 
-/** WeChat QR code and email, used in the dialog and inline on pages. */
-export function AuthorContactDetails() {
+/** WeChat QR code and email shown in the contact dialog. */
+function AuthorContactDetails() {
   const [method, setMethod] = useState<ContactMethod>("wechat");
   return (
     <AnimatedSegmentedTabs<ContactMethod>

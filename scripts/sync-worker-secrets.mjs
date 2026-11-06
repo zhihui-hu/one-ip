@@ -28,7 +28,6 @@ const allowed = [
   "CLOUDFLARE_ACCOUNT_ID",
   "CLOUDFLARE_ZONE_ID",
   "CLOUDFLARE_WEB_ANALYTICS_SITE_TAG",
-  "ADVERTISE_ANALYTICS_HOST",
 ];
 // Keys for features that were removed; skipped instead of uploaded.
 const retired = [

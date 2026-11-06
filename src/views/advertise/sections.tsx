@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AuthorContact } from "@/components/author-contact";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { t } from "@/i18n";
@@ -196,6 +197,19 @@ export function SlotSection() {
             <p className="m-0 text-[12px] leading-relaxed text-muted-foreground">
               {t(`advertise.slots.${slot.id}.text`)}
             </p>
+            <figure className="m-0 grid place-items-center rounded-[10px] bg-background p-3">
+              <img
+                src={slot.preview.src}
+                width={slot.preview.width}
+                height={slot.preview.height}
+                alt={t(`advertise.slots.${slot.id}.preview`)}
+                loading="lazy"
+                className="h-auto max-h-56 w-auto max-w-full rounded-lg border border-border shadow-sm"
+              />
+              <figcaption className="mt-2 text-[11px] text-subtle">
+                {t("advertise.slots.previewCaption")}
+              </figcaption>
+            </figure>
             <div className="flex gap-2 text-[12px]">
               <Image
                 aria-hidden="true"
@@ -223,12 +237,9 @@ export function SlotSection() {
               <strong className="text-sm font-semibold">
                 {slot.price ?? t("advertise.slots.priceOnRequest")}
               </strong>
-              <a
-                href="#advertise-contact"
-                className="text-[13px] font-medium text-primary hover:underline"
-              >
+              <AuthorContact className="cursor-pointer text-[13px] font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-ring">
                 {t("advertise.slots.book")}
-              </a>
+              </AuthorContact>
             </div>
           </div>
         ))}

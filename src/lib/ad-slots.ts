@@ -11,6 +11,8 @@ export interface AdSlot {
   nextFree?: string;
   /** Shown as written, e.g. "¥1000 / 月"; omitted shows "price on request". */
   price?: string;
+  /** Screenshot of the placement on a phone (in public/advertise/). */
+  preview: { src: string; width: number; height: number };
 }
 
 const homeEnds = sponsors
@@ -24,6 +26,10 @@ export const adSlots: readonly AdSlot[] = [
     total: 3,
     booked: Math.min(3, sponsors.length),
     nextFree: homeEnds[0],
+    preview: { src: "/advertise/home-mobile.webp", width: 750, height: 270 },
   },
-  { id: "readme" },
+  {
+    id: "readme",
+    preview: { src: "/advertise/readme-mobile.webp", width: 750, height: 790 },
+  },
 ];

@@ -7,7 +7,6 @@ const dayMs = 24 * hourMs;
 const offsetMs = 8 * hourMs;
 const defaultRepos = "zhihui-hu/one-ip";
 
-const beijingDate = (ms) => new Date(ms + offsetMs).toISOString().slice(0, 10);
 const beijingMidnight = (ms) =>
   Math.floor((ms + offsetMs) / dayMs) * dayMs - offsetMs;
 
@@ -28,69 +27,94 @@ async function graphql(token, query, variables) {
   return body.data;
 }
 
-const cloudflareQuery = `query ($zone: String!, $filter: ZoneHttpRequestsAdaptiveGroupsFilter_InputObject!) {
+// The hourly/daily datasets behind the dashboard's zone overview (Unique
+// Visitors, Total Requests, Percent Cached, Data Served, Data Cached).
+// Aggregating without a dimension deduplicates visitors across the whole
+// window. Hourly data reaches back about 3 days; 30 days use UTC dates.
+const fields = "sum { requests pageViews bytes cachedBytes } uniq { uniques }";
+const hourGroup = (name, from, to) =>
+  `${name}: httpRequests1hGroups(limit: 1, filter: { datetime_geq: $${from}, datetime_lt: $${to} }) { ${fields} }`;
+const cloudflareQuery = `query ($zone: String!, $end: Time!, $h24: Time!, $today: Time!, $yesterday: Time!, $d3: Time!, $hourly: Time!, $dFrom: Date!, $dTo: Date!) {
   viewer {
     zones(filter: { zoneTag: $zone }) {
-      hours: httpRequestsAdaptiveGroups(
-        limit: 1000
-        filter: $filter
-        orderBy: [datetimeHour_ASC]
-      ) { count sum { visits edgeResponseBytes } dimensions { datetimeHour } }
-      countries: httpRequestsAdaptiveGroups(
-        limit: 12
-        filter: $filter
-        orderBy: [sum_visits_DESC]
-      ) { sum { visits } dimensions { clientCountryName } }
+      ${hourGroup("last24h", "h24", "end")}
+      ${hourGroup("today", "today", "end")}
+      ${hourGroup("yesterday", "yesterday", "today")}
+      ${hourGroup("last3d", "d3", "end")}
+      last30d: httpRequests1dGroups(limit: 1, filter: { date_geq: $dFrom, date_leq: $dTo }) {
+        sum { requests pageViews bytes cachedBytes countryMap { clientCountryName requests } }
+        uniq { uniques }
+      }
+      hourly: httpRequests1hGroups(limit: 100, filter: { datetime_geq: $hourly, datetime_lt: $end }, orderBy: [datetime_ASC]) { dimensions { datetime } ${fields} }
+      daily: httpRequests1dGroups(limit: 40, filter: { date_geq: $dFrom, date_leq: $dTo }, orderBy: [date_ASC]) { dimensions { date } ${fields} }
     }
   }
 }`;
 
-/** Sum hourly buckets in [from, to). */
-function total(hours, from, to) {
-  let visits = 0;
-  let requests = 0;
-  let bytes = 0;
-  for (const hour of hours)
-    if (hour.time >= from && hour.time < to) {
-      visits += hour.visits;
-      requests += hour.requests;
-      bytes += hour.bytes;
-    }
-  return { visits, requests, bytes };
+export function cloudflareVariables(zone, now) {
+  const end = Math.floor(now / hourMs) * hourMs + hourMs;
+  const today = beijingMidnight(now);
+  const iso = (ms) => new Date(ms).toISOString();
+  const date = (ms) => iso(ms).slice(0, 10);
+  return {
+    zone,
+    end: iso(end),
+    h24: iso(end - dayMs),
+    today: iso(today),
+    yesterday: iso(today - dayMs),
+    d3: iso(today - 2 * dayMs),
+    hourly: iso(end - 3 * dayMs),
+    dFrom: date(now - 29 * dayMs),
+    dTo: date(now),
+  };
 }
 
-export function summarizeCloudflare(rows, now) {
-  const hours = rows.map((row) => ({
-    time: Date.parse(row.dimensions.datetimeHour),
-    visits: row.sum.visits,
-    requests: row.count,
-    bytes: row.sum.edgeResponseBytes ?? 0,
-  }));
-  const today = beijingMidnight(now);
-  const days = [];
-  for (let start = today - 29 * dayMs; start <= today; start += dayMs)
-    days.push({
-      date: beijingDate(start),
-      ...total(hours, start, start + dayMs),
-    });
+const metrics = (row) => ({
+  uniques: row?.uniq?.uniques ?? 0,
+  requests: row?.sum?.requests ?? 0,
+  pageViews: row?.sum?.pageViews ?? 0,
+  bytes: row?.sum?.bytes ?? 0,
+  cachedBytes: row?.sum?.cachedBytes ?? 0,
+});
+
+export function summarizeCloudflare(result, now) {
+  const end = Math.floor(now / hourMs) * hourMs + hourMs;
+  const byHour = new Map(
+    result.hourly.map((row) => [Date.parse(row.dimensions.datetime), row]),
+  );
   const hourly = [];
-  const lastHour = Math.floor(now / hourMs) * hourMs;
-  // Three days of hours covers the 24h, today, yesterday and 3-day charts.
-  for (let start = lastHour - 71 * hourMs; start <= lastHour; start += hourMs)
+  for (let start = end - 3 * dayMs; start < end; start += hourMs)
     hourly.push({
       time: new Date(start).toISOString(),
-      ...total(hours, start, start + hourMs),
+      ...metrics(byHour.get(start)),
     });
+  const countries = (result.last30d?.[0]?.sum.countryMap ?? [])
+    // XX is Cloudflare's "unknown"; T1 (Tor) fails the pattern anyway.
+    .filter(
+      (item) =>
+        /^[A-Z]{2}$/.test(item.clientCountryName) &&
+        item.clientCountryName !== "XX",
+    )
+    .sort((a, b) => b.requests - a.requests)
+    .slice(0, 12)
+    .map((item) => ({
+      country: item.clientCountryName,
+      requests: item.requests,
+    }));
   return {
     ranges: {
-      last24h: total(hours, now - dayMs, now + 1),
-      today: total(hours, today, now + 1),
-      yesterday: total(hours, today - dayMs, today),
-      last3d: total(hours, today - 2 * dayMs, now + 1),
-      last30d: total(hours, today - 29 * dayMs, now + 1),
+      last24h: metrics(result.last24h?.[0]),
+      today: metrics(result.today?.[0]),
+      yesterday: metrics(result.yesterday?.[0]),
+      last3d: metrics(result.last3d?.[0]),
+      last30d: metrics(result.last30d?.[0]),
     },
-    days,
     hourly,
+    daily: result.daily.map((row) => ({
+      date: row.dimensions.date,
+      ...metrics(row),
+    })),
+    countries,
   };
 }
 
@@ -98,33 +122,15 @@ async function cloudflareStats(env, now) {
   const token = env.CLOUDFLARE_ANALYTICS_TOKEN?.trim();
   const zone = env.CLOUDFLARE_ZONE_ID?.trim();
   if (!token || !zone) return unavailable("not-configured");
-  // Empty means the whole zone, matching the Cloudflare dashboard overview.
-  const host = env.ADVERTISE_ANALYTICS_HOST?.trim() || "";
-  // The Free plan caps adaptive queries at 30 days; start at Beijing midnight.
-  const from = beijingMidnight(now) - 29 * dayMs;
   try {
-    const data = await graphql(token, cloudflareQuery, {
-      zone,
-      filter: {
-        datetime_geq: new Date(from).toISOString(),
-        datetime_lt: new Date(now).toISOString(),
-        // Real visitors only, as in the dashboard (excludes Workers subrequests).
-        requestSource: "eyeball",
-        ...(host && { clientRequestHTTPHost: host }),
-      },
-    });
+    const data = await graphql(
+      token,
+      cloudflareQuery,
+      cloudflareVariables(zone, now),
+    );
     const result = data.viewer.zones[0];
     if (!result) return unavailable("no-access");
-    return {
-      available: true,
-      ...summarizeCloudflare(result.hours, now),
-      countries: result.countries
-        .filter((row) => row.dimensions.clientCountryName)
-        .map((row) => ({
-          country: row.dimensions.clientCountryName,
-          visits: row.sum.visits,
-        })),
-    };
+    return { available: true, ...summarizeCloudflare(result, now) };
   } catch (error) {
     console.warn("Cloudflare analytics failed", error?.message);
     return unavailable("request-failed");
@@ -149,11 +155,12 @@ async function github(token, path) {
 }
 
 async function repoStats(token, repo) {
-  const [info, views, clones, referrers] = await Promise.all([
+  // Referrers are deliberately not fetched: listing them would advertise
+  // other sites on the advertising page.
+  const [info, views, clones] = await Promise.all([
     github(token, `repos/${repo}`),
     github(token, `repos/${repo}/traffic/views`),
     github(token, `repos/${repo}/traffic/clones`),
-    github(token, `repos/${repo}/traffic/popular/referrers`),
   ]);
   return {
     repo,
@@ -165,11 +172,6 @@ async function repoStats(token, repo) {
       date: day.timestamp.slice(0, 10),
       views: day.count,
       uniques: day.uniques,
-    })),
-    referrers: referrers.slice(0, 6).map((item) => ({
-      referrer: item.referrer,
-      count: item.count,
-      uniques: item.uniques,
     })),
   };
 }

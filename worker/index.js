@@ -77,15 +77,22 @@ export default {
       if (path === "/map/config") return json(mapConfig(env));
       if (path === "/advertise/stats")
         return await cachedJson(
-          new URL("/api/advertise/stats", url.origin),
+          // Bump the cache key whenever the response shape changes.
+          new URL("/api/advertise/stats/v5", url.origin),
           300,
           () => advertiseStats(env),
-          // Never cache errors, so a fixed token shows up right away.
-          (data) =>
-            [data.cloudflare, data.github].every(
-              (source) =>
-                source.available || source.reason === "not-configured",
-            ),
+          // Cache only real data and never errors, so newly added or fixed
+          // tokens show up right away. Unconfigured sources cost no API calls.
+          (data) => {
+            const sources = [data.cloudflare, data.github];
+            return (
+              sources.some((source) => source.available) &&
+              sources.every(
+                (source) =>
+                  source.available || source.reason === "not-configured",
+              )
+            );
+          },
         );
       if (path === "/me") {
         const data = cfGeo(request);
