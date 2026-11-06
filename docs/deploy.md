@@ -107,10 +107,11 @@ Workers Builds 和 GitHub Actions 选择一种部署方式，避免重复发布�
 | -------- | ----------------------- | --------------------------------- |
 | Variable | `ENABLE_CF_DEPLOY=true` | 开启部署                          |
 | Variable | `CF_DEPLOY_TARGET`      | `workers`（默认）或 `pages`       |
+| Variable | `CF_DEPLOY_BRANCH`      | 部署分支，默认是仓库默认分支      |
 | Secret   | `CLOUDFLARE_API_TOKEN`  | 对应目标的 Workers/Pages 部署凭证 |
 | Secret   | `CLOUDFLARE_ACCOUNT_ID` | 目标 Cloudflare 账户 ID           |
 
-推送到 `main`，或运行 `Build and deploy one-ip`。构建和测试通过后进入部署。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
+推送到部署分支（默认 `main`），或在该分支上运行 `Build and deploy one-ip`。构建、测试和 Docker 冒烟测试通过后进入部署；其他分支只做构建和测试。只改文档不会触发。部署使用 `production` 环境，Secret 可以放在仓库或该环境中。外部 PR 执行测试，不获得部署凭证。这些凭证用于 CI。
 
 选择 `pages` 时先创建与 `deploy/pages/wrangler.toml` 同名的 Pages 项目。使用 Pages Git 集成时，无需开启 Actions 部署。
 

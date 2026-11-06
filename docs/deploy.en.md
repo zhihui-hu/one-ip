@@ -107,10 +107,11 @@ Choose Workers Builds or GitHub Actions to avoid duplicate deployments. Actions 
 | -------- | ----------------------- | --------------------------------------------------- |
 | Variable | `ENABLE_CF_DEPLOY=true` | Enable deployment                                   |
 | Variable | `CF_DEPLOY_TARGET`      | `workers` (default) or `pages`                      |
+| Variable | `CF_DEPLOY_BRANCH`      | Branch to deploy; defaults to the default branch    |
 | Secret   | `CLOUDFLARE_API_TOKEN`  | Workers/Pages deployment credentials for the target |
 | Secret   | `CLOUDFLARE_ACCOUNT_ID` | Target Cloudflare account ID                        |
 
-Push to `main` or run `Build and deploy one-ip`. Deployment starts after builds and tests pass. External PRs run tests without deployment credentials. These credentials are used by CI.
+Push to the deploy branch (`main` by default) or run `Build and deploy one-ip` on it. Deployment starts after the build, tests and Docker smoke test pass; other branches only build and test. Documentation-only changes do not trigger a run. Deployment uses the `production` environment, so secrets can live in the repository or that environment. External PRs run tests without deployment credentials. These credentials are used by CI.
 
 For `pages`, first create the Pages project named in `deploy/pages/wrangler.toml`. When using Pages Git integration, leave Actions deployment disabled.
 

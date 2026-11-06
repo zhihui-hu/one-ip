@@ -1,23 +1,22 @@
 name: Build and deploy one-ip
 
+# The same file lives on every branch. Which branch deploys is decided by the
+# CF_DEPLOY_BRANCH repository variable, falling back to the default branch, so
+# forks deploy their default branch (the open-source build) out of the box.
 on:
   pull_request:
     branches: [main, advertising-launch]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   push:
     branches: [main, advertising-launch]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   workflow_dispatch:
-    inputs:
-      source_branch:
-        description: Branch to build and deploy
-        required: true
-        default: advertising-launch
-        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: one-ip-${{ inputs.source_branch || github.ref_name }}
+  group: one-ip-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -31,16 +30,27 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      deploy: ${{ steps.gate.outputs.deploy }}
     steps:
+      - name: Decide whether this run deploys
+        id: gate
+        env:
+          DEPLOY_ENABLED: ${{ vars.ENABLE_CF_DEPLOY == 'true' }}
+          DEPLOY_BRANCH: ${{ vars.CF_DEPLOY_BRANCH || github.event.repository.default_branch }}
+        run: |
+          deploy=false
+          if [ "$GITHUB_EVENT_NAME" != pull_request ] && [ "$DEPLOY_ENABLED" = true ] \
+            && [ "$GITHUB_REF_NAME" = "$DEPLOY_BRANCH" ]; then
+            deploy=true
+          fi
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+          echo "Deploy branch: $DEPLOY_BRANCH; this ref: $GITHUB_REF_NAME; deploy: $deploy"
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.source_branch || github.sha }}
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.32.1
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -51,7 +61,7 @@ jobs:
       - name: Prepare Pages bundle
         run: node scripts/build-server.mjs pages
       - name: Upload deployment assets
-        if: github.event_name != 'pull_request' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/advertising-launch')
+        if: steps.gate.outputs.deploy == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: one-ip-dist
@@ -67,8 +77,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.source_branch || github.sha }}
       - uses: docker/setup-buildx-action@v3
       - name: Build image
         uses: docker/build-push-action@v6
@@ -87,7 +95,7 @@ jobs:
           docker run -d --name one-ip-ci --read-only --cap-drop ALL \
             --security-opt no-new-privileges:true -p 8080:8080 \
             -e PUBLIC_ORIGIN=http://127.0.0.1:8080 one-ip:ci
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             [ "$(docker inspect -f '{{.State.Health.Status}}' one-ip-ci)" = healthy ] && break
             sleep 2
           done
@@ -111,20 +119,17 @@ jobs:
 
   deploy:
     name: Deploy to Cloudflare
-    if: github.event_name != 'pull_request' && (github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/advertising-launch') && vars.ENABLE_CF_DEPLOY == 'true'
-    needs: build
+    if: needs.build.outputs.deploy == 'true'
+    needs: [build, docker]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: production
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.source_branch || github.sha }}
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.32.1
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version-file: .node-version
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -137,7 +142,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::error::Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository secrets."
+            echo "::error::Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repository or environment secrets."
             exit 1
           fi
           case "$CF_DEPLOY_TARGET" in
