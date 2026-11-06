@@ -15,6 +15,14 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 ![桌面首页（已打码）](docs/screenshots/desktop-home-redacted.png)
 
+<table>
+  <tr><th>手机 · 浅色</th><th>手机 · 深色</th></tr>
+  <tr>
+    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="手机浅色首页（已打码）" width="360" /></td>
+    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="手机深色首页（已打码）" width="360" /></td>
+  </tr>
+</table>
+
 ## 功能
 
 - **IP 查询**：IPv4 / IPv6 归属地、运营商、ASN、信誉分、风险标记与地图

@@ -15,6 +15,14 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 
 ![Desktop overview, redacted](docs/screenshots/desktop-home-redacted.png)
 
+<table>
+  <tr><th>Mobile · Light</th><th>Mobile · Dark</th></tr>
+  <tr>
+    <td><img src="docs/screenshots/mobile-home-light-redacted.png" alt="Redacted mobile light overview" width="360" /></td>
+    <td><img src="docs/screenshots/mobile-home-dark-redacted.png" alt="Redacted mobile dark overview" width="360" /></td>
+  </tr>
+</table>
+
 ## Features
 
 - **IP lookup**: IPv4 / IPv6 location, ISP, ASN, reputation score, risk flags and maps
