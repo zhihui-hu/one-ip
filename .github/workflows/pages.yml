@@ -111,7 +111,7 @@ jobs:
           expect 404 http://127.0.0.1:8080/worker/index.js
           expect 200 http://127.0.0.1:8080/api/map/config
           expect 403 -X POST -H 'Origin: https://evil.example' -H 'Content-Type: application/json' \
-            -d '{}' http://127.0.0.1:8080/api/browser/challenges/verify
+            -d '{}' http://127.0.0.1:8080/api/ping/start
           curl -sI http://127.0.0.1:8080/ | grep -qi '^content-security-policy:'
       - name: Container logs
         if: always()
