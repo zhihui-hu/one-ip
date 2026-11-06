@@ -72,14 +72,14 @@ test("failed domestic probe never promotes a proxy or routed IPv6 to local egres
   assert.ok(result.includes(t("home.ipv4ExternalProbe")));
   assert.ok(!result.includes(ipv6.ip));
 });
-test("failed external probe keeps its card without inventing an address", () => {
+test("failed external probe hides its card without inventing an address", () => {
   let tree;
-  render([{ data: ipv4 }, failed], [], {}, (value) => { tree = value; });
+  const result = render([{ data: ipv4 }, failed], [], {}, (value) => { tree = value; });
   const cards = findCards(tree);
-  assert.equal(cards.length, 2);
+  assert.equal(cards.length, 1);
   assert.equal(cards[0].props.data, ipv4);
-  assert.equal(cards[1].props.data, undefined);
-  assert.equal(cards[1].props.pending, false);
+  assert.ok(!result.includes(t("home.ipv4ExternalProbe")));
+  assert.ok(!result.includes(t("home.couldNotDetectIpv")));
 });
 
 test("home retest cancels previous runs before resetting only home query families", async () => {

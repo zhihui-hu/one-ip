@@ -186,3 +186,72 @@ export async function detectDnsExits(
     throw new Error(t("dns.dnsEgressCheckFailedPossiblyDueNetworkProxy"));
   return state;
 }
+
+const publicDnsProviders: [RegExp, string][] = [
+  [/google/i, "Google"],
+  [/cloudflare/i, "Cloudflare"],
+  [/quad9/i, "Quad9"],
+  [/opendns|cisco/i, "OpenDNS"],
+  [/nextdns/i, "NextDNS"],
+  [/adguard/i, "AdGuard"],
+  [/control ?d\b/i, "Control D"],
+  [/cleanbrowsing/i, "CleanBrowsing"],
+  [/mullvad/i, "Mullvad"],
+  [/yandex/i, "Yandex"],
+  [/alibaba|aliyun/i, "AliDNS"],
+  [/tencent|dnspod/i, "DNSPod"],
+  [/baidu/i, "Baidu"],
+];
+/** Name of a well-known public resolver operator, inferred from the ISP. */
+export function publicDnsProvider(isp: string | undefined) {
+  return isp
+    ? publicDnsProviders.find(([pattern]) => pattern.test(isp))?.[1]
+    : undefined;
+}
+
+export type DnsRelation = "match" | "mismatch" | "unknown";
+export type LeakLevel = "safe" | "leak" | "warning" | "unknown";
+export interface DnsAssessment {
+  level: LeakLevel;
+  egressCountries: string[];
+  relations: Record<string, DnsRelation>;
+  mismatched: DnsResolver[];
+  unknown: number;
+}
+
+/** Compare resolver countries with the HTTP egress countries (IPv4/IPv6). */
+export function assessDnsLeak(
+  results: DnsResolver[],
+  egressCountryCodes: (string | undefined)[],
+): DnsAssessment {
+  const egressCountries = [
+    ...new Set(
+      egressCountryCodes.flatMap((code) =>
+        code && /^[a-z]{2}$/i.test(code) ? [code.toUpperCase()] : [],
+      ),
+    ),
+  ];
+  const relations: Record<string, DnsRelation> = {};
+  for (const resolver of results)
+    relations[resolver.ip] =
+      !egressCountries.length || !resolver.country
+        ? "unknown"
+        : egressCountries.includes(resolver.country)
+          ? "match"
+          : "mismatch";
+  const mismatched = results.filter(
+    (resolver) => relations[resolver.ip] === "mismatch",
+  );
+  const unknown = results.filter(
+    (resolver) => relations[resolver.ip] === "unknown",
+  ).length;
+  const level: LeakLevel =
+    !results.length || !egressCountries.length || unknown === results.length
+      ? "unknown"
+      : mismatched.length
+        ? "leak"
+        : unknown
+          ? "warning"
+          : "safe";
+  return { level, egressCountries, relations, mismatched, unknown };
+}

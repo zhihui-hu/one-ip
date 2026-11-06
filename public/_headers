@@ -2,7 +2,7 @@
 # HTTPS connections and images remain open for user-selected diagnostic targets.
 # Local diagnostic probes may use data: connections.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-DnkQo35N/m0MZHMfPpbjwCWsckgDcpIy2Ioi7Clo2js=' https://challenges.cloudflare.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net https://www.gstatic.cn; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: data:; img-src 'self' https: data: blob:; font-src 'self' data:; frame-src 'self' about: https://challenges.cloudflare.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/ https://www.recaptcha.net; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-DnkQo35N/m0MZHMfPpbjwCWsckgDcpIy2Ioi7Clo2js=' https://challenges.cloudflare.com https://static.cloudflareinsights.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.recaptcha.net https://www.gstatic.cn; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: data:; img-src 'self' https: data: blob:; font-src 'self' data:; frame-src 'self' about: https://challenges.cloudflare.com https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/ https://www.recaptcha.net; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer

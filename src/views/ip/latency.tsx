@@ -22,7 +22,7 @@ export function IpLatency({
           <span>{t("common.globalLatencyTest")}</span>
           <span className="ml-auto flex shrink-0 items-center gap-1.5">
             <Button asChild size="sm" variant="outline" className="text-xs">
-              <Link to={`/network/ping/?host=${encodeURIComponent(ip)}`}>
+              <Link to={`/ping/?host=${encodeURIComponent(ip)}`}>
                 {t("ip.latency.fullTestLabel")}
                 <ArrowUpRight aria-hidden="true" />
               </Link>

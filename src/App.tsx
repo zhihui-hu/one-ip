@@ -10,37 +10,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { t } from "@/i18n";
 import { AppLayout } from "@/layout";
-import { legacyRoutes } from "@/layout/routes";
+import { browserChecks, legacyRoutes } from "@/layout/routes";
 import { ToolLayout } from "@/layout/tool-layout";
-import { aiPlatforms } from "@/views/ai/platforms";
 
-const PlatformDiagnostics = lazy(() => import("@/views/ai"));
 const HomePage = lazy(() => import("@/views/home"));
 const ClaudePage = lazy(() => import("@/views/claude"));
 const GptPage = lazy(() => import("@/views/gpt"));
 const IpPage = lazy(() => import("@/views/ip"));
 const LinkPage = lazy(() => import("@/views/link"));
 const BrowserPage = lazy(() => import("@/views/browser"));
-const ChallengesPage = lazy(() => import("@/views/browser/challenges"));
 const PingPage = lazy(() => import("@/views/ping"));
-const SpeedtestPage = lazy(() => import("@/views/network/speedtest"));
 const StatusPage = lazy(() => import("@/views/status"));
-const SubdomainsPage = lazy(() => import("@/views/subdomains"));
+const DnsLeakPage = lazy(() => import("@/views/dns-exit"));
+const WebRtcLeakPage = lazy(() => import("@/views/webrtc/leak-page"));
+const SpeedtestPage = lazy(() => import("@/views/network/speedtest"));
 const WhoisPage = lazy(() => import("@/views/whois"));
-const ClaudeStatusPage = lazy(() => import("@/views/claude/status"));
-const GptStatusPage = lazy(() => import("@/views/gpt/status"));
-const CdnPage = lazy(() => import("@/views/cdn"));
-const DnsExitPage = lazy(() => import("@/views/dns-exit"));
 const PolicyPage = lazy(() => import("@/views/policy"));
+
 function Redirect({ to }: { to: string }) {
   const { search, hash } = useLocation();
   const { ip } = useParams();
+  const [pathname, query] = to.split("?");
   return (
     <Navigate
       replace
       to={{
-        pathname: ip ? `${to}/${encodeURIComponent(ip)}` : to,
-        search,
+        pathname: ip ? `${pathname}/${encodeURIComponent(ip)}` : pathname,
+        search: query ? `?${query}` : search,
         hash,
       }}
     />
@@ -54,65 +50,38 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="terms" element={<PolicyPage page="terms" />} />
         <Route path="privacy" element={<PolicyPage page="privacy" />} />
-        <Route path="lookup" element={<ToolLayout />}>
-          <Route index element={<Navigate replace to="/lookup/ip" />} />
+        <Route element={<ToolLayout />}>
           <Route path="ip">
             <Route index element={<IpPage />} />
             <Route path=":ip" element={<IpPage />} />
           </Route>
           <Route path="whois" element={<WhoisPage />} />
-          <Route path="subdomains" element={<SubdomainsPage />} />
-        </Route>
-        <Route path="network" element={<ToolLayout />}>
-          <Route
-            index
-            element={<Navigate replace to="/network/connectivity" />}
-          />
-          <Route path="connectivity" element={<LinkPage />} />
-          <Route path="dns" element={<DnsExitPage />} />
-          <Route path="cdn" element={<CdnPage />} />
+          <Route path="leak">
+            <Route index element={<Navigate replace to="/leak/dns" />} />
+            <Route path="dns" element={<DnsLeakPage />} />
+            <Route path="webrtc" element={<WebRtcLeakPage />} />
+          </Route>
+          <Route path="unlock">
+            <Route index element={<Navigate replace to="/unlock/sites" />} />
+            <Route path="sites" element={<LinkPage />} />
+            <Route path="gpt" element={<GptPage />} />
+            <Route path="claude" element={<ClaudePage />} />
+          </Route>
           <Route path="speedtest" element={<SpeedtestPage />} />
           <Route path="ping" element={<PingPage />} />
-        </Route>
-        <Route path="browser" element={<ToolLayout />}>
-          <Route
-            index
-            element={<Navigate replace to="/browser/environment" />}
-          />
-          {[
-            "environment",
-            "fingerprint",
-            "consistency",
-            "automation",
-            "privacy",
-          ].map((page) => (
+          <Route path="status" element={<StatusPage />} />
+          <Route path="browser">
             <Route
-              key={page}
-              path={page}
-              element={<BrowserPage key={page} page={page} />}
+              index
+              element={<Navigate replace to="/browser/environment" />}
             />
-          ))}
-          <Route path="challenges" element={<ChallengesPage />} />
-        </Route>
-        <Route path="ai" element={<ToolLayout />}>
-          <Route index element={<Navigate replace to="/ai/gpt" />} />
-          <Route path="gpt" element={<GptPage />} />
-          <Route path="claude" element={<ClaudePage />} />
-          {aiPlatforms
-            .filter((platform) => !["gpt", "claude"].includes(platform.id))
-            .map((platform) => (
+            {browserChecks.map((page) => (
               <Route
-                key={platform.id}
-                path={platform.id}
-                element={
-                  <PlatformDiagnostics key={platform.id} platform={platform} />
-                }
+                key={page}
+                path={page}
+                element={<BrowserPage key={page} page={page} />}
               />
             ))}
-          <Route path="status">
-            <Route index element={<StatusPage />} />
-            <Route path="openai" element={<GptStatusPage />} />
-            <Route path="claude" element={<ClaudeStatusPage />} />
           </Route>
         </Route>
         {Object.entries(legacyRoutes).map(([from, to]) => (

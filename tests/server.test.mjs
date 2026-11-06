@@ -177,7 +177,7 @@ test("trusted proxies supply the rightmost forwarded address or, when enabled, C
 
 test("HTTPS behind a proxy passes the same-origin check via forwarded proto or PUBLIC_ORIGIN", async () => {
   const post = (handle, extra = {}, peer) =>
-    call(handle, "/api/browser/challenges/verify", {
+    call(handle, "/api/ping/start", {
       method: "POST",
       peer,
       body: "{}",
@@ -198,10 +198,13 @@ test("HTTPS behind a proxy passes the same-origin check via forwarded proto or P
     await error(
       await post(trusted.handle, { "X-Forwarded-Proto": "https" }, "10.0.0.2"),
     ),
-    "请选择验证服务",
+    "验证凭证无效，请重新验证",
   );
   const fixed = await app({ PUBLIC_ORIGIN: "https://ip.example.com" });
-  assert.equal(await error(await post(fixed.handle)), "请选择验证服务");
+  assert.equal(
+    await error(await post(fixed.handle)),
+    "验证凭证无效，请重新验证",
+  );
   assert.equal(
     await error(await post(fixed.handle, { Origin: "https://evil.example" })),
     "仅支持同源调用",

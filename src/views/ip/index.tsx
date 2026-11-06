@@ -2,13 +2,14 @@ import { useLayoutEffect, useRef, useState, useId } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { LookupForm } from "@/components/lookup-form";
 import { IpText, ErrorNotice, Pending } from "@/components/toolkit";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useLookupHistory } from "@/hooks/use-lookup-history";
 import { t } from "@/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
 import { Search, X } from "lucide-react";
-import { lookupIp } from "./api";
+import { lookupIpWithFallback } from "./api";
 import type { CoffeeLookup } from "./coffee";
 import { IpDetails } from "./details";
 import { dossierTopClass } from "./styles";
@@ -27,8 +28,9 @@ export default function IpPage() {
     staleTime: 300_000,
     retry: false,
     queryFn: async ({ signal }) => {
-      const result = await lookupIp(ip, signal);
-      history.save(ip, result);
+      const result = await lookupIpWithFallback(ip, signal);
+      // Degraded results must not replace a full cached lookup.
+      if (!result.fallback) history.save(ip, result);
       return result;
     },
   });
@@ -96,7 +98,7 @@ export default function IpPage() {
             value === ip
               ? void query.refetch()
               : navigate({
-                  pathname: `/lookup/ip/${encodeURIComponent(value)}`,
+                  pathname: `/ip/${encodeURIComponent(value)}`,
                   search: location.search,
                 })
           }
@@ -126,7 +128,7 @@ export default function IpPage() {
                 value === ip
                   ? void query.refetch()
                   : navigate({
-                      pathname: `/lookup/ip/${encodeURIComponent(value)}`,
+                      pathname: `/ip/${encodeURIComponent(value)}`,
                       search: location.search,
                     })
               }
@@ -142,6 +144,13 @@ export default function IpPage() {
     <div className="max-md:min-w-0 max-md:max-w-full [&_[data-slot=input-group]]:![border:0] [&_[data-slot=input-group]]:!bg-muted [&_[data-slot=input-group]]:![box-shadow:none]">
       <h1 className="sr-only">{t("common.ipLookup")}</h1>
       <ErrorNotice error={query.error} />
+      {query.data?.fallback && !query.isFetching && (
+        <Alert className="my-4">
+          <AlertDescription>
+            {t("ip.primarySourceUnavailableNotice")}
+          </AlertDescription>
+        </Alert>
+      )}
       {query.isFetching && (
         <p
           className="py-5 text-center text-[0.88rem] leading-[1.8] text-muted-foreground"

@@ -6,7 +6,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/telegram.org.ico"
   },
   {
-    "cc": "cn",
+    "cc": "ai",
     "name": "DeepSeek",
     "slug": "deepseek",
     "host": "www.deepseek.com",
@@ -155,7 +155,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.google.com.ico"
   },
   {
-    "cc": "us",
+    "cc": "streaming",
     "name": "YouTube",
     "url": "https://www.youtube.com/generate_204",
     "icon": "https://icons.duckduckgo.com/ip3/youtube.com.ico"
@@ -173,19 +173,19 @@
     "icon": "https://icons.duckduckgo.com/ip3/cloudflare.com.ico"
   },
   {
-    "cc": "us",
+    "cc": "ai",
     "name": "Claude",
     "url": "https://api.anthropic.com/favicon.ico",
     "icon": "https://icons.duckduckgo.com/ip3/claude.ai.ico"
   },
   {
-    "cc": "us",
+    "cc": "ai",
     "name": "ChatGPT",
     "url": "https://chatgpt.com/cdn-cgi/trace",
     "icon": "https://icons.duckduckgo.com/ip3/chatgpt.com.ico"
   },
   {
-    "cc": "us",
+    "cc": "ai",
     "name": "AI Studio",
     "slug": "gemini",
     "url": "https://generativelanguage.googleapis.com/favicon.ico",
@@ -267,7 +267,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.linkedin.com.ico"
   },
   {
-    "cc": "us",
+    "cc": "streaming",
     "name": "Twitch",
     "slug": "twitch",
     "host": "www.twitch.tv",
@@ -275,7 +275,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.twitch.tv.ico"
   },
   {
-    "cc": "us",
+    "cc": "streaming",
     "name": "Netflix",
     "slug": "netflix",
     "host": "www.netflix.com",
@@ -283,14 +283,14 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.netflix.com.ico"
   },
   {
-    "cc": "gl",
+    "cc": "streaming",
     "name": "TikTok",
     "slug": "tiktok",
     "url": "https://www.tiktok.com/favicon.ico",
     "icon": "https://icons.duckduckgo.com/ip3/www.tiktok.com.ico"
   },
   {
-    "cc": "gl",
+    "cc": "streaming",
     "name": "Spotify",
     "slug": "spotify",
     "url": "https://open.spotify.com/favicon.ico",
@@ -346,7 +346,7 @@
     "icon": "https://icons.duckduckgo.com/ip3/www.bbc.com.ico"
   },
   {
-    "cc": "gl",
+    "cc": "ai",
     "name": "Mistral AI",
     "slug": "mistral",
     "url": "https://mistral.ai/favicon.ico",

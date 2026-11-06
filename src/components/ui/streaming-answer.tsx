@@ -68,6 +68,8 @@ function Caret() {
 export function StreamingAnswer({
   parts,
   speed = 80,
+  animate = true,
+  onDone,
   after,
   className,
   strongClassName = "font-medium text-foreground underline decoration-primary/45 decoration-[1.5px] underline-offset-[5px]",
@@ -75,6 +77,10 @@ export function StreamingAnswer({
   parts: AnswerPart[];
   /** Characters per second. */
   speed?: number;
+  /** False shows the text whole at once, for a reply already seen. */
+  animate?: boolean;
+  /** Called once the whole text is showing (again if the text changes). */
+  onDone?: () => void;
   after?: ReactNode;
   className?: string;
   strongClassName?: string;
@@ -82,11 +88,11 @@ export function StreamingAnswer({
   const text = parts.map(textOf).join("");
   const total = text.length;
   const [shown, setShown] = useState(() =>
-    document.hidden || reducedMotion() ? total : 0,
+    !animate || document.hidden || reducedMotion() ? total : 0,
   );
 
   useEffect(() => {
-    if (shown >= total) return;
+    if (!animate || shown >= total) return;
     const start = performance.now() - (shown * 1000) / speed;
     let frame = requestAnimationFrame(function step(now) {
       const next = wordEnd(
@@ -99,11 +105,16 @@ export function StreamingAnswer({
     return () => cancelAnimationFrame(frame);
     // Restart only when the text itself changes, not on every reveal step.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, total, speed]);
+  }, [text, total, speed, animate]);
 
-  const done = shown >= total;
+  const done = !animate || shown >= total;
+  useEffect(() => {
+    if (done) onDone?.();
+    // Once per finished text, not whenever the callback's identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, text]);
   const full = paragraphsOf(parts, total, strongClassName);
-  const visible = paragraphsOf(parts, shown, strongClassName);
+  const visible = paragraphsOf(parts, done ? total : shown, strongClassName);
   const layer = "col-start-1 row-start-1 space-y-3";
   return (
     <div

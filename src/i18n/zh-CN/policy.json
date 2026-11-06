@@ -24,17 +24,11 @@
   "policy.tsx.serviceChanges": "服务调整",
   "policy.tsx.featuresDataSourcesRateLimitsMayChangeCheck": "本站可能调整功能、数据源和限流规则。使用前请查阅当前页面说明；重要结果请通过相关服务的官方渠道核实。",
   "policy.tsx.thirdPartyServicesUsed": "第三方服务明细",
-  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP 归属查询可能请求 ipwho.is、IP.SB 或 ipify；IP 健康度使用 Net.Coffee。全球 Ping 向 Globalping 提交目标和探针选择；地图优先加载天地图，未配置或不可用时回退到 OpenStreetMap；服务状态读取各厂商公开接口。具体请求取决于你打开的页面和选择的检测。",
+  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP 归属查询可能请求 ipwho.is、ipquery.io、IP.SB 或 ipify；IP 健康度使用 Net.Coffee。全球 Ping 向 Globalping 提交目标和探针选择；地图优先加载天地图，未配置或不可用时回退到 OpenStreetMap；服务状态读取各厂商公开接口。具体请求取决于你打开的页面和选择的检测。",
   "policy.tsx.webrtcAndDevicePermissions": "WebRTC 与设备权限",
   "policy.tsx.webrtcChecksConnectGoogleCloudflareStunServicesMay": "WebRTC 检测连接 Google、Cloudflare 的 STUN 服务，可能显示与网页请求不同的出口地址。摄像头、麦克风和定位测试由你点击触发并受浏览器授权控制；媒体权限测试获取流后立即关闭，不录制音视频。你可以在浏览器设置中撤销权限。",
   "policy.tsx.optionalCaptcha": "可选验证码",
   "policy.tsx.whenConfiguredUsedCaptchaFeaturesLoadCloudflareTurnstile": "配置并使用验证码功能时，浏览器会加载 Cloudflare Turnstile 或 Google reCAPTCHA。验证凭证经本站发送至对应服务校验；这些服务还会按自身规则处理设备和网络信号。",
   "policy.tsx.retentionAndDeletion": "保存与清除",
-  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "查询历史在当前浏览器按类别保留最近 10 条成功查询及结果，清除本站数据即可删除。服务端使用请求 IP 做限流；托管配置启用了采样日志，实际记录与保留时间取决于部署设置。清除浏览器数据不会删除第三方或托管服务的记录。如需咨询相关数据，请联系作者并说明请求时间和功能。",
-  "policy.tsx.optionalPublicIpv4Ipv6DefaultsRequestEgressRequired": "可选，公网 IPv4 / IPv6；默认查询请求出口，本地开发必填。",
-  "policy.tsx.jsonDefaultOrText": "json（默认）或 text。",
-  "policy.tsx.ipLocationIspAsnReputationScoreRiskFlags": "IP、位置、ISP、ASN、信誉分和风险标记；未知值为 null。",
-  "policy.tsx.75100Good4574Moderate044": "75–100 good · 45–74 moderate · 0–44 poor；无分数时 unknown。",
-  "policy.tsx.jsonError400InvalidInput403CrossSite": "JSON error：400 参数错误 · 403 跨站请求 · 405 方法错误 · 429 限流 · 502 上游失败 · 503 请指定 IP。",
-  "policy.tsx.netCoffeeDataIpReputationReferenceBrowserCalls": "数据来自 Net.Coffee，仅供 IP 信誉参考。浏览器仅支持同源调用，限流后请稍后重试。"
+  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "查询历史在当前浏览器按类别保留最近 10 条成功查询及结果，清除本站数据即可删除。服务端使用请求 IP 做限流；托管配置启用了采样日志，实际记录与保留时间取决于部署设置。清除浏览器数据不会删除第三方或托管服务的记录。如需咨询相关数据，请联系作者并说明请求时间和功能。"
 }

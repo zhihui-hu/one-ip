@@ -72,10 +72,13 @@ export function PrivacyToggle({ iconOnly = false }: { iconOnly?: boolean }) {
 export function IpText({
   ip,
   link = true,
+  newTab = false,
   className,
 }: {
   ip?: string;
   link?: boolean;
+  /** Open the IP detail page in a new browser tab. */
+  newTab?: boolean;
   className?: string;
 }) {
   const hidden = useAtomValue(hideIpAtom);
@@ -93,7 +96,12 @@ export function IpText({
       <AnimatedValue value={ip}>
         {link && !hidden ? (
           <UnderlineHover asChild>
-            <Link to={`/lookup/ip/${encodeURIComponent(ip)}`}>{content}</Link>
+            <Link
+              to={`/ip/${encodeURIComponent(ip)}`}
+              {...(newTab && { target: "_blank", rel: "noopener" })}
+            >
+              {content}
+            </Link>
           </UnderlineHover>
         ) : (
           content
@@ -228,25 +236,5 @@ export function ActionButton({
         children
       )}
     </Button>
-  );
-}
-export function ReadingLinks({
-  links,
-  title = t("common.furtherReadingLabel"),
-}: {
-  links: { path: string; title: string }[];
-  title?: string;
-}) {
-  return (
-    <section className="mt-8 max-xs:mt-6">
-      <h2 className="mb-2 text-[1.4rem] font-bold">{title}</h2>
-      <div className="grid grid-cols-[1fr_1fr] gap-x-6 gap-y-1.5 text-[0.9rem] text-muted-foreground max-xs:grid-cols-1">
-        {links.map((item) => (
-          <UnderlineHover asChild key={item.path}>
-            <Link to={item.path}>{item.title}</Link>
-          </UnderlineHover>
-        ))}
-      </div>
-    </section>
   );
 }

@@ -30,6 +30,8 @@ import rawtargets from "./targets.json";
 const targets = rawtargets.map(localizeCatalogItem);
 
 const groups = [
+  ["ai", t("link.aiUnlock")],
+  ["streaming", t("link.streamingUnlock")],
   ["cn", t("common.china")],
   ["jp", t("common.japan")],
   ["us", t("common.unitedStates")],
@@ -201,7 +203,9 @@ function ConnectivityGroup({
       <div className="mb-2 flex items-center justify-between gap-3">
         <h2 className="m-0 flex shrink-0 items-center gap-2 text-[1rem] font-semibold [&>span]:ml-auto [&>span]:text-[0.78rem] [&>span]:font-normal [&>span]:text-subtle">
           {["cn", "jp", "us", "gl"].includes(cc) && (
-            <CountryFlag code={cc === "gl" ? undefined : cc} />
+            <CountryFlag
+              code={cc.length === 2 && cc !== "gl" ? cc : undefined}
+            />
           )}
           {label}
         </h2>

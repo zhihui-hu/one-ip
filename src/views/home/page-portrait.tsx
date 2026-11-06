@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { LazyMount } from "@/components/lazy-mount";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -5,16 +6,14 @@ import {
   StreamingAnswer,
   type AnswerPart as Part,
 } from "@/components/ui/streaming-answer";
-import { useTheme } from "@/hooks/use-theme";
 import { locale, t, type MessageKey } from "@/i18n";
 import { countryName } from "@/lib/country";
 import { sameIp } from "@/lib/ip-address";
-import type { Geo } from "@/lib/types";
 import { fingerprint } from "@/views/browser/collect";
 import type { BrowserNavigator } from "@/views/browser/environment";
 import { lookupIp } from "@/views/ip/api";
 import { useQuery } from "@tanstack/react-query";
-import { getBrowserIp, getDomesticIp, getGeo } from "./api";
+import { getBrowserIp, getDomesticIp, getGeo, getOverseasIp } from "./api";
 
 /** Splits a message on its {n} placeholders, so the values can be highlighted. */
 function fill(key: MessageKey, values: (string | number)[]): Part[] {
@@ -28,14 +27,6 @@ function fill(key: MessageKey, values: (string | number)[]): Part[] {
   }
   if (last < template.length) parts.push(template.slice(last));
   return parts;
-}
-
-// Said the way a person would: "美国 Los Angeles", "Los Angeles, United States".
-function placeOf(geo: Geo) {
-  const country = countryName(geo.country_code) ?? geo.country;
-  const town = geo.city ?? geo.region;
-  if (locale === "en") return [town, country].filter(Boolean).join(", ");
-  return [country, town].filter(Boolean).join(" ");
 }
 
 // "新加坡时间", "Pacific Time": friendlier than "Asia/Singapore".
@@ -123,31 +114,101 @@ function languageName(tag: string) {
   }
 }
 
+// By the visitor's own clock: 5–11 morning, 11–13 noon, 13–18 afternoon,
+// 18–23 evening, otherwise late night.
+function greetingOf(hour: number): MessageKey {
+  if (hour >= 5 && hour < 11) return "home.portrait.morning";
+  if (hour >= 11 && hour < 13) return "home.portrait.noon";
+  if (hour >= 13 && hour < 18) return "home.portrait.afternoon";
+  if (hour >= 18 && hour < 23) return "home.portrait.evening";
+  return "home.portrait.lateNight";
+}
+
 type Company = {
   is_proxy?: boolean;
   is_vpn?: boolean;
   is_tor?: boolean;
-  is_datacenter?: boolean;
-  is_mobile?: boolean;
-  isResidential?: boolean;
   trust_score?: number;
 };
 
-function typeOf(company?: Company) {
-  if (!company) return undefined;
-  if (company.is_proxy || company.is_vpn || company.is_tor)
-    return t("home.portrait.typeProxy");
-  if (company.is_datacenter) return t("home.portrait.typeDatacenter");
-  if (company.is_mobile) return t("home.portrait.typeMobile");
-  if (company.isResidential) return t("home.portrait.typeResidential");
-  return undefined;
+// Same bands as the IP page: 90–100 high, 75–89 good, 45–74 fair, below that low.
+function scoreComment(score: number): MessageKey {
+  if (score >= 90) return "home.portrait.scoreHigh";
+  if (score >= 75) return "home.portrait.scoreGood";
+  if (score >= 45) return "home.portrait.scoreFair";
+  return "home.portrait.scoreLow";
+}
+
+// A rough word on the machine, by logical cores (browsers may cap this).
+function powerComment(cores: number): MessageKey {
+  if (cores >= 12) return "home.portrait.powerHigh";
+  if (cores >= 8) return "home.portrait.powerGood";
+  if (cores >= 4) return "home.portrait.powerFair";
+  return "home.portrait.powerLow";
+}
+
+// "中国电信" reads better than "Chinanet" in a Chinese letter.
+function ispName(isp: string) {
+  if (locale === "en") return isp;
+  if (/china ?telecom|chinanet/i.test(isp)) return "中国电信";
+  if (/china ?unicom|cnc ?group/i.test(isp)) return "中国联通";
+  if (/china ?mobile|cmnet/i.test(isp)) return "中国移动";
+  return isp;
+}
+
+// The letter as last written this session, so a return visit skips the typing.
+const cacheKey = "ip-tools:portrait-letter";
+
+function readCachedLetter(): Part[] | undefined {
+  try {
+    const value: unknown = JSON.parse(sessionStorage.getItem(cacheKey) ?? "");
+    return Array.isArray(value) ? (value as Part[]) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function cacheLetter(parts: Part[]) {
+  try {
+    sessionStorage.setItem(cacheKey, JSON.stringify(parts));
+  } catch {
+    // Storage full or blocked: the next visit just types it out again.
+  }
+}
+
+/** True once the element has scrolled properly into view; stays true after. */
+function useSeen<T extends Element>() {
+  const ref = useRef<T>(null);
+  const [seen, setSeen] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
+  useEffect(() => {
+    const element = ref.current;
+    if (seen || !element) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setSeen(true);
+          observer.disconnect();
+        }
+      },
+      // Its top must clear the bottom fifth of the screen, not just peek in.
+      { rootMargin: "0px 0px -20% 0px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [seen]);
+  return [ref, seen] as const;
 }
 
 function PortraitLetter() {
-  const { resolvedTheme } = useTheme();
+  const [cardRef, seen] = useSeen<HTMLDivElement>();
+  // Read the clock once, so a re-render can't switch the greeting mid-letter.
+  const [hour] = useState(() => new Date().getHours());
+  const [cached] = useState(readCachedLetter);
   const external = useQuery({
     queryKey: ["browser-ip", 4],
-    queryFn: ({ signal }) => getBrowserIp(4, signal),
+    queryFn: ({ signal }) => getOverseasIp(signal),
     retry: false,
     staleTime: 60_000,
   });
@@ -174,7 +235,6 @@ function PortraitLetter() {
     staleTime: 60_000,
   });
   const geo = useQuery(geoQuery(ip));
-  const geo6 = useQuery(geoQuery(ip6));
   const domesticGeo = useQuery(geoQuery(domesticIp));
   const reputation = useQuery({
     queryKey: ["lookup-ip-coffee", ip],
@@ -199,7 +259,6 @@ function PortraitLetter() {
     !external6.isPending &&
     !domestic.isPending &&
     (!ip || (!geo.isPending && !reputation.isPending)) &&
-    (!ip6 || !geo6.isPending) &&
     (!split || !domesticGeo.isPending) &&
     !visitor.isPending;
 
@@ -208,56 +267,64 @@ function PortraitLetter() {
   const home = split
     ? { ip: domesticIp!, ...domestic.data, ...domesticGeo.data }
     : where;
-  const nav = navigator as BrowserNavigator;
   const unknown = t("common.unknown");
   const parts: Part[] = [];
 
-  // The network: the exit sites see, what kind of address it is, the other routes.
+  // A hello for the time of day, to wherever they really seem to be.
   const town =
     home?.city ?? countryName(home?.country_code) ?? home?.country ?? "";
+  parts.push(
+    t(greetingOf(hour)),
+    ...(town
+      ? fill("home.portrait.from", [town])
+      : [t("home.portrait.greetEnd")]),
+    "\n",
+  );
+
+  // The network: the browser, the exits sites see, and what the score says.
+  const nav = navigator as BrowserNavigator;
+  const browser = browserOf(nav.userAgent);
   if (where) {
-    const type = typeOf(company);
+    const proxied =
+      split || company?.is_proxy || company?.is_vpn || company?.is_tor;
     const score = company?.trust_score;
-    const isp = where.isp || unknown;
     parts.push(
-      ...fill(split ? "home.portrait.overseasIp" : "home.portrait.yourIp", [
-        where.ip,
-        placeOf(where) || unknown,
-      ]),
-      ...(type
-        ? fill("home.portrait.ownedBy", [isp, type])
-        : fill("home.portrait.runBy", [isp])),
+      ...fill(
+        proxied ? "home.portrait.exitProxy" : "home.portrait.exitDirect",
+        [browser, where.ip],
+      ),
+      ...(ip6 ? fill("home.portrait.ipv6", [ip6]) : []),
       ...(typeof score === "number"
-        ? fill("home.portrait.score", [score])
-        : []),
-      t("home.portrait.period"),
+        ? [...fill("home.portrait.score", [score]), t(scoreComment(score))]
+        : [t("home.portrait.period")]),
     );
     if (split && home)
       parts.push(
-        ...fill("home.portrait.domesticExit", [
-          placeOf(home) || unknown,
-          home.isp || unknown,
+        ...fill("home.portrait.domestic", [
+          ispName(home.isp || unknown),
           home.ip,
-          town || placeOf(home) || unknown,
         ]),
       );
     else if (domesticIp) parts.push(t("home.portrait.direct"));
-  } else parts.push(t("home.portrait.noIp"));
-  if (ip6) {
-    const v6 = { ip: ip6, ...geo6.data };
-    const near =
-      where &&
-      v6.country_code === where.country_code &&
-      (v6.city ?? "") === (where.city ?? "");
-    parts.push(
-      ...(near
-        ? fill("home.portrait.ipv6Near", [ip6])
-        : fill("home.portrait.ipv6Far", [ip6, placeOf(v6) || unknown])),
-    );
+  } else {
+    parts.push(t("home.portrait.noIp"));
+    if (ip6) parts.push(...fill("home.portrait.onlyIpv6", [ip6]));
   }
   parts.push("\n");
 
-  // Language and clock, against where the IP is.
+  // The machine, then its language and clock against where the IP is.
+  const mobile = /Mobi|Android|iPhone|iPad/.test(nav.userAgent);
+  const cores = nav.hardwareConcurrency;
+  const gpu = gpuOf();
+  parts.push(
+    ...fill(mobile ? "home.portrait.phone" : "home.portrait.computer", [
+      osOf(nav.userAgent, nav.userAgentData?.platform || nav.platform),
+      cores ?? "?",
+      `${screen.width} × ${screen.height}`,
+    ]),
+    ...(gpu ? fill("home.portrait.gpu", [gpu]) : []),
+    t(cores ? powerComment(cores) : "home.portrait.period"),
+  );
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   parts.push(
     ...fill("home.portrait.language", [
@@ -279,21 +346,6 @@ function PortraitLetter() {
     );
   parts.push("\n");
 
-  // The device, and how they like it to look.
-  const mobile = /Mobi|Android|iPhone|iPad/.test(nav.userAgent);
-  const gpu = gpuOf();
-  parts.push(
-    ...fill(mobile ? "home.portrait.phone" : "home.portrait.computer", [
-      osOf(nav.userAgent, nav.userAgentData?.platform || nav.platform),
-      browserOf(nav.userAgent),
-      `${screen.width} × ${screen.height}`,
-      nav.hardwareConcurrency ?? "?",
-    ]),
-    ...(gpu ? fill("home.portrait.gpu", [gpu]) : [t("home.portrait.period")]),
-    t(resolvedTheme === "dark" ? "home.portrait.dark" : "home.portrait.light"),
-    "\n",
-  );
-
   // What it adds up to.
   if (visitor.data)
     parts.push(
@@ -304,11 +356,16 @@ function PortraitLetter() {
   parts.push(t("home.portrait.farewell"));
 
   return (
-    <Card aria-label={t("home.portrait.title")}>
+    <Card ref={cardRef} aria-label={t("home.portrait.title")}>
       <CardContent>
-        {ready ? (
+        {/* Data loads ahead of time; the typing waits until it can be watched.
+            Seen before this session: show the last letter at once, then the
+            fresh one in its place when it's ready, without typing either. */}
+        {cached || (ready && seen) ? (
           <StreamingAnswer
-            parts={parts}
+            parts={ready ? parts : cached!}
+            animate={!cached}
+            onDone={() => ready && cacheLetter(parts)}
             speed={locale === "en" ? 200 : 80}
             className="text-[14px] leading-7 text-muted-foreground"
             after={
@@ -340,7 +397,7 @@ export function PagePortrait() {
   return (
     <LazyMount
       className="mb-3"
-      threshold={0.2}
+      rootMargin="300px 0px"
       fallback={
         <Card aria-label={t("home.portrait.title")}>
           <CardContent>

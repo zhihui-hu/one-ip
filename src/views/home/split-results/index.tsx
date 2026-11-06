@@ -210,7 +210,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             <UnderlineHover asChild>
               <Link
                 className="text-[0.78rem] text-muted-foreground"
-                to="/network/connectivity"
+                to="/unlock/sites"
               >
                 {t("home.viewAll")}
               </Link>
@@ -238,7 +238,11 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
                       className={`shrink-0 rounded-[5px] px-1.5 py-0.5 text-[11px] ${routeClass[route]}`}
                     >
                       {t(
-                        `home.route${route === "direct" ? "Direct" : route === "proxy" ? "Proxy" : "Unknown"}`,
+                        route === "direct"
+                          ? "home.routeDirect"
+                          : route === "proxy"
+                            ? "home.routeProxy"
+                            : "home.routeUnknown",
                       )}
                     </span>
                     <span className="min-w-0 text-[13px] font-semibold wrap-anywhere">
@@ -382,7 +386,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
             <div>
               {t("common.egressIp")}
               {detail.geo?.ip ? (
-                <IpText ip={detail.geo.ip} />
+                <IpText ip={detail.geo.ip} newTab={summary} />
               ) : (
                 t("home.egressIpWasNotReadable")
               )}
@@ -407,7 +411,7 @@ export function SplitResults({ summary = false }: { summary?: boolean }) {
           <div className="space-y-3">
             {selectedGroup?.addresses.map((geo) => (
               <div key={geo.ip}>
-                <IpText ip={geo.ip} />
+                <IpText ip={geo.ip} newTab={summary} />
               </div>
             ))}
             <div className="flex flex-wrap gap-2">

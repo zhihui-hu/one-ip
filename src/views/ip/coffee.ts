@@ -162,6 +162,8 @@ export const coffeeIpSchema = z
 export type CoffeeIp = z.infer<typeof coffeeIpSchema>;
 export interface CoffeeLookup extends Lookup {
   coffee: CoffeeIp;
+  /** Set when Net.Coffee was unreachable and only same-origin geo data is shown. */
+  fallback?: boolean;
 }
 export function coffeeThreatLabels(data: CoffeeIp, riskOnly = false): string[] {
   return (data.intelligence?.threats ?? [])

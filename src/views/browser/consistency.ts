@@ -6,7 +6,7 @@ export interface Check {
     "consistent" | "different" | "detected" | "not-detected" | "unavailable";
   detail: string;
 }
-export function platformFamily(value: string) {
+function platformFamily(value: string) {
   if (/Android/i.test(value)) return "Android";
   if (/iPhone|iPad|iPod|iOS/i.test(value)) return "iOS";
   if (/Windows|Win32|Win64/i.test(value)) return "Windows";

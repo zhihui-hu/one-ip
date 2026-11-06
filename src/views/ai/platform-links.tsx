@@ -8,13 +8,7 @@ export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
     <div className="mt-4 flex flex-wrap gap-2">
       {[
         { name: t("ai.website"), url: `https://${platform.domain}` },
-        {
-          name:
-            platform.id === "qwen"
-              ? t("ai.apiEndpointUs")
-              : t("ai.apiEndpoint"),
-          url: platform.apiUrl,
-        },
+        { name: t("ai.apiEndpoint"), url: platform.apiUrl },
         { name: t("common.apiDocumentation"), url: platform.docsUrl },
       ].map((link) => (
         <Button variant="outline" size="sm" asChild key={link.name}>
@@ -24,7 +18,7 @@ export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
         </Button>
       ))}
       <Button variant="outline" size="sm" asChild>
-        <Link to={`/ai/status?service=${platform.statusId}`}>
+        <Link to={`/status?service=${platform.statusId}`}>
           {t("navigation.serviceStatus")}
         </Link>
       </Button>
@@ -32,23 +26,21 @@ export function AiPlatformLinks({ platform }: { platform: AiPlatform }) {
         <Link to="/browser/privacy">{t("common.permissionsPrivacy")}</Link>
       </Button>
       <Button variant="outline" size="sm" asChild>
-        <Link to="/lookup/ip">{t("ai.lookUpPublicIp")}</Link>
+        <Link to="/ip">{t("ai.lookUpPublicIp")}</Link>
       </Button>
-      {["gpt", "claude"].includes(platform.id) && (
-        <Button variant="outline" size="sm" asChild>
-          <a
-            href={
-              platform.id === "claude"
-                ? "https://www.anthropic.com/supported-countries"
-                : "https://platform.openai.com/docs/supported-countries"
-            }
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t("ai.supportedRegions")}
-          </a>
-        </Button>
-      )}
+      <Button variant="outline" size="sm" asChild>
+        <a
+          href={
+            platform.id === "claude"
+              ? "https://www.anthropic.com/supported-countries"
+              : "https://platform.openai.com/docs/supported-countries"
+          }
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t("ai.supportedRegions")}
+        </a>
+      </Button>
     </div>
   );
 }

@@ -27,7 +27,6 @@ export const aiPlatforms = [
     statusId: "33",
     name: "Grok",
     domain: "grok.com",
-    statusPage: "https://status.x.ai",
   },
   {
     id: "perplexity",
@@ -45,8 +44,6 @@ export const aiPlatforms = [
     statusId: "31",
     name: "Gemini",
     domain: "gemini.google.com",
-    statusPage: "https://aistudio.google.com/status",
-    statusLabel: t("ai.aiStudioGeminiApiStatus"),
   },
   {
     id: "deepseek",
@@ -55,7 +52,6 @@ export const aiPlatforms = [
     statusId: "32",
     name: "DeepSeek",
     domain: "chat.deepseek.com",
-    statusPage: "https://status.deepseek.com",
   },
   {
     id: "qwen",

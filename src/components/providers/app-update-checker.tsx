@@ -4,6 +4,10 @@ import { t } from "@/i18n";
 import { updateAvailableAtom } from "@/store/app-update";
 import { useAtom } from "jotai";
 
+/** "Remind me later" hides the notice for this long. */
+const snoozeMs = 30 * 60_000;
+let snoozedUntil = 0;
+
 type WorkerMessage = {
   type: "baseline" | "unchanged" | "changed" | "unavailable" | "error";
   message?: string;
@@ -42,7 +46,8 @@ export function AppUpdateChecker() {
       });
     };
     const onMessage = ({ data }: MessageEvent<WorkerMessage>) => {
-      if (data?.type === "changed") setAvailable(true);
+      if (data?.type === "changed" && Date.now() >= snoozedUntil)
+        setAvailable(true);
       if (data?.type === "error")
         console.debug("App update check failed.", data.message);
     };
@@ -70,7 +75,10 @@ export function AppUpdateChecker() {
   return (
     <UpdateAvailableNotice
       open={available}
-      onOpenChange={setAvailable}
+      onOpenChange={(open) => {
+        if (!open) snoozedUntil = Date.now() + snoozeMs;
+        setAvailable(open);
+      }}
       onUpdate={() => {
         const url = new URL(window.location.href);
         url.searchParams.set("t", Date.now().toString());
@@ -78,7 +86,6 @@ export function AppUpdateChecker() {
       }}
       title={t("appUpdate.yourNextUpdateIsReady")}
       description={t("appUpdate.tryTheNewVersionWhenYouReReady")}
-      updateLabel={t("appUpdate.tryTheUpdate")}
       updatingLabel={t("appUpdate.gettingItReady")}
     />
   );

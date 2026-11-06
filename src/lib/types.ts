@@ -29,9 +29,15 @@ export interface Lookup {
   risk: Risk;
   rdap?: Record<string, unknown>;
 }
+export type RtcCandidateKind = "host" | "srflx" | "prflx" | "relay";
+export type RtcStatus = "match" | "leak" | "local" | "unverified";
 export interface RtcResult {
   ip: string;
   type: string;
   public: boolean;
   geo?: Geo;
+  kind?: RtcCandidateKind;
+  family?: 4 | 6;
+  protocols?: string[];
+  status?: RtcStatus;
 }

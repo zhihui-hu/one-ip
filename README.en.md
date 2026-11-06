@@ -25,11 +25,11 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 
 ## Features
 
-- **IP lookup**: IPv4 / IPv6 location, ISP, ASN, reputation score, risk flags and maps
-- **Network diagnostics**: per-site egress routing, connectivity timing, global Ping, DNS / CDN, WHOIS
-- **Browser checks**: fingerprints, consistency checks, automation signals, permissions and WebRTC
-- **AI access**: connectivity and egress comparison for ChatGPT, Claude, Gemini and more
-- **Service status**: official status feeds and incidents in one place
+- **Current IP (home)**: IPv4 / IPv6 location, ISP, ASN, reputation score and maps; IP checks open in a new tab
+- **Leak test**: DNS leaks and WebRTC leaks
+- **Network unlock**: reachability and routed egress for AI, streaming and regional sites, plus ChatGPT and Claude diagnostics
+- **Speed test**: download, upload and latency over Cloudflare's edge network
+- **More tools**: WHOIS, global Ping, browser fingerprint and consistency checks, service status
 - Chinese / English, light / dark themes, mobile layouts; native browser [WebMCP](https://developer.chrome.com/docs/ai/webmcp/) tools
 
 Results rely on third-party services and may be affected by rate limits or CORS. IP classifications and scores are for reference only.

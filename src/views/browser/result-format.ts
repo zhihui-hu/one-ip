@@ -1,6 +1,6 @@
 import { t } from "@/i18n";
 
-export const labels: Record<string, string> = {
+const labels: Record<string, string> = {
   navigator: t("common.browserEnvironment"),
   canvas: t("browser.results.canvasDrawing"),
   audio: t("browser.results.audioFingerprint"),
@@ -132,7 +132,7 @@ export function parseDetail(detail: string | undefined): unknown {
     return detail;
   }
 }
-export function asRecord(value: unknown): Record<string, unknown> {
+function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};

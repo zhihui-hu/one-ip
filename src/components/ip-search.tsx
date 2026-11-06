@@ -51,7 +51,7 @@ export function IpSearch() {
     setOpen(false);
     setIp("");
     navigate({
-      pathname: `/lookup/ip/${encodeURIComponent(value)}`,
+      pathname: `/ip/${encodeURIComponent(value)}`,
       search: location.search,
     });
   };

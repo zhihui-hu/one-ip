@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseDnsResponse, detectDnsExits } from "../src/views/dns-exit/api.ts";
+import {
+  assessDnsLeak,
+  detectDnsExits,
+  parseDnsResponse,
+  publicDnsProvider,
+} from "../src/views/dns-exit/api.ts";
 
 test("DNS parsers keep all resolvers and exclude Fastly client IP", () => {
   assert.deepEqual(
@@ -105,4 +110,34 @@ test("multi-source probes merge results, retain failures and use fresh domains",
   } finally {
     globalThis.fetch = original;
   }
+});
+
+test("DNS leak assessment compares resolver countries with HTTP egress", () => {
+  const resolvers = [
+    { ip: "8.8.8.8", geo: "", country: "US" },
+    { ip: "202.96.128.86", geo: "", country: "CN" },
+    { ip: "9.9.9.9", geo: "" },
+  ];
+  const leak = assessDnsLeak(resolvers, ["us", undefined]);
+  assert.equal(leak.level, "leak");
+  assert.deepEqual(leak.egressCountries, ["US"]);
+  assert.deepEqual(
+    leak.mismatched.map((item) => item.ip),
+    ["202.96.128.86"],
+  );
+  assert.equal(leak.relations["9.9.9.9"], "unknown");
+  assert.equal(assessDnsLeak(resolvers.slice(0, 1), ["US"]).level, "safe");
+  assert.equal(
+    assessDnsLeak([resolvers[0], resolvers[2]], ["US", "JP"]).level,
+    "warning",
+  );
+  assert.equal(assessDnsLeak(resolvers, []).level, "unknown");
+  assert.equal(assessDnsLeak([], ["US"]).level, "unknown");
+});
+
+test("well-known public resolvers are labelled by ISP", () => {
+  assert.equal(publicDnsProvider("Google LLC"), "Google");
+  assert.equal(publicDnsProvider("Cloudflare, Inc."), "Cloudflare");
+  assert.equal(publicDnsProvider("China Telecom"), undefined);
+  assert.equal(publicDnsProvider(undefined), undefined);
 });

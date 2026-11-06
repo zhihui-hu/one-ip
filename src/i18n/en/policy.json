@@ -24,17 +24,11 @@
   "policy.tsx.serviceChanges": "Service changes",
   "policy.tsx.featuresDataSourcesRateLimitsMayChangeCheck": "Features, data sources and rate limits may change. Check the current instructions before use and verify important results through the relevant official service.",
   "policy.tsx.thirdPartyServicesUsed": "Third-party services used",
-  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP lookups may contact ipwho.is, IP.SB or ipify; IP health uses Net.Coffee. Global ping sends targets and probe selections to Globalping; maps prefer Tianditu and fall back to OpenStreetMap when it is not configured or unavailable; service status reads providers’ public endpoints. Requests depend on the pages and checks you select.",
+  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP lookups may contact ipwho.is, ipquery.io, IP.SB or ipify; IP health uses Net.Coffee. Global ping sends targets and probe selections to Globalping; maps prefer Tianditu and fall back to OpenStreetMap when it is not configured or unavailable; service status reads providers’ public endpoints. Requests depend on the pages and checks you select.",
   "policy.tsx.webrtcAndDevicePermissions": "WebRTC and device permissions",
   "policy.tsx.webrtcChecksConnectGoogleCloudflareStunServicesMay": "WebRTC checks connect to Google and Cloudflare STUN services and may reveal an egress address different from web requests. Camera, microphone and location tests start when clicked and are controlled by browser permissions. Media permission tests close the stream immediately without recording audio or video. Revoke permissions in browser settings.",
   "policy.tsx.optionalCaptcha": "Optional CAPTCHA",
   "policy.tsx.whenConfiguredUsedCaptchaFeaturesLoadCloudflareTurnstile": "When configured and used, CAPTCHA features load Cloudflare Turnstile or Google reCAPTCHA. This site forwards verification tokens to the provider for validation. Those services also process device and network signals under their own policies.",
   "policy.tsx.retentionAndDeletion": "Retention and deletion",
-  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "Lookup history keeps the latest 10 successful queries and results per category in the current browser; clear site data to remove it. The server uses request IPs for rate limiting. Hosting configuration enables sampled logs; actual records and retention depend on deployment settings. Clearing browser data does not remove third-party or hosting records. Contact the author with the request time and feature for data questions.",
-  "policy.tsx.optionalPublicIpv4Ipv6DefaultsRequestEgressRequired": "Optional public IPv4 / IPv6; defaults to request egress. Required locally.",
-  "policy.tsx.jsonDefaultOrText": "json (default) or text.",
-  "policy.tsx.ipLocationIspAsnReputationScoreRiskFlags": "IP, location, ISP, ASN, reputation score and risk flags; unknown values are null.",
-  "policy.tsx.75100Good4574Moderate044": "75–100 good · 45–74 moderate · 0–44 poor; unknown when no score is available.",
-  "policy.tsx.jsonError400InvalidInput403CrossSite": "JSON error: 400 invalid input · 403 cross-site request · 405 wrong method · 429 rate limit · 502 upstream failure · 503 specify an IP.",
-  "policy.tsx.netCoffeeDataIpReputationReferenceBrowserCalls": "Net.Coffee data is for IP reputation reference. Browser calls must be same-origin. Retry later after rate limiting."
+  "policy.tsx.lookupHistoryKeepsLatest10SuccessfulQueriesResults": "Lookup history keeps the latest 10 successful queries and results per category in the current browser; clear site data to remove it. The server uses request IPs for rate limiting. Hosting configuration enables sampled logs; actual records and retention depend on deployment settings. Clearing browser data does not remove third-party or hosting records. Contact the author with the request time and feature for data questions."
 }

@@ -1,114 +1,118 @@
 import { t } from "@/i18n";
-import { aiPlatforms } from "@/views/ai/platforms";
 
+/**
+ * Feature groups that own several pages. They are no longer rendered as
+ * header links; every page is reached from the flat tool directory instead.
+ */
 export const navigationRoutes = [
   {
-    value: "/",
-    label: t("navigation.overview"),
-    short: t("navigation.overview"),
+    path: "/leak",
+    label: t("navigation.leakTest"),
+    short: t("navigation.leakTestShort"),
   },
   {
-    value: "/lookup/",
-    label: t("navigation.lookup"),
-    short: t("navigation.lookup"),
+    path: "/unlock",
+    label: t("navigation.networkUnlock"),
+    short: t("navigation.networkUnlockShort"),
   },
   {
-    value: "/network/",
-    label: t("navigation.network"),
-    short: t("navigation.network"),
+    path: "/speedtest",
+    label: t("navigation.speedtest"),
+    short: t("navigation.speedtestShort"),
   },
-  {
-    value: "/browser/",
-    label: t("navigation.browser"),
-    short: t("navigation.browser"),
-  },
-  { value: "/ai/", label: "AI", short: "AI" },
 ] as const;
-/** Each section is one page; its tools are tabs inside that page. */
-export const toolGroups = {
-  lookup: [
-    { path: "/lookup/ip", label: t("navigation.ipCheck") },
-    { path: "/lookup/whois", label: "WHOIS" },
-    { path: "/lookup/subdomains", label: t("common.subdomainLookup") },
+export type NavigationPath = (typeof navigationRoutes)[number]["path"];
+
+export const browserChecks = [
+  "environment",
+  "fingerprint",
+  "checks",
+  "privacy",
+] as const;
+
+/** Pages inside each feature group (URL structure only, not rendered as tabs). */
+export const pageTabs: Partial<
+  Record<NavigationPath, readonly { path: string; label: string }[]>
+> = {
+  "/leak": [
+    { path: "/leak/dns", label: t("navigation.dnsLeak") },
+    { path: "/leak/webrtc", label: t("navigation.webrtcLeak") },
   ],
-  network: [
-    { path: "/network/connectivity", label: t("common.connectivityEgress") },
-    { path: "/network/dns", label: t("common.dnsEgress") },
-    { path: "/network/cdn", label: t("navigation.cdnNodes") },
-    { path: "/network/speedtest", label: t("speedtest.title") },
-    { path: "/network/ping", label: t("common.globalPing") },
+  "/unlock": [
+    { path: "/unlock/sites", label: t("navigation.unlockSites") },
+    { path: "/unlock/gpt", label: "ChatGPT" },
+    { path: "/unlock/claude", label: "Claude" },
   ],
-  browser: [
-    { path: "/browser/environment", label: t("common.environment") },
-    { path: "/browser/fingerprint", label: t("common.fingerprint") },
-    { path: "/browser/consistency", label: t("common.consistency") },
-    { path: "/browser/automation", label: t("common.automation") },
-    { path: "/browser/privacy", label: t("common.permissionsPrivacy") },
-    { path: "/browser/challenges", label: t("common.humanVerification") },
-  ],
-  ai: [
-    ...aiPlatforms.map((platform) => ({
-      path: `/ai/${platform.id}`,
-      label: platform.name,
-    })),
-    { path: "/ai/status", label: t("navigation.serviceStatus") },
-  ],
-} as const;
-export type ToolGroup = keyof typeof toolGroups;
-export const legacyRoutes: Record<string, string> = {
-  "/query": "/lookup/ip",
-  "/query/ip": "/lookup/ip",
-  "/query/ip/:ip": "/lookup/ip",
-  "/query/whois": "/lookup/whois",
-  "/ip": "/lookup/ip",
-  "/ip/:ip": "/lookup/ip",
-  "/whois": "/lookup/whois",
-  "/network/ip": "/lookup/ip",
-  "/network/ip/:ip": "/lookup/ip",
-  "/network/whois": "/lookup/whois",
-  "/network/subdomains": "/lookup/subdomains",
-  "/link": "/network/connectivity",
-  "/network/link": "/network/connectivity",
-  "/network/exits": "/network/connectivity",
-  "/ping": "/network/ping",
-  "/cdn": "/network/cdn",
-  "/dns-exit": "/network/dns",
-  "/network/dns-exit": "/network/dns",
-  "/webrtc": "/browser/privacy",
-  "/network/webrtc": "/browser/privacy",
-  "/browser/webrtc": "/browser/privacy",
-  "/gpt": "/ai/gpt",
-  "/claude": "/ai/claude",
-  "/status": "/ai/status",
-  "/status/openai": "/ai/status/openai",
-  "/status/claude": "/ai/status/claude",
-  "/gpt/status.html": "/ai/status/openai",
-  "/claude/status.html": "/ai/status/claude",
-  "/ai/gpt/status": "/ai/status/openai",
-  "/ai/claude/status": "/ai/status/claude",
 };
-export function activeNavigationRoute(pathname: string) {
+
+/** Other first-level pages. */
+export const secondaryRoutes = [
+  "/",
+  "/ip",
+  "/whois",
+  "/ping",
+  "/status",
+  ...browserChecks.map((page) => `/browser/${page}`),
+] as const;
+
+/** Old paths that still resolve; `:ip` is carried over when present. */
+export const legacyRoutes: Record<string, string> = {
+  "/lookup": "/ip",
+  "/lookup/ip": "/ip",
+  "/lookup/ip/:ip": "/ip",
+  "/lookup/whois": "/whois",
+  "/query": "/ip",
+  "/query/ip": "/ip",
+  "/query/ip/:ip": "/ip",
+  "/query/whois": "/whois",
+  "/network": "/unlock/sites",
+  "/network/ip": "/ip",
+  "/network/ip/:ip": "/ip",
+  "/network/whois": "/whois",
+  "/network/connectivity": "/unlock/sites",
+  "/network/link": "/unlock/sites",
+  "/network/exits": "/unlock/sites",
+  "/network/dns": "/leak/dns",
+  "/network/speedtest": "/speedtest",
+  "/connectivity": "/unlock/sites",
+  "/link": "/unlock/sites",
+  "/dns": "/leak/dns",
+  "/network/ping": "/ping",
+  "/webrtc": "/leak/webrtc",
+  "/network/webrtc": "/leak/webrtc",
+  "/browser/webrtc": "/leak/webrtc",
+  "/browser/consistency": "/browser/checks",
+  "/browser/automation": "/browser/checks",
+  "/ai": "/unlock/gpt",
+  "/ai/gpt": "/unlock/gpt",
+  "/ai/claude": "/unlock/claude",
+  "/gpt": "/unlock/gpt",
+  "/claude": "/unlock/claude",
+  "/ai/status": "/status",
+  "/ai/status/openai": "/status?service=9",
+  "/ai/status/claude": "/status?service=4",
+  "/ai/gpt/status": "/status?service=9",
+  "/ai/claude/status": "/status?service=4",
+  "/status/openai": "/status?service=9",
+  "/status/claude": "/status?service=4",
+  "/gpt/status.html": "/status?service=9",
+  "/claude/status.html": "/status?service=4",
+};
+
+/**
+ * The header link that owns a path, "" for a known page outside the header,
+ * or "not-found".
+ */
+export function activeNavigationRoute(pathname: string): string {
   const path = pathname.replace(/\/+$/, "") || "/";
-  if (path === "/") return "/";
-  for (const [group, routes] of Object.entries(toolGroups)) {
-    if (path === `/${group}` || routes.some((route) => route.path === path))
-      return `/${group}/`;
-  }
-  if (/^\/lookup\/ip\/[^/]+$/.test(path)) return "/lookup/";
-  return /^\/ai\/status\/(?:openai|claude)$/.test(path) ? "/ai/" : "not-found";
-}
-
-/** The tab that owns a path, including detail pages below a tab. */
-export function activeTool(pathname: string) {
-  const path = pathname.replace(/\/+$/, "");
-  return Object.values(toolGroups)
-    .flat()
-    .find((tool) => path === tool.path || path.startsWith(`${tool.path}/`))
-    ?.path;
-}
-
-export function visibleTools(group: ToolGroup, challengesConfigured: boolean) {
-  return toolGroups[group].filter(
-    (tool) => tool.path !== "/browser/challenges" || challengesConfigured,
+  if (/^\/ip\/[^/]+$/.test(path)) return "";
+  const owner = navigationRoutes.find(
+    (route) =>
+      path === route.path ||
+      pageTabs[route.path]?.some((tab) => tab.path === path),
   );
+  if (owner) return owner.path;
+  return (secondaryRoutes as readonly string[]).includes(path)
+    ? ""
+    : "not-found";
 }
