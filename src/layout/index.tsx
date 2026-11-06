@@ -1,11 +1,11 @@
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { AuthorContact } from "@/components/author-contact";
+import { GithubLink, repositoryUrl } from "@/components/github-link";
 import { HomePageSkeleton } from "@/components/home-page-skeleton";
 import { IpSearch } from "@/components/ip-search";
 import { LanguageSelect } from "@/components/language-select";
 import { AppUpdateChecker } from "@/components/providers/app-update-checker";
-import { ShareSite } from "@/components/share-site";
 import { ThemeToggleButton } from "@/components/theme/theme-toggle-button";
 import { Pending, PrivacyToggle } from "@/components/toolkit";
 import { UnderlineHover } from "@/components/underline-hover";
@@ -37,7 +37,7 @@ const navClass = cn(
 
 /** Header icon buttons are uniform regardless of each button's own variant. */
 const headerActionsClass =
-  "flex items-center gap-1 [&>button]:size-8! [&>button]:rounded-lg! [&>button]:border-border! [&>button]:bg-card! [&>button]:p-0! [&>button]:text-muted-foreground! [&>button]:hover:bg-muted! [&>button]:hover:text-foreground! [&>[data-ip-search]]:w-auto! [&>[data-ip-search]]:px-2!";
+  "flex items-center gap-1 [&>:is(button,a)]:size-8! [&>:is(button,a)]:rounded-lg! [&>:is(button,a)]:border-border! [&>:is(button,a)]:bg-card! [&>:is(button,a)]:p-0! [&>:is(button,a)]:text-muted-foreground! [&>:is(button,a)]:hover:bg-muted! [&>:is(button,a)]:hover:text-foreground! [&>[data-ip-search]]:w-auto! [&>[data-ip-search]]:px-2!";
 
 export function AppLayout() {
   const { resolvedTheme } = useTheme();
@@ -80,7 +80,7 @@ export function AppLayout() {
             <PrivacyToggle iconOnly />
             <LanguageSelect />
             <ThemeToggleButton className="size-8 rounded-full text-muted-foreground" />
-            <ShareSite />
+            <GithubLink />
           </div>
         </header>
         <nav
@@ -106,7 +106,7 @@ export function AppLayout() {
             <PrivacyToggle iconOnly />
             <LanguageSelect />
             <ThemeToggleButton className="size-9 shrink-0 rounded-lg text-muted-foreground" />
-            <ShareSite />
+            <GithubLink />
           </div>
         </nav>
         <main className="outline-none">
@@ -151,7 +151,7 @@ export function AppLayout() {
           ·{" "}
           <UnderlineHover asChild>
             <a
-              href="https://github.com/zhihui-hu/one-ip"
+              href={repositoryUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="align-middle"
