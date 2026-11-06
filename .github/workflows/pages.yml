@@ -2,9 +2,9 @@ name: Build and deploy one-ip
 
 on:
   pull_request:
-    branches: [main, advertising-launch]
+    branches: [advertising-launch]
   push:
-    branches: [main, advertising-launch]
+    branches: [advertising-launch]
   workflow_dispatch:
     inputs:
       source_branch:

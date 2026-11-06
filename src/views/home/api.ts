@@ -20,7 +20,7 @@ export async function getGeo(
   };
   try {
     return await Promise.any([
-      geoFromIpSb(ip, scoped()),
+      geoFromIpQuery(ip, scoped()),
       geoFromIpWhoIs(ip, scoped()),
     ]);
   } catch {
@@ -38,14 +38,42 @@ export async function getGeo(
     throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
   }
 }
-async function geoFromIpSb(ip: string, signal: AbortSignal): Promise<Geo> {
-  const data = await request<Geo>(
-    `https://api.ip.sb/geoip/${encodeURIComponent(ip)}`,
-    { signal },
-  );
-  if (!sameIp(data?.ip, ip) || (!data.country && !data.isp))
+async function geoFromIpQuery(ip: string, signal: AbortSignal): Promise<Geo> {
+  // api.ip.sb/geoip is blocked for third-party sites by AdGuard Tracking
+  // Protection, so the browser uses ipquery.io instead.
+  const data = await request<{
+    ip?: string;
+    isp?: { asn?: string; org?: string; isp?: string };
+    location?: {
+      country?: string;
+      country_code?: string;
+      state?: string;
+      city?: string;
+      latitude?: number;
+      longitude?: number;
+      timezone?: string;
+    };
+  }>(`https://api.ipquery.io/${encodeURIComponent(ip)}?format=json`, {
+    signal,
+  });
+  const location = data?.location;
+  const isp = data?.isp?.isp || data?.isp?.org;
+  if (!sameIp(data?.ip, ip) || (!location?.country && !isp))
     throw new Error(t("home.incompleteLocationInformation"));
-  return { ...data, ip, source: "ip.sb" };
+  const asn = Number(data.isp?.asn?.replace(/^AS/i, ""));
+  return {
+    ip,
+    country: location?.country,
+    country_code: location?.country_code,
+    region: location?.state,
+    city: location?.city,
+    isp,
+    asn: Number.isFinite(asn) && asn > 0 ? asn : undefined,
+    latitude: location?.latitude,
+    longitude: location?.longitude,
+    timezone: location?.timezone,
+    source: "ipquery.io",
+  };
 }
 async function geoFromIpWhoIs(ip: string, signal: AbortSignal): Promise<Geo> {
   const data = await request<{

@@ -24,7 +24,7 @@
   "policy.tsx.serviceChanges": "服务调整",
   "policy.tsx.featuresDataSourcesRateLimitsMayChangeCheck": "本站可能调整功能、数据源和限流规则。使用前请查阅当前页面说明；重要结果请通过相关服务的官方渠道核实。",
   "policy.tsx.thirdPartyServicesUsed": "第三方服务明细",
-  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP 归属查询可能请求 ipwho.is、IP.SB 或 ipify；IP 健康度使用 Net.Coffee。全球 Ping 向 Globalping 提交目标和探针选择；地图优先加载天地图，未配置或不可用时回退到 OpenStreetMap；服务状态读取各厂商公开接口。具体请求取决于你打开的页面和选择的检测。",
+  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP 归属查询可能请求 ipwho.is、ipquery.io、IP.SB 或 ipify；IP 健康度使用 Net.Coffee。全球 Ping 向 Globalping 提交目标和探针选择；地图优先加载天地图，未配置或不可用时回退到 OpenStreetMap；服务状态读取各厂商公开接口。具体请求取决于你打开的页面和选择的检测。",
   "policy.tsx.webrtcAndDevicePermissions": "WebRTC 与设备权限",
   "policy.tsx.webrtcChecksConnectGoogleCloudflareStunServicesMay": "WebRTC 检测连接 Google、Cloudflare 的 STUN 服务，可能显示与网页请求不同的出口地址。摄像头、麦克风和定位测试由你点击触发并受浏览器授权控制；媒体权限测试获取流后立即关闭，不录制音视频。你可以在浏览器设置中撤销权限。",
   "policy.tsx.optionalCaptcha": "可选验证码",

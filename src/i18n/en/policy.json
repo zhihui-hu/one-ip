@@ -24,7 +24,7 @@
   "policy.tsx.serviceChanges": "Service changes",
   "policy.tsx.featuresDataSourcesRateLimitsMayChangeCheck": "Features, data sources and rate limits may change. Check the current instructions before use and verify important results through the relevant official service.",
   "policy.tsx.thirdPartyServicesUsed": "Third-party services used",
-  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP lookups may contact ipwho.is, IP.SB or ipify; IP health uses Net.Coffee. Global ping sends targets and probe selections to Globalping; maps prefer Tianditu and fall back to OpenStreetMap when it is not configured or unavailable; service status reads providers’ public endpoints. Requests depend on the pages and checks you select.",
+  "policy.tsx.ipLookupsMayContactIpwhoIpSbIpify": "IP lookups may contact ipwho.is, ipquery.io, IP.SB or ipify; IP health uses Net.Coffee. Global ping sends targets and probe selections to Globalping; maps prefer Tianditu and fall back to OpenStreetMap when it is not configured or unavailable; service status reads providers’ public endpoints. Requests depend on the pages and checks you select.",
   "policy.tsx.webrtcAndDevicePermissions": "WebRTC and device permissions",
   "policy.tsx.webrtcChecksConnectGoogleCloudflareStunServicesMay": "WebRTC checks connect to Google and Cloudflare STUN services and may reveal an egress address different from web requests. Camera, microphone and location tests start when clicked and are controlled by browser permissions. Media permission tests close the stream immediately without recording audio or video. Revoke permissions in browser settings.",
   "policy.tsx.optionalCaptcha": "Optional CAPTCHA",
