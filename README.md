@@ -9,7 +9,7 @@
 
 IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
-**中文** · [English](README.en.md)
+**中文** · [English](README.en.md) · [日本語](README.ja.md)
 
 [在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
