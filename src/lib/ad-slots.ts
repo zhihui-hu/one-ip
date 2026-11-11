@@ -1,4 +1,6 @@
-import { sponsors } from "@/lib/sponsors";
+import { activeSponsors } from "@/lib/sponsors";
+
+const sponsors = activeSponsors();
 
 /** Ad placements that exist on One IP. Fill in `price` to publish it. */
 export interface AdSlot {
@@ -18,6 +20,7 @@ export interface AdSlot {
 const homeEnds = sponsors
   .map((sponsor) => sponsor.endsAt)
   .filter((date): date is string => Boolean(date))
+  .map((date) => date.slice(0, 10))
   .sort();
 
 export const adSlots: readonly AdSlot[] = [
