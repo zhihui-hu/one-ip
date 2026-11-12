@@ -80,7 +80,7 @@ test("every listed placement has an HTTPS link and its banner file", async () =>
   const { existsSync } = await import("node:fs");
   for (const sponsor of sponsors) {
     assert.match(sponsor.href, /^https:\/\//);
-    if (sponsor.image)
-      assert.ok(existsSync(`public${sponsor.image}`), sponsor.image);
+    for (const image of [sponsor.image, sponsor.imageEn])
+      if (image) assert.ok(existsSync(`public${image}`), image);
   }
 });

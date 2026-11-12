@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { t } from "@/i18n";
+import { locale, t } from "@/i18n";
 import { activeSponsors, type Sponsor } from "@/lib/sponsors";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
 /** Text sponsors and vacancies share whatever width the banners leave. */
 const itemClass = "min-w-[100px] flex-1";
-/** Banners are 640×88 artwork: the full row on phones, 320×44 beyond. */
-const bannerItemClass = "aspect-[640/88] w-full flex-none sm:w-[320px]";
+/**
+ * Banners keep their artwork's ratio (640×88 unless the sponsor says
+ * otherwise): the full row on phones, 44px high beyond. Ratios may differ,
+ * so a shorter banner centres in the row rather than stretching.
+ */
+const bannerItemClass = "w-full flex-none self-center sm:h-11 sm:w-auto";
+const bannerSize = [640, 88] as const;
 const bannerLinkClass =
   "block size-full cursor-pointer overflow-hidden rounded-[5px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 const linkClass =
@@ -60,48 +65,53 @@ export function SponsorLinks({
       aria-label={t("common.sponsorAdvertisements")}
     >
       <ul className="m-0 flex min-w-0 flex-1 list-none gap-2 overflow-x-auto p-0 [scrollbar-width:none]">
-        {items.map((sponsor) => (
-          <li
-            key={sponsor.href}
-            className={
-              sponsor.image ? cn(bannerItemClass, "relative") : itemClass
-            }
-          >
-            <a
-              className={sponsor.image ? bannerLinkClass : linkClass}
-              href={sponsor.href}
-              target="_blank"
-              rel="sponsored noopener noreferrer"
-              title={sponsor.name}
+        {items.map((sponsor) => {
+          const image = (locale === "en" && sponsor.imageEn) || sponsor.image;
+          const [width, height] = sponsor.imageSize ?? bannerSize;
+          return (
+            <li
+              key={sponsor.href}
+              className={image ? cn(bannerItemClass, "relative") : itemClass}
+              style={
+                image ? { aspectRatio: `${width} / ${height}` } : undefined
+              }
             >
-              {sponsor.image ? (
-                <img
-                  src={sponsor.image}
-                  alt={sponsor.name}
-                  className="block size-full object-cover"
-                  width="640"
-                  height="88"
-                />
-              ) : (
-                <>
-                  <span>{sponsor.name}</span>
-                  <span aria-hidden="true">↗</span>
-                </>
-              )}
-            </a>
-            {sponsor.image && (
-              <button
-                type="button"
-                onClick={() => close(sponsor.href)}
-                className="absolute top-0.5 right-0.5 flex size-4 cursor-pointer items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
-                aria-label={t("common.closeAdvertisement")}
-                title={t("common.closeAdvertisement")}
+              <a
+                className={image ? bannerLinkClass : linkClass}
+                href={sponsor.href}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                title={sponsor.name}
               >
-                <X className="size-2.5" strokeWidth={3} aria-hidden="true" />
-              </button>
-            )}
-          </li>
-        ))}
+                {image ? (
+                  <img
+                    src={image}
+                    alt={sponsor.name}
+                    className="block size-full object-cover"
+                    width={width}
+                    height={height}
+                  />
+                ) : (
+                  <>
+                    <span>{sponsor.name}</span>
+                    <span aria-hidden="true">↗</span>
+                  </>
+                )}
+              </a>
+              {image && (
+                <button
+                  type="button"
+                  onClick={() => close(sponsor.href)}
+                  className="absolute top-0.5 right-0.5 flex size-4 cursor-pointer items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
+                  aria-label={t("common.closeAdvertisement")}
+                  title={t("common.closeAdvertisement")}
+                >
+                  <X className="size-2.5" strokeWidth={3} aria-hidden="true" />
+                </button>
+              )}
+            </li>
+          );
+        })}
         {Array.from({ length: vacantCount }, (_, index) => (
           <li key={`vacant-${index}`} className={itemClass}>
             <Link
