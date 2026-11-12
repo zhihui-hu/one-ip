@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import { locale, t } from "@/i18n";
 import { activeSponsors, type Sponsor } from "@/lib/sponsors";
@@ -9,10 +9,11 @@ import { X } from "lucide-react";
 const itemClass = "min-w-[100px] flex-1";
 /**
  * Banners keep their artwork's ratio (640×88 unless the sponsor says
- * otherwise): the full row on phones, 44px high beyond. Ratios may differ,
- * so a shorter banner centres in the row rather than stretching.
+ * otherwise). On phones they share the row, each as wide as its ratio so
+ * all come out the same height; from `sm` up each is 44px high.
  */
-const bannerItemClass = "w-full flex-none self-center sm:h-11 sm:w-auto";
+const bannerItemClass =
+  "relative min-w-0 flex-[var(--banner-ratio)_1_0%] self-center sm:h-11 sm:w-auto sm:flex-none";
 const bannerSize = [640, 88] as const;
 const bannerLinkClass =
   "block size-full cursor-pointer overflow-hidden rounded-[5px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
@@ -48,6 +49,8 @@ export function SponsorLinks({
   // A closed banner hands its slot back to the "Advertise here" blocks.
   const items = listed.filter((sponsor) => !closed.includes(sponsor.href));
   const vacantCount = Math.max(0, 3 - items.length);
+  // A phone row has no room for banners and vacancies at a readable size.
+  const hasBanner = items.some((sponsor) => sponsor.image);
 
   const close = (href: string) => {
     const next = [...closed, href];
@@ -61,7 +64,7 @@ export function SponsorLinks({
 
   return (
     <aside
-      className="flex min-h-11 max-w-full min-w-0"
+      className="flex max-w-full min-w-0 sm:min-h-11"
       aria-label={t("common.sponsorAdvertisements")}
     >
       <ul className="m-0 flex min-w-0 flex-1 list-none gap-2 overflow-x-auto p-0 [scrollbar-width:none]">
@@ -71,9 +74,14 @@ export function SponsorLinks({
           return (
             <li
               key={sponsor.href}
-              className={image ? cn(bannerItemClass, "relative") : itemClass}
+              className={image ? bannerItemClass : itemClass}
               style={
-                image ? { aspectRatio: `${width} / ${height}` } : undefined
+                image
+                  ? ({
+                      aspectRatio: `${width} / ${height}`,
+                      "--banner-ratio": width / height,
+                    } as CSSProperties)
+                  : undefined
               }
             >
               <a
@@ -102,18 +110,25 @@ export function SponsorLinks({
                 <button
                   type="button"
                   onClick={() => close(sponsor.href)}
-                  className="absolute top-0.5 right-0.5 flex size-4 cursor-pointer items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
+                  className="absolute top-0.5 right-0.5 flex size-3 cursor-pointer sm:size-4 items-center justify-center rounded-full bg-black/45 text-white hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                   aria-label={t("common.closeAdvertisement")}
                   title={t("common.closeAdvertisement")}
                 >
-                  <X className="size-2.5" strokeWidth={3} aria-hidden="true" />
+                  <X
+                    className="size-2 sm:size-2.5"
+                    strokeWidth={3}
+                    aria-hidden="true"
+                  />
                 </button>
               )}
             </li>
           );
         })}
         {Array.from({ length: vacantCount }, (_, index) => (
-          <li key={`vacant-${index}`} className={itemClass}>
+          <li
+            key={`vacant-${index}`}
+            className={cn(itemClass, hasBanner && "max-sm:hidden")}
+          >
             <Link
               to="/advertise"
               className={cn(
