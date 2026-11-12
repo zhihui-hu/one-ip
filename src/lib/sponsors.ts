@@ -25,8 +25,8 @@ export const sponsors: readonly Sponsor[] = [
   {
     name: "Proxy-Seller",
     href: "https://proxy-seller.com/?partner=C23994CEA11142E6",
-    image: "/sponsors/proxy-seller-zh.jpg",
-    imageEn: "/sponsors/proxy-seller-en.jpg",
+    image: "/sponsors/proxy-seller-zh.png",
+    imageEn: "/sponsors/proxy-seller-en.png",
     imageSize: [298, 44],
     startsAt: "2026-11-12 00:00:00",
     endsAt: "2026-12-11 23:59:59",

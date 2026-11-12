@@ -419,6 +419,31 @@ test("icon proxy rejects upstream redirects without forwarding Location", async 
   });
 });
 
+test("icon proxy falls back to a second fixed provider and remembers misses", async () => {
+  const seen = [];
+  await withFetch(async (url) => {
+    seen.push(new URL(url).hostname);
+    if (url.startsWith("https://icons.duckduckgo.com/")) throw new TypeError("unreachable");
+    assert.equal(new URL(url).searchParams.get("url"), "https://fallback-icon.com");
+    return new Response("icon", { headers: { "Content-Type": "image/png" } });
+  }, async () => {
+    const response = await worker.fetch(request("/api/icons/fallback-icon.com"), env);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Content-Type"), "image/png");
+  });
+  assert.deepEqual(seen, ["icons.duckduckgo.com", "t3.gstatic.com"]);
+
+  let calls = 0;
+  await withFetch(async () => {
+    calls += 1;
+    return new Response(null, { status: 404 });
+  }, async () => {
+    assert.equal((await worker.fetch(request("/api/icons/missing-icon.com"), env)).status, 502);
+    assert.equal((await worker.fetch(request("/api/icons/missing-icon.com"), env)).status, 502);
+  });
+  assert.equal(calls, 2);
+});
+
 test("WeChat icon uses its official resource because the icon provider returns 404", async () => {
   await withFetch(async (url) => {
     assert.equal(url, "https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico");

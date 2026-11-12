@@ -15,7 +15,7 @@ A toolbox for IP lookups, network diagnostics, browser checks and AI service sta
 
 <!-- sponsors:start -->
 
-[<img src="public/sponsors/proxy-seller-en.jpg" alt="Proxy-Seller: Residential · ISP · IPv4/IPv6 · Mobile proxies, 15% off with code ONEIP" width="298" height="44" />](https://proxy-seller.com/?partner=C23994CEA11142E6)
+[<img src="public/sponsors/proxy-seller-en.png" alt="Proxy-Seller: Residential · ISP · IPv4/IPv6 · Mobile proxies, 15% off with code ONEIP" width="298" height="44" />](https://proxy-seller.com/?partner=C23994CEA11142E6)
 
 [Advertise here](mailto:ip@huzhihui.com) · [<img src="public/contact/wechat.svg" alt="" width="14" height="14" /> WeChat](public/contact/wechat.jpg)
 <!-- sponsors:end -->

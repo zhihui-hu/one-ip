@@ -300,7 +300,7 @@
     "group": "VPS",
     "url": "https://bwhstatus.com/",
     "page": "https://bwhstatus.com/",
-    "icon": "https://icons.duckduckgo.com/ip3/bandwagonhost.com.ico",
+    "icon": "/site-icons/bandwagonhost.com.png",
     "note": "读取官方页面的当前汇总状态；完整事件请查看官方状态页。",
     "officialStatus": true,
     "nameKey": "sites.bandwagonHost",
