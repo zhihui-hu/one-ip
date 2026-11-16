@@ -13,6 +13,13 @@ IP 查询、网络诊断、浏览器检测与 AI 服务状态工具箱。
 
 [在线体验](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
+<!-- sponsors:start -->
+
+[<img src="public/sponsors/proxy-seller-zh.png" alt="Proxy-Seller：住宅代理 · ISP · IPv4/IPv6 · 移动代理，优惠码 ONEIP 立享 85 折" width="298" height="44" />](https://proxy-seller.com/?partner=C23994CEA11142E6)
+
+[广告位招租](mailto:ip@huzhihui.com) · [<img src="public/contact/wechat.svg" alt="" width="14" height="14" /> 微信联系](public/contact/wechat.jpg)
+<!-- sponsors:end -->
+
 ![桌面首页（已打码）](docs/screenshots/desktop-home-redacted.png)
 
 <table>
