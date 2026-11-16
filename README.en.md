@@ -9,7 +9,7 @@
 
 A toolbox for IP lookups, network diagnostics, browser checks and AI service status.
 
-[中文](README.md) · **English**
+[中文](README.md) · **English** · [日本語](README.ja.md)
 
 [Live demo](https://ip.huzhihui.com/) · [GitHub](https://github.com/zhihui-hu/one-ip)
 
