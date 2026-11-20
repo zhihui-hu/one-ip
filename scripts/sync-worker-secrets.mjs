@@ -15,6 +15,8 @@ const ignored = spawnSync("git", ["check-ignore", "-q", filename]);
 if (ignored.status !== 0) throw new Error("Secret file must be ignored by Git");
 const values = parseEnv(readFileSync(filename, "utf8"));
 const allowed = [
+  "IPBOT_API_URL",
+  "IPBOT_ORIGIN",
   "TURNSTILE_NONINTERACTIVE_SITE_KEY",
   "TURNSTILE_NONINTERACTIVE_SECRET",
   "TURNSTILE_NONINTERACTIVE_HOSTNAMES",

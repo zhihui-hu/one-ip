@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { hideIpAtom } from "@/store/privacy";
 import { useAtom } from "jotai";
 import { Crown, Eye, EyeOff, ShieldAlert } from "lucide-react";
-import { coffeeThreatLabels, type CoffeeLookup } from "./coffee";
 import { IpFacts } from "./field-help";
+import { threatLabels, type IpbotLookup } from "./ipbot";
 import { IpLatency } from "./latency";
 import { LocationMap } from "./location-map";
 import { PerfectScoreEffects } from "./perfect-score-effects";
@@ -57,14 +57,14 @@ export function IpDetails({
   search,
   recent,
 }: {
-  data: CoffeeLookup;
+  data: IpbotLookup;
   search?: ReactNode;
   recent?: ReactNode;
 }) {
   const mobile = useIsMobile();
   const [hidden, setHidden] = useAtom(hideIpAtom);
-  const d = data.coffee;
-  const threats = coffeeThreatLabels(d, true);
+  const d = data.profile;
+  const threats = threatLabels(d, true);
   const profile = useMemo(() => ipProfile(d), [d]);
   const inbound = useIpLatency(d.ip);
   const chip = (label: string, tone: ChipTone = "neutral", title?: string) => (
@@ -274,13 +274,10 @@ export function IpDetails({
             rows={[
               ["ASN", d.asn ? `AS${d.asn}` : undefined],
               [t("ip.isp"), d.isp],
-              [t("ip.asnName"), d.asname],
               [t("ip.asnOrganization"), d.asOrganization],
-
               ["CIDR", d.cidr],
               [t("ip.asnSelfReportedType"), d.asn_kind],
               [t("ip.asnIpv4Addresses"), number(d.asn_ipv4_count)],
-              [t("ip.asnRegistered"), d.asn_allocated],
             ]}
           />
         </ToolCard>
@@ -295,9 +292,7 @@ export function IpDetails({
                   : undefined,
               ],
               [t("ip.addressCount"), number(d.range?.count)],
-              [t("ip.estimatedBandwidth"), d.asn_tbps],
               ["Bogon", riskFlag(d.is_bogon)],
-              [t("ip.redditRestriction"), riskFlag(d.reddit_blocked)],
               ["PTR", d.rdns || "—"],
               [
                 "RPKI",
@@ -316,10 +311,6 @@ export function IpDetails({
               ["Tor", riskFlag(d.is_tor)],
               [t("common.crawlerFlag"), riskFlag(d.is_crawler)],
               [t("common.abuseFlag"), riskFlag(d.is_abuser)],
-              [
-                t("ip.abuseScore"),
-                d.intelligence?.abuser_score_raw ?? d.abuser_score,
-              ],
             ]}
           />
         </ToolCard>
@@ -335,32 +326,6 @@ export function IpDetails({
                   : chip(t("common.unknown")),
               ],
               [t("ip.abuseLevel"), d.intelligence?.abuser_level],
-              [
-                t("ip.httpHoneypotBlacklist"),
-                d.intelligence?.rep_threat == null
-                  ? chip(t("common.unknown"))
-                  : JSON.stringify(d.intelligence.rep_threat),
-              ],
-              [
-                t("ip.vpnDetails"),
-                d.vpn_trace == null
-                  ? "—"
-                  : typeof d.vpn_trace === "string"
-                    ? d.vpn_trace
-                    : JSON.stringify(d.vpn_trace),
-              ],
-              [t("ip.accessAssessment"), d.ai_verdict?.label],
-              [
-                t("ip.assessmentConfidence"),
-                d.ai_verdict?.confidence == null ? (
-                  "—"
-                ) : (
-                  <span key="confidence">
-                    {number(d.ai_verdict.confidence)}%
-                  </span>
-                ),
-              ],
-              [t("ip.assessmentReasoning"), d.ai_verdict?.reasoning],
             ]}
           />
         </ToolCard>
@@ -488,74 +453,7 @@ export function IpDetails({
             />
           </ToolCard>
         )}
-        {!!d.company_history?.length && (
-          <ToolCard title={t("ip.companyHistory")}>
-            <IpFacts
-              rows={d.company_history.map((row) => [
-                seen(row.seen_at),
-                [row.company_name, row.company_type]
-                  .filter(Boolean)
-                  .join(" · "),
-              ])}
-            />
-          </ToolCard>
-        )}
       </div>
-      {!!d.dc_neighbors?.length && (
-        <ToolCard title={t("ip.relatedNetworkAddresses")}>
-          {mobile ? (
-            <ul className="divide-y divide-border/60">
-              {d.dc_neighbors.map((row, index) => (
-                <li
-                  key={`${row.ip}-${index}`}
-                  className="min-w-0 py-3 first:pt-0 last:pb-0"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                    <span className="min-w-0 text-sm font-semibold">
-                      <IpText ip={row.ip} />
-                    </span>
-                    <time
-                      className="shrink-0 whitespace-nowrap text-[11px] tabular-nums text-muted-foreground"
-                      aria-label={t("ip.recorded")}
-                    >
-                      {seen(row.seen_at)}
-                    </time>
-                  </div>
-                  {row.city && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {row.city}
-                    </p>
-                  )}
-                  {row.company && (
-                    <p className="mt-1 break-words text-xs leading-relaxed">
-                      {row.company}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <DataTable
-              className="rounded-none bg-transparent"
-              columns={[
-                {
-                  accessorKey: "ip",
-                  header: "IP",
-                  cell: ({ row }) => <IpText ip={row.original.ip} />,
-                },
-                { accessorKey: "city", header: t("ip.city") },
-                { accessorKey: "company", header: t("ip.company") },
-                {
-                  accessorKey: "seen_at",
-                  header: t("ip.recorded"),
-                  cell: ({ row }) => seen(row.original.seen_at),
-                },
-              ]}
-              data={d.dc_neighbors}
-            />
-          )}
-        </ToolCard>
-      )}
       <Suspense
         fallback={
           <ToolCard title={t("ip.bgpRouteTopology")}>
@@ -568,7 +466,7 @@ export function IpDetails({
         <IpRouteGraph
           ip={d.ip}
           currentAsn={d.asn}
-          currentAsnName={d.asOrganization ?? d.asname}
+          currentAsnName={d.asOrganization}
         />
       </Suspense>
       <div className="flex flex-wrap gap-2">

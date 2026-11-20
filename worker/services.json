@@ -3,12 +3,11 @@
     "id": "telegram",
     "name": "Telegram",
     "group": "社区",
-    "url": "https://uptimerobot.com/api/pulse/monitors/telegram",
-    "page": "https://uptimerobot.com/is-it-down/telegram/",
-    "statusSource": "UptimeRobot",
+    "url": "https://telegram.org",
+    "page": "https://telegram.org",
     "icon": "https://icons.duckduckgo.com/ip3/telegram.org.ico",
     "officialStatus": false,
-    "note": "第三方来源：UptimeRobot。仅监测 telegram.org 网站可用性，不代表 Telegram 全球消息收发状态；数据过期或不可用时显示待确认。"
+    "note": "非官方来源：仅监测 telegram.org 网站可用性，不代表 Telegram 全球消息收发状态；数据过期或不可用时显示待确认。"
   },
   {
     "id": "0",
@@ -291,7 +290,7 @@
     "group": "VPS",
     "url": "https://bwhstatus.com/",
     "page": "https://bwhstatus.com/",
-    "icon": "https://icons.duckduckgo.com/ip3/bandwagonhost.com.ico",
+    "icon": "/site-icons/bandwagonhost.com.png",
     "note": "读取官方页面的当前汇总状态；完整事件请查看官方状态页。",
     "officialStatus": true
   },

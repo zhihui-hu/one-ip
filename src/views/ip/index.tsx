@@ -10,18 +10,18 @@ import { useQuery } from "@tanstack/react-query";
 import { gsap } from "gsap";
 import { Search, X } from "lucide-react";
 import { lookupIpWithFallback } from "./api";
-import type { CoffeeLookup } from "./coffee";
 import { IpDetails } from "./details";
+import type { IpbotLookup } from "./ipbot";
 import { dossierTopClass } from "./styles";
 
 export default function IpPage() {
   const { ip = "" } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const history = useLookupHistory<CoffeeLookup>("ip-tools:coffee-history:v1");
+  const history = useLookupHistory<IpbotLookup>("ip-tools:ipbot-history:v1");
   const cached = history.find(ip);
   const query = useQuery({
-    queryKey: ["lookup-ip-coffee", ip],
+    queryKey: ["lookup-ip-profile", ip],
     enabled: !!ip,
     initialData: cached?.data,
     initialDataUpdatedAt: cached?.savedAt,
@@ -161,7 +161,7 @@ export default function IpPage() {
       )}
       {query.data ? (
         <IpDetails
-          key={query.data.coffee.ip}
+          key={query.data.profile.ip}
           data={query.data}
           search={search}
           recent={recent}

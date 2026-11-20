@@ -10,7 +10,14 @@
 4. 构建命令填 `pnpm build`，部署命令填 `pnpm deploy`。使用 Node.js 24 和 pnpm 10.32.1，根目录保持默认。
 5. 点击部署，完成后打开 `workers.dev` 地址。自定义域名在 Worker 设置中绑定。
 
-项目使用 **Cloudflare Workers + Static Assets**，`/api/*` 接口需要 Worker。基础功能无需应用环境变量或 API Key。Turnstile 的配置见“验证体验”。
+项目使用 **Cloudflare Workers + Static Assets**，`/api/*` 接口需要 Worker。Turnstile 的配置见“验证体验”。
+
+IP 归属、网络、风险、WHOIS、全球 Ping 与服务状态数据全部来自 [ipbot](https://ipbot.net)，由 Worker 在服务端请求并在边缘缓存。
+
+- 无需 API Key。Worker 请求 ipbot 时带上 `Origin: https://ip.huzhihui.com`；`huzhihui.com` 在 ipbot 的白名单（`PARTNER_DOMAINS`）中，免会话、不限流，网络路由、WHOIS、全球 Ping 与服务状态都依赖它。部署在其他域名时用 `IPBOT_ORIGIN` 改成已加入白名单的来源，否则这些功能不可用，IP 归属与画像按 ipbot 默认额度限流。
+- `IPBOT_API_URL`：可选，默认 `https://api.ipbot.net`，仅在自建 ipbot 或本地调试时修改。
+
+浏览器检测出口 IP 时直接请求 `/api/me`：IPv4 用只有 A 记录的 `api4.ipbot.net`，IPv6 用经 Cloudflare 双栈的 `api.ipbot.net`；huzhihui.com 子域不限流，其他域名按 ipbot 默认额度限流。
 
 国内网络访问地图时，建议在 Worker → Settings → Variables and Secrets 配置 `TIANDITU_TOKEN`（也可以用 `pnpm exec wrangler secret put TIANDITU_TOKEN`）。配置后地图优先使用天地图，失败时回退到 OpenStreetMap；未配置时保持 OpenStreetMap。
 

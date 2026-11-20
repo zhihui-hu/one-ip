@@ -51,11 +51,11 @@ export default function PolicyPage({ page }: { page: "terms" | "privacy" }) {
       ],
       [
         t("policy.tsx.thirdPartyDataProcessing"),
-        t("policy.tsx.ipHealthQueriesSendQueriedPublicIpNet"),
+        t("policy.tsx.ipQueriesSendQueriedPublicIpToIpbot"),
       ],
       [
         t("policy.tsx.thirdPartyServicesUsed"),
-        t("policy.tsx.ipLookupsMayContactIpwhoIpSbIpify"),
+        t("policy.tsx.ipDataComesFromIpbotEgressProbes"),
       ],
       [
         t("policy.tsx.webrtcAndDevicePermissions"),

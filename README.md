@@ -68,7 +68,7 @@ pnpm build && pnpm test && pnpm lint
 
 ## 数据来源
 
-Net.Coffee、ip-api、Globalping、IANA / RDAP、各平台官方状态源；浏览器检测使用 FingerprintJS 与 CreepJS（见 [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)），Claude 环境检测字典参考 [FuckClaude](https://github.com/LinXiaoTao/FuckClaude)（见 `vendor/claude-environment/`）。检测结果仅用于环境排查，不代表任何平台的官方判定。
+IP 归属、网络与风险数据统一来自 [ipbot](https://ipbot.net)（由 Worker 在服务端请求并缓存）；网络路由、WHOIS、全球 Ping 与服务状态同样经 ipbot 获取；出口 IP 由浏览器直接访问 ipbot 检测，国内出口读取网易与字节跳动公开 CDN 资源的响应头，网站连通与出口路由检测只访问被检测的网站本身；浏览器检测使用 FingerprintJS 与 CreepJS（见 [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)），Claude 环境检测字典参考 [FuckClaude](https://github.com/LinXiaoTao/FuckClaude)（见 `vendor/claude-environment/`）。检测结果仅用于环境排查，不代表任何平台的官方判定。
 
 欢迎提交 Issue。分享截图前请遮盖 IP、位置和指纹等隐私信息。
 

@@ -36,29 +36,8 @@ const definitions = new Map([
     t("ip.ipv4AddressCountAssociatedAsnSizeBlockNumber"),
   ],
   [
-    t("ip.estimatedBandwidth"),
-    t("ip.organizationLevelBandwidthEstimateReportedRangeMeasuredDownload"),
-  ],
-  [
-    t("ip.asnRegistered"),
-    t("ip.asnRegistrationAllocationDateActivationDateIpBlock"),
-  ],
-  [
     t("common.proxy"),
     t("ip.whetherAddressIdentifiedProxyExitDatabaseCoverageUpdate"),
-  ],
-  [
-    t("ip.httpHoneypotBlacklist"),
-    t("ip.threatSignalsHoneypotsObservingScansAttacksAutomatedTraffic"),
-  ],
-  [t("ip.abuseScore"), t("ip.strengthReportedAbuseSignalsFieldUsesOwnScale")],
-  [
-    t("ip.assessmentConfidence"),
-    t("ip.providerSConfidenceAssessmentServiceUptimeProbabilityAccessing"),
-  ],
-  [
-    t("ip.relatedNetworkAddresses"),
-    t("ip.otherAssociatedNetworkAddressesNecessarilySameServerUsed"),
   ],
   [
     t("common.ipReputation"),
@@ -130,9 +109,7 @@ export function IpFacts({ rows }: { rows: [string, ReactNode][] }) {
     t("common.proxy"),
     t("common.crawlerFlag"),
     t("common.abuseFlag"),
-    t("ip.redditRestriction"),
     t("ip.abuseLevel"),
-    t("ip.assessmentConfidence"),
   ]);
   const compact = new Set<string>();
   const fits = ([label, value]: [string, ReactNode]) =>

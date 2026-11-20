@@ -12,7 +12,7 @@ export interface ServiceStatus {
   components?: { id: string; name: string; status: string }[];
   fetchedAt: string;
   checkedAt?: string;
-  source: string;
+  source?: string;
 }
 export const getStatus = (id: string, signal?: AbortSignal) =>
   endpoint<ServiceStatus>(`/status/${id}`, { signal });

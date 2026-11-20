@@ -25,7 +25,7 @@ import {
 import { SVGRenderer } from "echarts/renderers";
 import { gsap } from "gsap";
 import { Info } from "lucide-react";
-import type { CoffeeIp } from "./coffee";
+import type { IpbotProfile } from "./ipbot";
 import type { ipProfile } from "./profile";
 import { ipProfileFields } from "./profile-fields";
 import { ScenarioPanel } from "./scenario-panel";
@@ -180,7 +180,7 @@ export default function IpProfileGraph({
   inbound,
 }: {
   inbound: ReturnType<typeof useIpLatency>;
-  data: CoffeeIp;
+  data: IpbotProfile;
   profile: ReturnType<typeof ipProfile>;
 }) {
   const [selected, setSelected] = useState<number | null>(null);

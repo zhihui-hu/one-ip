@@ -198,72 +198,178 @@ test("removed DNS endpoints return 404 without querying upstream services", asyn
     },
   );
 });
-test("Ping validates candidates and requests actual ICMP probes", async () => {
+const partnerEnv = env;
+const IPBOT_WHITELISTED = "https://ip.huzhihui.com";
+const startPingRequest = (body) =>
+  request("/api/ping/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+test("Ping is verified here, then forwarded to ipbot as a whitelisted origin", async () => {
   let captured;
   await withFetch(
     mockPingVerification(async (url, init) => {
-      assert.equal(url, "https://api.globalping.io/v1/measurements");
+      assert.equal(url, "https://api.ipbot.net/api/ping/start");
+      assert.equal(init.method, "POST");
+      assert.equal(init.headers.Origin, IPBOT_WHITELISTED);
       captured = JSON.parse(init.body);
+      if (captured.nodes?.[0] === "bad")
+        return Response.json({ error: "无效的探测地区" }, { status: 400 });
       return Response.json({ id: "measurement-id-123" });
     }),
     async () => {
       const unverified = await worker.fetch(
-        request("/api/ping/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ host: "example.com", nodes: ["n03", "n04"] }),
-        }),
-        env,
+        startPingRequest({ host: "example.com", nodes: ["JP:Tokyo"] }),
+        partnerEnv,
       );
       assert.equal(unverified.status, 403);
       assert.equal(captured, undefined);
       const response = await worker.fetch(
-        request("/api/ping/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            host: "example.com",
-            nodes: ["n03", "n04"],
-            verification: pingVerification,
-          }),
+        startPingRequest({
+          host: "example.com",
+          regions: ["AS", "EU"],
+          perRegion: 3,
+          verification: pingVerification,
         }),
-        env,
+        partnerEnv,
       );
       assert.equal(response.status, 200);
-      assert.equal(captured.type, "ping");
-      assert.equal(captured.limit, undefined);
-      assert.equal(captured.locations.length, 2);
-      assert.ok(captured.locations.every((location) => location.limit === 1));
-      assert.equal(captured.measurementOptions.packets, 3);
-      assert.equal(captured.locations[0].city, "Tokyo");
+      assert.equal((await response.json()).id, "measurement-id-123");
+      assert.deepEqual(captured, {
+        host: "example.com",
+        regions: ["AS", "EU"],
+        perRegion: 3,
+      });
       const invalid = await worker.fetch(
-        request("/api/ping/start", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            host: "example.com",
-            nodes: ["bad"],
-            verification: pingVerification,
-          }),
+        startPingRequest({
+          host: "example.com",
+          nodes: ["bad"],
+          verification: pingVerification,
         }),
-        env,
+        partnerEnv,
+      );
+      assert.equal(invalid.status, 400);
+      assert.equal((await invalid.json()).error, "无效的探测地区");
+    },
+  );
+});
+test("Ping nodes and results come from ipbot; a refused origin is a 502", async () => {
+  const urls = [];
+  await withFetch(
+    async (url, init) => {
+      urls.push(url);
+      assert.equal(init.headers.Origin, IPBOT_WHITELISTED);
+      return url.endsWith("/ping/nodes")
+        ? Response.json([{ id: "JP:Tokyo", cc: "jp", city: "Tokyo", name: "Tokyo" }])
+        : Response.json({ id: "measurement-id-123", status: "finished" });
+    },
+    async () => {
+      const nodes = await worker.fetch(request("/api/ping/nodes"), partnerEnv);
+      assert.equal((await nodes.json())[0].id, "JP:Tokyo");
+      const result = await worker.fetch(
+        request("/api/ping/result/measurement-id-123"),
+        partnerEnv,
+      );
+      assert.equal((await result.json()).status, "finished");
+      const invalid = await worker.fetch(
+        request("/api/ping/result/short"),
+        partnerEnv,
       );
       assert.equal(invalid.status, 400);
     },
   );
-});
-test("WHOIS uses RDAP and never turns a target into a free-form fetch URL", async () => {
+  assert.deepEqual(urls, [
+    "https://api.ipbot.net/api/ping/nodes",
+    "https://api.ipbot.net/api/ping/result/measurement-id-123",
+  ]);
   await withFetch(
-    async (url) => {
-      assert.equal(url, "https://rdap.org/autnum/15169");
-      return Response.json({ handle: "AS15169" });
+    async (url, init) => {
+      assert.equal(init.headers.Origin, "https://tools.huzhihui.com");
+      return Response.json({ error: "页面会话已过期，请刷新页面" }, { status: 401 });
     },
     async () => {
       const response = await worker.fetch(
-        request("/api/whois/lookup/AS15169"),
-        env,
+        request("/api/ping/result/measurement-id-456"),
+        { ...env, IPBOT_ORIGIN: "https://tools.huzhihui.com" },
       );
-      assert.equal((await response.json()).data.handle, "AS15169");
+      // Not whitelisted is an operator problem: no ipbot session message leaks.
+      assert.equal(response.status, 502);
+    },
+  );
+});
+test("WHOIS and network lookups go to ipbot after local input checks", async () => {
+  const urls = [];
+  await withFetch(
+    async (url, init) => {
+      urls.push(url);
+      assert.equal(init.headers.Origin, IPBOT_WHITELISTED);
+      if (url.includes("/whois/lookup/"))
+        return Response.json({
+          source: "RDAP · 注册局实时数据",
+          query: "AS15169",
+          data: { handle: "AS15169" },
+        });
+      return Response.json({
+        prefix: "8.8.8.0/24",
+        asns: [{ asn: "15169" }],
+        routeAvailable: true,
+        ptrAvailable: true,
+        validations: [],
+        source: "RIPE RIS / RIPEstat",
+      });
+    },
+    async () => {
+      const whois = await worker.fetch(
+        request("/api/whois/lookup/as15169"),
+        partnerEnv,
+      );
+      assert.equal((await whois.json()).data.handle, "AS15169");
+      const network = await worker.fetch(
+        request("/api/ip/network/8.8.8.8"),
+        partnerEnv,
+      );
+      assert.equal((await network.json()).prefix, "8.8.8.0/24");
+      const path = await worker.fetch(
+        request("/api/whois/lookup/example.com%2Fadmin"),
+        partnerEnv,
+      );
+      assert.equal(path.status, 400);
+    },
+  );
+  assert.deepEqual(urls, [
+    "https://api.ipbot.net/api/whois/lookup/AS15169",
+    "https://api.ipbot.net/api/ip/network/8.8.8.8",
+  ]);
+});
+test("service status unwraps ipbot's detail and hides its failures", async () => {
+  await withFetch(
+    async (url) => {
+      assert.equal(url, "https://api.ipbot.net/api/status/9");
+      return Response.json({
+        id: "9",
+        status: {
+          status: { indicator: "none", description: "All Systems Operational" },
+          components: [],
+          fetchedAt: "2026-11-20T00:00:00Z",
+          source: "https://status.openai.com",
+        },
+        history: [],
+      });
+    },
+    async () => {
+      const response = await worker.fetch(request("/api/status/9"), partnerEnv);
+      const data = await response.json();
+      assert.equal(data.status.indicator, "none");
+      assert.equal(data.source, "https://status.openai.com");
+    },
+  );
+  await withFetch(
+    async () => Response.json({ id: "4", error: "官方状态数据暂不可用" }),
+    async () => {
+      const response = await worker.fetch(request("/api/status/4"), partnerEnv);
+      assert.equal(response.status, 502);
     },
   );
 });
@@ -284,97 +390,6 @@ test("upstream errors do not expose response bodies or credentials", async () =>
 test("removed IP card endpoint returns 404", async () => {
   const response = await worker.fetch(request("/api/card.svg"), env);
   assert.equal(response.status, 404);
-});
-
-test("domain registration bypasses rdap.org using the IANA registry endpoint", async () => {
-  const urls = [];
-  await withFetch(async (url) => {
-    urls.push(url);
-    if (url === "https://data.iana.org/rdap/dns.json") return Response.json({ services: [[["com"], ["https://rdap.verisign.com/com/v1/"]]] });
-    assert.equal(url, "https://rdap.verisign.com/com/v1/domain/qq.com");
-    return Response.json({ ldhName: "QQ.COM" });
-  }, async () => {
-    const response = await worker.fetch(request("/api/whois/lookup/qq.com"), env);
-    assert.equal(response.status, 200);
-    assert.equal((await response.json()).data.ldhName, "QQ.COM");
-  });
-  assert.equal(urls.length, 2);
-});
-
-test("unsupported domain suffix returns an explicit RDAP error", async () => {
-  await withFetch(async (url) => {
-    assert.equal(url, "https://data.iana.org/rdap/dns.json");
-    return Response.json({ services: [] });
-  }, async () => {
-    const response = await worker.fetch(request("/api/whois/lookup/domain.zzz"), env);
-    assert.equal(response.status, 422);
-  });
-});
-
-test("Ping catalog lists all online cities and aggregates probe counts", async () => {
-  await withFetch(async (url) => {
-    assert.equal(url, "https://api.globalping.io/v1/probes");
-    return Response.json([
-      { location: { country: "JP", city: "Tokyo" } },
-      { location: { country: "JP", city: "Tokyo" } },
-      { location: { country: "NZ", city: "Auckland" } },
-    ]);
-  }, async () => {
-    const response = await worker.fetch(request("/api/ping/nodes"), env);
-    assert.equal(response.status, 200);
-    const data = await response.json();
-    assert.equal(data.length, 2);
-    assert.equal(data[0].id, "JP:Tokyo");
-    assert.equal(data[0].probes, 2);
-    assert.equal(data[1].id, "NZ:Auckland");
-  });
-});
-test("Ping accepts only catalog locations for dynamic selection", async () => {
-  await withFetch(mockPingVerification(async (url, init) => {
-    if (url.endsWith("/probes")) return Response.json([{ location: { country: "NZ", city: "Auckland" } }]);
-    assert.equal(url, "https://api.globalping.io/v1/measurements");
-    const payload = JSON.parse(init.body);
-    assert.deepEqual(payload.locations, [{ country: "NZ", city: "Auckland", limit: 1 }]);
-    return Response.json({ id: "measurement-test" });
-  }), async () => {
-    const makeRequest = (id) => request("/api/ping/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ host: "1.1.1.1", nodes: [id], verification: pingVerification }) });
-    assert.equal((await worker.fetch(makeRequest("NZ:Auckland"), env)).status, 200);
-    assert.equal((await worker.fetch(makeRequest("NZ:Unknown"), env)).status, 400);
-  });
-});
-
-
-test("regional Ping requests spread probes across continents without conflicting limits", async () => {
-  await withFetch(mockPingVerification(async (url, init) => {
-    assert.equal(url, "https://api.globalping.io/v1/measurements");
-    const body = JSON.parse(init.body);
-    assert.deepEqual(body.locations, [ { continent: "AS", limit: 3 }, { continent: "EU", limit: 3 } ]);
-    assert.equal(body.limit, undefined);
-    assert.equal(body.inProgressUpdates, true);
-    return Response.json({ id: "regional-test" });
-  }), async () => {
-    const response = await worker.fetch(request("/api/ping/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ host: "1.1.1.1", regions: ["AS", "EU"], perRegion: 3, verification: pingVerification }) }), env);
-    assert.equal(response.status, 200);
-    const invalid = await worker.fetch(request("/api/ping/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ host: "1.1.1.1", regions: ["AS", "EU"], perRegion: 30, verification: pingVerification }) }), env);
-    assert.equal(invalid.status, 400);
-  });
-});
-
-test("preferred Ping pins the online major provider ASN while custom mode keeps city selection", async () => {
-  await withFetch(mockPingVerification(async (url, init) => {
-    if (url.endsWith("/probes")) return Response.json([
-      { location: { country: "US", city: "Seattle", asn: 123, network: "Small ISP" } },
-      { location: { country: "US", city: "Seattle", asn: 16509, network: "Amazon.com, Inc." } },
-    ]);
-    assert.equal(url, "https://api.globalping.io/v1/measurements");
-    const body = JSON.parse(init.body);
-    assert.equal(body.locations[0].asn, 16509);
-    assert.equal(body.locations[0].city, "Seattle");
-    return Response.json({ id: "preferred-test" });
-  }), async () => {
-    const response = await worker.fetch(request("/api/ping/start", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ host: "1.1.1.1", nodes: ["US:Seattle"], preferred: true, verification: pingVerification }) }), env);
-    assert.equal(response.status, 200);
-  });
 });
 
 test("icon proxy uses a fixed provider, caches images and strips upstream cookies", async () => {
@@ -417,6 +432,31 @@ test("icon proxy rejects upstream redirects without forwarding Location", async 
     assert.equal(response.headers.get("Location"), null);
     assert.deepEqual(await response.json(), { error: "图标暂不可用" });
   });
+});
+
+test("icon proxy falls back to a second fixed provider and remembers misses", async () => {
+  const seen = [];
+  await withFetch(async (url) => {
+    seen.push(new URL(url).hostname);
+    if (url.startsWith("https://icons.duckduckgo.com/")) throw new TypeError("unreachable");
+    assert.equal(new URL(url).searchParams.get("url"), "https://fallback-icon.com");
+    return new Response("icon", { headers: { "Content-Type": "image/png" } });
+  }, async () => {
+    const response = await worker.fetch(request("/api/icons/fallback-icon.com"), env);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Content-Type"), "image/png");
+  });
+  assert.deepEqual(seen, ["icons.duckduckgo.com", "t3.gstatic.com"]);
+
+  let calls = 0;
+  await withFetch(async () => {
+    calls += 1;
+    return new Response(null, { status: 404 });
+  }, async () => {
+    assert.equal((await worker.fetch(request("/api/icons/missing-icon.com"), env)).status, 502);
+    assert.equal((await worker.fetch(request("/api/icons/missing-icon.com"), env)).status, 502);
+  });
+  assert.equal(calls, 2);
 });
 
 test("WeChat icon uses its official resource because the icon provider returns 404", async () => {

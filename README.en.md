@@ -68,7 +68,7 @@ pnpm build && pnpm test && pnpm lint
 
 ## Data sources
 
-Net.Coffee, ip-api, Globalping, IANA / RDAP and official platform status feeds. Browser checks use FingerprintJS and CreepJS (see [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)); the Claude environment dictionary is based on [FuckClaude](https://github.com/LinXiaoTao/FuckClaude) (see `vendor/claude-environment/`). Results are for troubleshooting only and are not official decisions by any platform.
+IP location, network and risk data all come from [ipbot](https://ipbot.net), requested and cached server-side by the Worker. Network routing, WHOIS, global ping and service status also come through ipbot. Exit IPs are detected by the browser directly against ipbot, and the domestic exit from response headers of public NetEase and ByteDance CDN resources; connectivity and egress-route checks only contact the sites being tested. Browser checks use FingerprintJS and CreepJS (see [vendor/browser-diagnostics](vendor/browser-diagnostics/README.md)); the Claude environment dictionary is based on [FuckClaude](https://github.com/LinXiaoTao/FuckClaude) (see `vendor/claude-environment/`). Results are for troubleshooting only and are not official decisions by any platform.
 
 Issues are welcome. Redact IPs, locations and fingerprint identifiers before sharing screenshots.
 

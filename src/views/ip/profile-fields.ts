@@ -1,5 +1,5 @@
 import { t } from "@/i18n";
-import { coffeeThreatLabels, type CoffeeIp } from "./coffee.ts";
+import { threatLabels, type IpbotProfile } from "./ipbot.ts";
 import type { ipProfile } from "./profile";
 
 type Option = {
@@ -18,11 +18,11 @@ type Field = {
 };
 
 export function ipProfileFields(
-  data: CoffeeIp,
+  data: IpbotProfile,
   profile: ReturnType<typeof ipProfile>,
 ): Field[] {
-  const threats = coffeeThreatLabels(data);
-  const riskThreats = coffeeThreatLabels(data, true);
+  const threats = threatLabels(data);
+  const riskThreats = threatLabels(data, true);
   const typeOptions = [
     [
       t("common.residentialIp"),

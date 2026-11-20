@@ -70,7 +70,7 @@ export function useScenarioEvidence(ip: string) {
       target: target?.url ?? (key === "quality" ? "speed.cloudflare.com" : ip),
       source:
         key === "https"
-          ? "Globalping"
+          ? "ipbot"
           : key === "quality"
             ? AIM_VERSION
             : "Browser Fetch",

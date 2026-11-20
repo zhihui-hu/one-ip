@@ -1,19 +1,24 @@
-import { getAiStatus } from "./ai-status.js";
 import { cachedJson } from "./cache.js";
 import { challengeConfig, verifyChallenge } from "./challenges.js";
-import { getCloudStatus } from "./cloud-status.js";
-import { cfGeo, geoIp, secondaryGeo } from "./geo.js";
+import { cfGeo } from "./geo.js";
 import { clientIp, HttpError, inputJson, json, publicIp } from "./http.js";
 import { siteIcon } from "./icons.js";
-import { ipNetwork } from "./ip-network.js";
-import { ipType } from "./ip-type.js";
+import {
+  geoIp,
+  ipNetwork,
+  ipProfile,
+  lookupIp,
+  lookupRegistration,
+  pingNodes,
+  pingResult,
+  serviceStatus,
+  startPing,
+} from "./ipbot.js";
 import { mapConfig } from "./map.js";
-import { startPing, pingResult, pingNodes } from "./ping.js";
 import { rateLimit } from "./rate-limit.js";
-import { normalizeStatus } from "./service-status.js";
 import services from "./services.json";
 import { tlsFingerprint } from "./tls-fingerprint.js";
-import { lookupRegistration, registrationTarget } from "./whois.js";
+import { registrationTarget } from "./whois.js";
 
 /** @type {ExportedHandler<Env>} */
 export default {
@@ -91,18 +96,16 @@ export default {
         }
         return json(
           request.clientIpSource
-            ? await geoIp(data.ip).catch(() => data)
+            ? await geoIp(data.ip, env).catch(() => data)
             : data,
         );
       }
-      if (path.startsWith("/ip-type/"))
-        return await ipType(decodeURIComponent(path.slice(9)), url.origin);
       if (path.startsWith("/geoip/")) {
         const ip = publicIp(decodeURIComponent(path.slice(7)));
         return await cachedJson(
           new URL(`/api/geoip/${encodeURIComponent(ip)}`, url.origin),
           3600,
-          () => geoIp(ip),
+          () => geoIp(ip, env),
         );
       }
       if (path.startsWith("/ip/network/")) {
@@ -110,7 +113,7 @@ export default {
         return await cachedJson(
           new URL(`/api/ip/network/${encodeURIComponent(ip)}`, url.origin),
           300,
-          () => ipNetwork(ip),
+          () => ipNetwork(ip, env),
           (data) =>
             data.routeAvailable &&
             data.ptrAvailable &&
@@ -120,25 +123,18 @@ export default {
       if (path.startsWith("/ip/lookup/")) {
         const ip = publicIp(decodeURIComponent(path.slice(11)));
         return await cachedJson(
-          new URL(`/api/ip/lookup/${encodeURIComponent(ip)}`, url.origin),
+          new URL(`/api/ip/lookup/v2/${encodeURIComponent(ip)}`, url.origin),
           3600,
-          async () => {
-            const [primary, secondary, registration] = await Promise.allSettled(
-              [geoIp(ip), secondaryGeo(ip), lookupRegistration(ip)],
-            );
-            const sources = [primary, secondary].flatMap((r) =>
-              r.status === "fulfilled" ? [r.value] : [],
-            );
-            return {
-              geo: sources[0] ?? { ip },
-              sources,
-              rdap:
-                registration.status === "fulfilled"
-                  ? registration.value.data
-                  : undefined,
-            };
-          },
-          (data) => data.sources.length === 2 && data.rdap !== undefined,
+          () => lookupIp(ip, env),
+          (data) => data.sources.length > 0 && data.rdap !== undefined,
+        );
+      }
+      if (path.startsWith("/ip/profile/")) {
+        const ip = publicIp(decodeURIComponent(path.slice(12)));
+        return await cachedJson(
+          new URL(`/api/ip/profile/${encodeURIComponent(ip)}`, url.origin),
+          300,
+          () => ipProfile(ip, env),
         );
       }
       if (path.startsWith("/whois/lookup/")) {
@@ -146,14 +142,14 @@ export default {
         return await cachedJson(
           new URL(`/api/whois/lookup/${encodeURIComponent(query)}`, url.origin),
           3600,
-          () => lookupRegistration(query),
+          () => lookupRegistration(query, env),
         );
       }
       if (path === "/ping/nodes")
         return await cachedJson(
           new URL("/api/ping/nodes", url.origin),
           300,
-          pingNodes,
+          () => pingNodes(env),
           (data) => data.length > 0,
         );
       if (path === "/ping/start") {
@@ -173,10 +169,10 @@ export default {
         );
         if (!verification.success)
           throw new HttpError(403, verification.message);
-        return json(await startPing(input));
+        return json(await startPing(input, env));
       }
       if (path.startsWith("/ping/result/"))
-        return json(await pingResult(path.slice(13)));
+        return json(await pingResult(path.slice(13), env));
       if (path.startsWith("/status/")) {
         const service = services.find((s) => s.id === path.slice(8));
         if (!service) throw new HttpError(404, "未知服务");
@@ -188,25 +184,7 @@ export default {
         return await cachedJson(
           new URL(`/api/status/${service.id}`, url.origin),
           60,
-          async () => {
-            const data = await (service.group === "VPS" ||
-            [
-              "aws",
-              "google-cloud",
-              "oracle-cloud",
-              "34",
-              "aliyun",
-              "tencent-cloud",
-              "azure",
-            ].includes(service.id)
-              ? getCloudStatus(service)
-              : getAiStatus(service));
-            return {
-              ...normalizeStatus(data),
-              fetchedAt: new Date().toISOString(),
-              source: service.url,
-            };
-          },
+          () => serviceStatus(service.id, env),
           (data) => Boolean(data.status?.indicator),
         );
       }

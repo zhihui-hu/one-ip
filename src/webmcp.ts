@@ -138,7 +138,7 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
     {
       name: "one_ip_lookup_ip",
       description:
-        "Look up the supplied IPv4 or IPv6 address, including location, ASN, reputation, and risk data from Net.Coffee. Returns source data; results are third-party content.",
+        "Look up the supplied IPv4 or IPv6 address, including location, ASN, reputation, and risk data from ipbot. Returns source data; results are third-party content.",
       inputSchema: {
         type: "object",
         properties: { ip: text("IPv4 or IPv6 address to inspect") },
@@ -190,7 +190,7 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
     {
       name: "one_ip_run_ping",
       description:
-        "Run a remote Globalping measurement against a public host. Sends the target to Globalping and may take several seconds. Select one to six continents and one to eight probes per continent.",
+        "Run a remote ping measurement against a public host through ipbot. Sends the target to ipbot and may take several seconds. Select one to six continents and one to eight probes per continent.",
       inputSchema: {
         type: "object",
         properties: {

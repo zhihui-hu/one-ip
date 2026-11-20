@@ -10,7 +10,14 @@
 4. Set the build command to `pnpm build` and the deploy command to `pnpm deploy`. Use Node.js 24 and pnpm 10.32.1. Keep the default root directory.
 5. Deploy and open the assigned `workers.dev` address. Use the Worker settings to connect a custom domain.
 
-The project uses **Cloudflare Workers with Static Assets**. The `/api/*` routes need a Worker. Core features require no application environment variables or API keys. See “Verification” for Turnstile setup.
+The project uses **Cloudflare Workers with Static Assets**. The `/api/*` routes need a Worker. See “Verification” for Turnstile setup.
+
+All IP location, network, risk, WHOIS, global ping and service status data comes from [ipbot](https://ipbot.net); the Worker requests it server-side and caches it at the edge.
+
+- No API key is needed. The Worker calls ipbot with `Origin: https://ip.huzhihui.com`; `huzhihui.com` is on ipbot's whitelist (`PARTNER_DOMAINS`), so calls need no session and are not rate limited. Network routing, WHOIS, global ping and service status depend on it. On another domain, set `IPBOT_ORIGIN` to a whitelisted origin; otherwise those features are unavailable and IP location and profiles fall under ipbot's default limits.
+- `IPBOT_API_URL`: optional, defaults to `https://api.ipbot.net`; change it only for a self-hosted ipbot or local debugging.
+
+The browser finds exit IPs by calling `/api/me` directly: IPv4 on `api4.ipbot.net` (A record only) and IPv6 on `api.ipbot.net` (dual-stack through Cloudflare); huzhihui.com subdomains are not rate limited, other domains get ipbot's default limits.
 
 For map access from mainland China, configure `TIANDITU_TOKEN` under Worker → Settings → Variables and Secrets (or run `pnpm exec wrangler secret put TIANDITU_TOKEN`). Maps prefer Tianditu and fall back to OpenStreetMap when unavailable; without the token, OpenStreetMap remains the default.
 
