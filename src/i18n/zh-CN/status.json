@@ -44,8 +44,7 @@
   "status.unresolvedEventsOfficialRssFeedLiveMonitoringMetrics": "读取官方 RSS 中未解决的事件；不包含状态页的实时监控指标。",
   "status.unresolvedEventsOfficialDeepseekRssFeedResolvedEvents": "读取 DeepSeek 官方 RSS 中未解决的事件，已恢复事件不计入故障。",
   "status.alibabaCloudNonRegionalModelStudioStatusCovers": "展示阿里云非区域性「百炼」产品状态，覆盖千问 API；不代表千问聊天网站状态。",
-  "status.thirdPartySourceUptimerobotMonitorsTelegramOrgWebsite": "第三方来源：UptimeRobot。仅监测 telegram.org 网站可用性，不代表 Telegram 全球消息收发状态；数据过期或不可用时显示待确认。",
-  "status.thirdParty": "第三方 · {0} ↗",
+  "status.unofficialSourceMonitorsTelegramOrgWebsite": "非官方来源：仅监测 telegram.org 网站可用性，不代表 Telegram 全球消息收发状态；数据过期或不可用时显示待确认。",
   "status.sourceProvidesAggregateStatusSeeSourcePageIncident": "此数据源仅提供汇总状态，事件详情请查看来源页面。",
   "status.sourceCheckedAt": "来源检测时间：{0}"
 }

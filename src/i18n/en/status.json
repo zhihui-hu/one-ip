@@ -44,8 +44,7 @@
   "status.unresolvedEventsOfficialRssFeedLiveMonitoringMetrics": "Unresolved events from the official RSS feed; live monitoring metrics are not included.",
   "status.unresolvedEventsOfficialDeepseekRssFeedResolvedEvents": "Unresolved events from the official DeepSeek RSS feed; resolved events are excluded.",
   "status.alibabaCloudNonRegionalModelStudioStatusCovers": "Alibaba Cloud non-regional Model Studio status covers the Qwen API, not the Qwen chat website.",
-  "status.thirdPartySourceUptimerobotMonitorsTelegramOrgWebsite": "Third-party source: UptimeRobot. Monitors telegram.org website availability only, not global Telegram messaging. Stale or unavailable data is shown as unconfirmed.",
-  "status.thirdParty": "Third party · {0} ↗",
+  "status.unofficialSourceMonitorsTelegramOrgWebsite": "Unofficial source: monitors telegram.org website availability only, not global Telegram messaging. Stale or unavailable data is shown as unconfirmed.",
   "status.sourceProvidesAggregateStatusSeeSourcePageIncident": "This source provides aggregate status only. See the source page for incident details.",
   "status.sourceCheckedAt": "Source checked at: {0}"
 }

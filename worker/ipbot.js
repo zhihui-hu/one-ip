@@ -115,12 +115,24 @@ export function pingResult(id, env) {
   return partner(env, `/ping/result/${id}`);
 }
 
+/** ipbot labels third-party monitors by provider; the site only names ipbot. */
+const monitorLabel = /\s*\(UptimeRobot\)\s*$/i;
+
 /** Current state, components and incidents of one catalog service. */
 export async function serviceStatus(id, env) {
   const data = await partner(env, `/status/${encodeURIComponent(id)}`);
   if (!data?.status?.status?.indicator)
     throw new HttpError(502, data?.error || "官方状态数据暂不可用");
-  return data.status;
+  const status = { ...data.status };
+  if (/uptimerobot\.com/i.test(String(status.source ?? "")))
+    delete status.source;
+  if (Array.isArray(status.components))
+    status.components = status.components.map((component) =>
+      typeof component?.name === "string"
+        ? { ...component, name: component.name.replace(monitorLabel, "") }
+        : component,
+    );
+  return status;
 }
 
 /** Location for one public IP. */

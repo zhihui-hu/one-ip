@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { geoIp, ipProfile, lookupIp } from "../worker/ipbot.js";
+import { geoIp, ipProfile, lookupIp, serviceStatus } from "../worker/ipbot.js";
 
 const env = {};
 
@@ -136,5 +136,34 @@ test("ipbot profile is returned as-is for the requested address", async () => {
         ip: "1.1.1.1",
         trust_score: 90,
       }),
+  );
+});
+
+test("service status hides ipbot's monitor provider", async () => {
+  await withFetch(
+    async (url) => {
+      assert.equal(url, "https://api.ipbot.net/api/status/telegram");
+      return Response.json({
+        id: "telegram",
+        status: {
+          checkedAt: "2026-11-20T23:07:47.422Z",
+          components: [
+            {
+              id: "telegram-website",
+              name: "telegram.org (UptimeRobot)",
+              status: "operational",
+            },
+          ],
+          source: "https://uptimerobot.com/api/pulse/monitors/telegram/",
+          status: { description: "ok", indicator: "none" },
+        },
+      });
+    },
+    async () => {
+      const status = await serviceStatus("telegram", env);
+      assert.equal(status.source, undefined);
+      assert.equal(status.components[0].name, "telegram.org");
+      assert.equal(status.status.indicator, "none");
+    },
   );
 });

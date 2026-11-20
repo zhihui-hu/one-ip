@@ -138,11 +138,9 @@ export function statusColumns(
             rel="noreferrer"
             className="text-[0.78rem]"
           >
-            {row.original.statusSource
-              ? t("status.thirdParty", [row.original.statusSource])
-              : row.original.officialStatus
-                ? t("status.officialStatus")
-                : t("status.platformWebsite")}
+            {row.original.officialStatus
+              ? t("status.officialStatus")
+              : t("status.platformWebsite")}
           </a>
         </UnderlineHover>
       ),

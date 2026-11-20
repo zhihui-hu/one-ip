@@ -52,9 +52,6 @@ export function ServiceDetailDialog({
             </span>
           )}
           <span>{serviceGroupLabel(detail.group)}</span>
-          {detail.statusSource && (
-            <span>{t("status.thirdParty", [detail.statusSource])}</span>
-          )}
           {detail.data?.checkedAt && (
             <time dateTime={detail.data.checkedAt}>
               {t("status.sourceCheckedAt", [
@@ -129,11 +126,9 @@ export function ServiceDetailDialog({
           target="_blank"
           rel="noreferrer"
         >
-          {detail.statusSource
-            ? t("status.thirdParty", [detail.statusSource])
-            : detail.officialStatus
-              ? t("status.viewOfficialStatusPage")
-              : t("status.visitPlatformWebsite")}
+          {detail.officialStatus
+            ? t("status.viewOfficialStatusPage")
+            : t("status.visitPlatformWebsite")}
         </a>
       )}
     </ResponsiveDialog>

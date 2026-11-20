@@ -36,7 +36,6 @@ export function toTableRow(service: ServiceWithQuery) {
     loading: Boolean(service.url) && service.query.isPending,
     integrated: Boolean(service.url),
     officialStatus: service.officialStatus !== false,
-    statusSource: "statusSource" in service ? service.statusSource : undefined,
     note: service.note,
     fetching: service.query.isFetching,
     failed: service.query.isError,
