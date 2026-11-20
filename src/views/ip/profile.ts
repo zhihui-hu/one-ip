@@ -1,7 +1,7 @@
 import { t } from "@/i18n";
-import { coffeeThreatLabels, type CoffeeIp } from "./coffee.ts";
+import { threatLabels, type IpbotProfile } from "./ipbot.ts";
 
-export function ipProfile(data: CoffeeIp) {
+export function ipProfile(data: IpbotProfile) {
   const score =
     typeof data.trust_score === "number" &&
     Number.isFinite(data.trust_score) &&
@@ -53,7 +53,7 @@ export function ipProfile(data: CoffeeIp) {
   const unknownFlags = flags.filter(
     ([, value]) => typeof value !== "boolean",
   ).length;
-  const threats = coffeeThreatLabels(data, true);
+  const threats = threatLabels(data, true);
   const clear = !detected.length && !unknownFlags && !threats.length;
   const preferred =
     score !== null &&

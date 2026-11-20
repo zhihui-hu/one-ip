@@ -1,31 +1,29 @@
 import { t } from "@/i18n";
 import { sameIp } from "@/lib/ip-address";
-import { endpoint, request } from "@/lib/network";
+import { endpoint } from "@/lib/network";
 import type { Geo, Lookup } from "@/lib/types";
-import { adaptCoffee, coffeeIpSchema, type CoffeeLookup } from "./coffee.ts";
+import { adaptIpbot, ipbotProfileSchema, type IpbotLookup } from "./ipbot.ts";
 import type { IpNetwork } from "./route-graph/types.ts";
 
-/** Budget for the direct Net.Coffee call before falling back to the same-origin API. */
-const COFFEE_TIMEOUT_MS = 5000;
-
+/** Full ipbot profile, proxied (and edge-cached) by this site's Worker. */
 export async function lookupIp(ip: string, signal?: AbortSignal) {
-  const data = await request<unknown>(
-    `https://ip.net.coffee/api/ip/lookup/${encodeURIComponent(ip)}`,
-    { signal, mode: "cors", credentials: "omit", cache: "no-store" },
+  const data = await endpoint<unknown>(
+    `/ip/profile/${encodeURIComponent(ip)}`,
+    { signal },
   );
-  const result = coffeeIpSchema.safeParse(data);
+  const result = ipbotProfileSchema.safeParse(data);
   if (!result.success)
     throw new Error(t("api.theIpLocationSourceReturnedNoValidResult"));
   if (!sameIp(result.data.ip, ip))
     throw new Error(t("ip.ipReturnedSourceDoesMatchRequestedAddress"));
-  return adaptCoffee(result.data);
+  return adaptIpbot(result.data);
 }
 
-/** Same-origin lookup for visitors whose network cannot reach Net.Coffee (e.g. mainland China). */
-export async function lookupIpViaServer(
+/** Location-only ipbot lookup, used when the full profile is busy or failed. */
+export async function lookupIpLocation(
   ip: string,
   signal?: AbortSignal,
-): Promise<CoffeeLookup> {
+): Promise<IpbotLookup> {
   const data = await endpoint<Partial<Lookup>>(
     `/ip/lookup/${encodeURIComponent(ip)}`,
     { signal },
@@ -36,7 +34,7 @@ export async function lookupIpViaServer(
   );
   if (!sources.length)
     throw new Error(t("api.theIpLocationSourceReturnedNoValidResult"));
-  const coffee = coffeeIpSchema.parse({
+  const profile = ipbotProfileSchema.parse({
     ip,
     country: geo.country,
     countryCode: geo.country_code,
@@ -46,7 +44,7 @@ export async function lookupIpViaServer(
     asn: typeof geo.asn === "number" ? geo.asn : undefined,
   });
   return {
-    coffee,
+    profile,
     geo,
     sources,
     rdap: data.rdap,
@@ -55,18 +53,14 @@ export async function lookupIpViaServer(
   };
 }
 
-/** Prefer Net.Coffee; degrade to the same-origin API when it is blocked or slow. */
+/** Prefer the full profile; degrade to the location lookup when it fails. */
 export async function lookupIpWithFallback(ip: string, signal?: AbortSignal) {
-  const timeout = AbortSignal.timeout(COFFEE_TIMEOUT_MS);
   try {
-    return await lookupIp(
-      ip,
-      signal ? AbortSignal.any([signal, timeout]) : timeout,
-    );
+    return await lookupIp(ip, signal);
   } catch (error) {
     signal?.throwIfAborted();
     try {
-      return await lookupIpViaServer(ip, signal);
+      return await lookupIpLocation(ip, signal);
     } catch {
       signal?.throwIfAborted();
       throw error;

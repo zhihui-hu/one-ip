@@ -75,7 +75,7 @@ async function withFetch(fn, run) {
 const geoFetch = (seen) => async (url) => {
   const ip = decodeURIComponent(String(url).split("/").at(-1));
   seen.push(ip);
-  return Response.json({ success: true, ip, country: "X" });
+  return Response.json({ ip, country: "X" });
 };
 
 test("standalone server parses only global _headers rules and validates its configuration", async () => {

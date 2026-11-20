@@ -41,7 +41,7 @@ export function HomePage() {
           "browser-ip",
           "split",
           "geoip",
-          "lookup-ip-coffee",
+          "lookup-ip-profile",
           "connectivity",
           "connectivity-progress",
           "ai-preview",
@@ -130,7 +130,7 @@ export function HomePage() {
   const geoByIp = new Map(ips.map((ip, index) => [ip, geoQueries[index]]));
   const typeQueries = useQueries({
     queries: ips.map((ip) => ({
-      queryKey: ["lookup-ip-coffee", ip],
+      queryKey: ["lookup-ip-profile", ip],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
         lookupIp(ip, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
       staleTime: 3600_000,

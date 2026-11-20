@@ -237,7 +237,7 @@ function PortraitLetter() {
   const geo = useQuery(geoQuery(ip));
   const domesticGeo = useQuery(geoQuery(domesticIp));
   const reputation = useQuery({
-    queryKey: ["lookup-ip-coffee", ip],
+    queryKey: ["lookup-ip-profile", ip],
     queryFn: ({ signal }) =>
       lookupIp(ip!, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
     enabled: Boolean(ip),
@@ -262,7 +262,7 @@ function PortraitLetter() {
     (!split || !domesticGeo.isPending) &&
     !visitor.isPending;
 
-  const company = reputation.data?.coffee as Company | undefined;
+  const company = reputation.data?.profile as Company | undefined;
   const where = ip ? { ip, ...external.data, ...geo.data } : undefined;
   const home = split
     ? { ip: domesticIp!, ...domestic.data, ...domesticGeo.data }

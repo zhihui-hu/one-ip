@@ -19,68 +19,55 @@ const optionalFlag = z
   .catch(undefined)
   .transform((value) => value ?? undefined);
 
-export const coffeeIpSchema = z
+/** One ipbot history period: the /24 block's location and network between two days. */
+const historyPeriod = z.object({
+  from: optionalText,
+  to: optionalText,
+  country_code: optionalText,
+  region: optionalText,
+  city: optionalText,
+  asn: optionalNumber,
+  organization: optionalText,
+});
+
+/** Epoch seconds of an ipbot `YYYY-MM-DD` day (UTC). */
+function daySeconds(day?: string) {
+  const time = day ? Date.parse(`${day}T00:00:00Z`) : NaN;
+  return Number.isFinite(time) ? time / 1000 : undefined;
+}
+
+/**
+ * Newest-first periods differ in any snapshot field; keeps one row per run of equal
+ * values for the fields a table shows, dated by its newest day.
+ */
+function collapse<T>(rows: T[], key: (row: T) => unknown[]) {
+  return rows.filter(
+    (row, index) =>
+      index === 0 ||
+      JSON.stringify(key(row)) !== JSON.stringify(key(rows[index - 1])),
+  );
+}
+
+/**
+ * ipbot `GET /api/ip/profile/{ip}` (proxied by the Worker as `/api/ip/profile/{ip}`).
+ * `location_history` and `asn_history` are derived from ipbot's `history` periods.
+ */
+export const ipbotProfileSchema = z
   .object({
     registered_country_code: optionalText,
-    registered_country: optionalText,
     is_public_service: optionalFlag,
     datacenter_name: optionalText,
-    reddit_blocked: optionalFlag,
-    vpn_trace: z.unknown().optional(),
-    ai_verdict: z
-      .object({
-        label: optionalText,
-        confidence: optionalNumber,
-        reasoning: optionalText,
-      })
+    history: z
+      .array(historyPeriod)
       .nullish()
-      .transform((value) => value ?? undefined),
-    location_history: z
-      .array(
-        z.object({
-          country: optionalText,
-          region: optionalText,
-          city: optionalText,
-          seen_at: optionalNumber,
-        }),
-      )
-      .nullish()
-      .transform((value) => value ?? undefined),
-    asn_history: z
-      .array(
-        z.object({
-          asn: optionalNumber,
-          asn_org: optionalText,
-          seen_at: optionalNumber,
-        }),
-      )
-      .nullish()
-      .transform((value) => value ?? undefined),
-    company_history: z
-      .array(
-        z.object({
-          company_name: optionalText,
-          company_type: optionalText,
-          seen_at: optionalNumber,
-        }),
-      )
-      .nullish()
-      .transform((value) => value ?? undefined),
-    dc_neighbors: z
-      .array(
-        z.object({
-          ip: z.string(),
-          country_code: optionalText,
-          city: optionalText,
-          company: optionalText,
-          seen_at: optionalNumber,
-        }),
-      )
-      .nullish()
+      .catch(undefined)
       .transform((value) => value ?? undefined),
     ip: z.string(),
     cidr: optionalText,
     trust_score: optionalNumber,
+    latitude: optionalNumber,
+    longitude: optionalNumber,
+    timezone: optionalText,
     country: optionalText,
     countryCode: optionalText,
     region: optionalText,
@@ -97,10 +84,8 @@ export const coffeeIpSchema = z
     is_mobile: optionalFlag,
     company_type: optionalText,
     company_name: optionalText,
-    abuser_score: optionalText,
     asn: optionalNumber,
     asOrganization: optionalText,
-    asname: optionalText,
     rdns: optionalText,
     range: z
       .object({
@@ -113,9 +98,7 @@ export const coffeeIpSchema = z
       .transform((value) => value ?? undefined),
     asn_kind: optionalText,
     rpki_status: optionalText,
-    asn_tbps: optionalText,
     asn_ipv4_count: optionalNumber,
-    asn_allocated: optionalText,
     geo_sources: z
       .array(
         z.object({
@@ -142,8 +125,6 @@ export const coffeeIpSchema = z
           .nullish()
           .transform((value) => value ?? undefined),
         abuser_level: optionalText,
-        abuser_score_raw: optionalText,
-        rep_threat: z.unknown().optional(),
       })
       .nullish()
       .transform((value) => value ?? undefined),
@@ -157,15 +138,41 @@ export const coffeeIpSchema = z
       .nullish()
       .transform((value) => value ?? undefined),
   })
-  .passthrough();
+  .passthrough()
+  .transform((data) => {
+    const periods = data.history ?? [];
+    const location_history = collapse(
+      periods.map((row) => ({
+        country: row.country_code?.toUpperCase(),
+        region: row.region,
+        city: row.city,
+        seen_at: daySeconds(row.to),
+      })),
+      (row) => [row.country, row.region, row.city],
+    );
+    const asn_history = collapse(
+      periods.map((row) => ({
+        asn: row.asn,
+        asn_org: row.organization,
+        seen_at: daySeconds(row.to),
+      })),
+      (row) => [row.asn, row.asn_org],
+    );
+    return {
+      ...data,
+      registered_country: data.registered_country_code,
+      location_history: location_history.length ? location_history : undefined,
+      asn_history: asn_history.length ? asn_history : undefined,
+    };
+  });
 
-export type CoffeeIp = z.infer<typeof coffeeIpSchema>;
-export interface CoffeeLookup extends Lookup {
-  coffee: CoffeeIp;
-  /** Set when Net.Coffee was unreachable and only same-origin geo data is shown. */
+export type IpbotProfile = z.infer<typeof ipbotProfileSchema>;
+export interface IpbotLookup extends Lookup {
+  profile: IpbotProfile;
+  /** Set when the full ipbot profile failed and only its location lookup is shown. */
   fallback?: boolean;
 }
-export function coffeeThreatLabels(data: CoffeeIp, riskOnly = false): string[] {
+export function threatLabels(data: IpbotProfile, riskOnly = false): string[] {
   return (data.intelligence?.threats ?? [])
     .filter(
       (threat) =>
@@ -180,10 +187,10 @@ export function coffeeThreatLabels(data: CoffeeIp, riskOnly = false): string[] {
     )
     .map((label) => label.trim());
 }
-export function adaptCoffee(data: CoffeeIp): CoffeeLookup {
+export function adaptIpbot(data: IpbotProfile): IpbotLookup {
   const sources: Geo[] = (data.geo_sources ?? []).map((g) => ({
     ip: data.ip,
-    source: `Net.Coffee / ${g.src ?? "—"}`,
+    source: `ipbot / ${g.src ?? "—"}`,
     country: g.country,
     country_code: g.country_code,
     region: g.region,
@@ -201,11 +208,15 @@ export function adaptCoffee(data: CoffeeIp): CoffeeLookup {
         ? g.lon
         : undefined,
   }));
-  const coordinates = sources.find(
-    (g) => g.latitude != null && g.longitude != null,
-  );
+  const coordinates =
+    data.latitude != null &&
+    data.longitude != null &&
+    Math.abs(data.latitude) <= 90 &&
+    Math.abs(data.longitude) <= 180
+      ? { latitude: data.latitude, longitude: data.longitude }
+      : sources.find((g) => g.latitude != null && g.longitude != null);
   return {
-    coffee: data,
+    profile: data,
     geo: {
       ip: data.ip,
       country: data.country,
@@ -216,12 +227,13 @@ export function adaptCoffee(data: CoffeeIp): CoffeeLookup {
       asn: data.asn,
       latitude: coordinates?.latitude,
       longitude: coordinates?.longitude,
-      source: "Net.Coffee",
+      timezone: data.timezone,
+      source: "ipbot",
     },
     sources,
     risk: {
       available: true,
-      source: "Net.Coffee",
+      source: "ipbot",
       vpn: data.is_vpn,
       proxy: data.is_proxy,
       tor: data.is_tor,

@@ -36,7 +36,7 @@ export function IpOverviewCard({
   const geo = data ? { ...data, ...geoQuery?.data } : undefined;
   const classification = data ? typeQuery : undefined;
   const company = classification?.isSuccess
-    ? classification.data.coffee
+    ? classification.data.profile
     : undefined;
   const mapGeo =
     geo?.latitude != null && geo?.longitude != null

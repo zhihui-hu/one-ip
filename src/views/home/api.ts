@@ -6,29 +6,16 @@ import type { Geo } from "@/lib/types";
 
 export const getMyIp = (signal?: AbortSignal) =>
   endpoint<Geo>("/me", { signal });
-/** Location for an IP: browser-direct providers first, then the same-origin API. */
+/** Location for an IP from ipbot, through this site's Worker. */
 export async function getGeo(
   ip: string,
   signal?: AbortSignal,
-  timeoutMs = 3000,
+  timeoutMs = 5000,
 ): Promise<Geo> {
-  // Each provider gets its own budget so one blocked host (common from
-  // mainland China) cannot starve the others.
-  const scoped = () => {
-    const timeout = AbortSignal.timeout(timeoutMs);
-    return signal ? AbortSignal.any([signal, timeout]) : timeout;
-  };
-  try {
-    return await Promise.any([
-      geoFromIpQuery(ip, scoped()),
-      geoFromIpWhoIs(ip, scoped()),
-    ]);
-  } catch {
-    signal?.throwIfAborted();
-  }
+  const timeout = AbortSignal.timeout(timeoutMs);
   try {
     const data = await endpoint<Geo>(`/geoip/${encodeURIComponent(ip)}`, {
-      signal: scoped(),
+      signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     });
     if (!sameIp(data?.ip, ip) || (!data.country && !data.isp))
       throw new Error(t("home.incompleteLocationInformation"));
@@ -37,72 +24,6 @@ export async function getGeo(
     signal?.throwIfAborted();
     throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
   }
-}
-async function geoFromIpQuery(ip: string, signal: AbortSignal): Promise<Geo> {
-  // api.ip.sb/geoip is blocked for third-party sites by AdGuard Tracking
-  // Protection, so the browser uses ipquery.io instead.
-  const data = await request<{
-    ip?: string;
-    isp?: { asn?: string; org?: string; isp?: string };
-    location?: {
-      country?: string;
-      country_code?: string;
-      state?: string;
-      city?: string;
-      latitude?: number;
-      longitude?: number;
-      timezone?: string;
-    };
-  }>(`https://api.ipquery.io/${encodeURIComponent(ip)}?format=json`, {
-    signal,
-  });
-  const location = data?.location;
-  const isp = data?.isp?.isp || data?.isp?.org;
-  if (!sameIp(data?.ip, ip) || (!location?.country && !isp))
-    throw new Error(t("home.incompleteLocationInformation"));
-  const asn = Number(data.isp?.asn?.replace(/^AS/i, ""));
-  return {
-    ip,
-    country: location?.country,
-    country_code: location?.country_code,
-    region: location?.state,
-    city: location?.city,
-    isp,
-    asn: Number.isFinite(asn) && asn > 0 ? asn : undefined,
-    latitude: location?.latitude,
-    longitude: location?.longitude,
-    timezone: location?.timezone,
-    source: "ipquery.io",
-  };
-}
-async function geoFromIpWhoIs(ip: string, signal: AbortSignal): Promise<Geo> {
-  const data = await request<{
-    ip?: string;
-    success: boolean;
-    country?: string;
-    country_code?: string;
-    region?: string;
-    city?: string;
-    connection?: { isp?: string; asn?: number };
-    latitude?: number;
-    longitude?: number;
-    timezone?: { id?: string };
-  }>(`https://ipwho.is/${encodeURIComponent(ip)}`, { signal });
-  if (data?.success !== true || !sameIp(data.ip, ip))
-    throw new Error(t("home.locationDetailsAreUnavailablePleaseRetryLater"));
-  return {
-    ip,
-    country: data.country,
-    country_code: data.country_code,
-    region: data.region,
-    city: data.city,
-    isp: data.connection?.isp,
-    asn: data.connection?.asn,
-    latitude: data.latitude,
-    longitude: data.longitude,
-    timezone: data.timezone?.id,
-    source: "ipwho.is",
-  };
 }
 export async function getDomesticIp(signal?: AbortSignal): Promise<Geo> {
   const timeout = AbortSignal.timeout(3000);
@@ -243,56 +164,44 @@ async function detectSite(site: Site, signal?: AbortSignal): Promise<Geo> {
   return geo;
 }
 
+/** IPv4 exit seen by overseas sites, from ipbot. */
+export const getOverseasIp = (signal?: AbortSignal) => getBrowserIp(4, signal);
+
 /**
- * IP seen by overseas sites. ipify alone is often slow or blocked from
- * mainland China (or sent direct by split rules), which used to hide the
- * overseas card even though the proxy worked. Cloudflare traces on overseas
- * sites act as fallbacks; sources run in parallel and the earliest source in
- * this list that answers wins, so the result stays stable between runs.
+ * ipbot's `/api/me` echo. `api4` has only an A record (DNS-only), so it
+ * always answers over IPv4. `api` sits behind Cloudflare, whose edge is
+ * dual-stack, so visitors with IPv6 usually reach it over IPv6; it counts
+ * only when it answers over the requested family. The origin has no IPv6,
+ * so there is no IPv6-only host.
  */
-export async function getOverseasIp(signal?: AbortSignal): Promise<Geo> {
-  // The card is labelled IPv4, so dual-stack traces must answer over IPv4;
-  // 1.1.1.1 is IPv4-only and comes last because rules often send it direct.
-  const ipv4Trace = async (domain: string) => {
-    const geo = await trace(domain, signal);
-    if (geo.ip.includes(":")) throw new Error(t("home.noValidIpObtained"));
-    return geo;
-  };
-  const attempts: Promise<Geo>[] = [
-    getBrowserIp(4, signal),
-    ipv4Trace("chatgpt.com"),
-    ipv4Trace("www.cloudflare.com"),
-    ipv4Trace("1.1.1.1"),
-  ];
-  // Settle every attempt so later rejections are never unhandled.
-  attempts.forEach((attempt) => attempt.catch(() => undefined));
-  let lastError: unknown;
-  for (const attempt of attempts) {
-    try {
-      return await attempt;
-    } catch (error) {
-      signal?.throwIfAborted();
-      lastError = error;
-    }
-  }
-  throw lastError;
-}
+const IPBOT_ECHO = {
+  4: ["https://api4.ipbot.net", "https://api.ipbot.net"],
+  6: ["https://api.ipbot.net"],
+} as const;
 
 export async function getBrowserIp(
   version: 4 | 6,
   signal?: AbortSignal,
 ): Promise<Geo> {
-  const data = await request<{ ip: string }>(
-    `https://${version === 4 ? "api4" : "api6"}.ipify.org?format=json`,
-    {
-      signal: signal
-        ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
-        : AbortSignal.timeout(3000),
+  const scoped = () =>
+    signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(3000)])
+      : AbortSignal.timeout(3000);
+  const attempts = IPBOT_ECHO[version].map(async (origin) => {
+    const data = await request<{ ip?: string }>(`${origin}/api/me`, {
+      signal: scoped(),
       cache: "no-store",
-    },
-  );
-  const ip = normalizeIp(data?.ip);
-  if (!ip || (version === 6) !== ip.includes(":"))
+      credentials: "omit",
+    });
+    const ip = normalizeIp(data?.ip);
+    if (!ip || (version === 6) !== ip.includes(":"))
+      throw new Error(t("home.noValidIpObtained"));
+    return { ip, source: "ipbot" } satisfies Geo;
+  });
+  try {
+    return await Promise.any(attempts);
+  } catch {
+    signal?.throwIfAborted();
     throw new Error(t("home.noValidIpObtained"));
-  return { ip, source: "ipify" };
+  }
 }
