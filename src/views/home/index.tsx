@@ -132,7 +132,7 @@ export function HomePage() {
     queries: ips.map((ip) => ({
       queryKey: ["lookup-ip-profile", ip],
       queryFn: ({ signal }: { signal: AbortSignal }) =>
-        lookupIp(ip, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
+        lookupIp(ip, AbortSignal.any([signal, AbortSignal.timeout(8000)])),
       staleTime: 3600_000,
       retry: false,
       refetchOnWindowFocus: false,

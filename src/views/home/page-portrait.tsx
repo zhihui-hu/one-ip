@@ -239,7 +239,7 @@ function PortraitLetter() {
   const reputation = useQuery({
     queryKey: ["lookup-ip-profile", ip],
     queryFn: ({ signal }) =>
-      lookupIp(ip!, AbortSignal.any([signal, AbortSignal.timeout(3000)])),
+      lookupIp(ip!, AbortSignal.any([signal, AbortSignal.timeout(8000)])),
     enabled: Boolean(ip),
     retry: false,
     staleTime: 3600_000,

@@ -190,7 +190,7 @@ export function createWebMcpTools(navigate: (path: string) => void): Tool[] {
     {
       name: "one_ip_run_ping",
       description:
-        "Run a remote ping measurement against a public host through ipbot (Globalping probes). Sends the target to ipbot and may take several seconds. Select one to six continents and one to eight probes per continent.",
+        "Run a remote ping measurement against a public host through ipbot. Sends the target to ipbot and may take several seconds. Select one to six continents and one to eight probes per continent.",
       inputSchema: {
         type: "object",
         properties: {
